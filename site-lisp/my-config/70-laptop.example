@@ -1,0 +1,24 @@
+;;; 70-laptop.el --- laptop configuration.
+
+;; .==========================================[ !!! WARNING !!! ]==============================================.
+;; |                                                                                                           |
+;; | This is example file, you must edit it and save with .el extension if you want it to be loaded at startup |
+;; |                                                                                                           |
+;; '==========================================================================================================='
+
+
+;;; Code:
+
+(blink-cursor-mode -1)
+(setq-default cursor-type 'bar)
+(set-face-background 'cursor "#0F0")
+(windmove-default-keybindings)
+(display-battery-mode 1)
+(defun paste-from-primary ()
+  (interactive)
+  (let ((x-select-enable-primary t))
+    (yank)))
+
+(global-set-key (kbd "C-M-y") #'paste-from-primary)
+
+;; 70-laptop.el ends here

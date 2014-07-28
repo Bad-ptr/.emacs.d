@@ -1,0 +1,145 @@
+;;; my-private.el -- This file is ignored by git. Set here your private settings.
+
+;; This file is ignored by git. Set here your private settings, save as ~/.emacs.d/my-private.el,
+;; then kill this buffer with C-x k and you're done.
+
+;;; Code:
+
+
+;; Emacs' settings
+(setq
+ user-full-name "Vasily Pupkin"
+ user-mail-address "vasya-pupkin2020@gmail.com"
+ user-emacs-directory "~/.emacs.d/"
+ package-user-dir (expand-file-name "elpa" user-emacs-directory)
+ ;;user-init-file "~/.emacs"
+ )
+
+
+;; For now it's used only by template.el
+(defvar user-nickname "Vasya_pupkin"
+  "My nickname.")
+
+
+;; Jabber accounts
+(with-eval-after-load "jabber-autoloads"
+  (setq jabber-account-list
+        '(("vasya-pupkin2020@gmail.com" (:password . "passwordvasypupkina2020")
+           (:network-server . "talk.google.com") (:port . 5223) (:connection-type . ssl))
+          ("Vas_pup@jabber.ru" (:password . "jabbervasypupkina")))))
+
+;; Package archives
+(setq package-user-dir (expand-file-name "elpa" user-emacs-directory)
+        package-archives '(;; ("ELPA" . "http://tromey.com/elpa/")
+                           ;; ("GNU/ELPA" . "http://elpa.gnu.org/packages/")
+                           ("MELPA" . "http://melpa.milkbox.net/packages/")))
+
+
+;; List of packages you like. Uncomment it if you want this packages to be installed.
+;; (defvar my/-favourite-packages-list
+;;   '(anaconda-mode
+;;     adoc-mode
+;;     backup-walker
+;;     bison-mode
+;;     bm
+;;     browse-kill-ring
+;;     caml
+;;     cmake-mode
+;;     cperl-mode
+;;     coffee-mode
+;;     cuda-mode
+;;     rainbow-identifiers ;color-identifiers-mode
+;;     company
+;;     company-anaconda
+;;     company-inf-python
+;;     company-inf-ruby
+;;     company-irony
+;;     csharp-mode
+;;     css-eldoc
+;;     diff-hl
+;;     drag-stuff
+;;     dylan-mode
+;;     edit-list
+;;     eimp
+;;     expand-region
+;;     eyedropper
+;;     find-file-in-repository
+;;     find-temp-file
+;;     flx flx-ido
+;;     flycheck
+;;     fsharp-mode
+;;     git-commit-mode git-rebase-mode
+;;     git-timemachine
+;;     glsl-mode
+;;     gnu-apl-mode
+;;     go-eldoc go-mode
+;;     golden-ratio
+;;     haml-mode
+;;     haskell-mode
+;;     hexrgb
+;;     highlight-blocks highlight-parentheses highlight-tail
+;;     httprepl
+;;     ido-at-point ido-hacks ido-ubiquitous ido-vertical-mode
+;;     inf-ruby
+;;     io-mode io-mode-inf
+;;     irony
+;;     jabber
+;;     jedi
+;;     json-mode
+;;     key-chord
+;;     lice
+;;     lua-mode
+;;     magit
+;;     manage-minor-mode
+;;     markdown-mode
+;;     miniedit
+;;     multiple-cursors
+;;     nemerle
+;;     omnisharp
+;;     pcre2el
+;;     persp-mode
+;;     php-eldoc php-mode
+;;     qml-mode
+;;     rainbow-blocks
+;;     rectangle-utils
+;;     redo+
+;;     rust-mode
+;;     sass-mode
+;;     shell-pop
+;;     skeletor
+;;     smex
+;;     smooth-scrolling
+;;     sqlup-mode
+;;     tabbar
+;;     vkill
+;;     vlf
+;;     wgrep)
+;;   "List of packages I like.")
+
+
+;; Examples of setting default font (this must be set in private or custom file):
+;; better do it with `customize-face', but sometimes it's not flexible enough.
+
+;; (add-hook 'after-make-frame-functions
+;;           (labels ((setfont (frame)
+;;                             (unless (and (daemonp) (eq frame terminal-frame))
+;;                               (when (display-graphic-p frame)
+;;                                 (set-face-font 'default
+;;                                                "-unknown-DejaVu Sans Mono-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")))
+;;                             (remove-hook 'after-make-frame-functions #'setfont)))
+;;             #'setfont))
+;; (set-face-font 'default "Terminus-10.0:antialias=none")
+;; (set-face-font 'default "Consolas-11.0:antialias=normal")
+;; (set-face-font 'default "Consolas-11.0:antialias=subpixel")
+;; (set-face-font 'default "Monospace-10.0:antialias=true:hinting=true:hintstyle=hintfull:rgba=rgba:dpi=120:weight=normal")
+;; (set-face-font 'default "-xos4-Terminus-normal-normal-normal-*-16-*-*-*-c-80-iso10646-1")
+;; (set-face-font 'default "Monospace:pixelsize=13:foundry=unknown:weight=normal:slant=normal:width=normal:spacing=100:scalable=true")
+;; (set-face-font 'default "Monospace:pixelsize=16:foundry=unknown:weight=normal:slant=normal:width=normal:spacing=100:scalable=true")
+;; (set-face-font 'default "Terminus-10.0:antialias=true:hinting=true:hintstyle=hintfull:rgba=rgba:dpi=120:weight=normal")
+;; (set-face-font 'default "Monaco-8.0:hintsyle=hintnone:antialias=false:hinting=true:dpi=120:weight=light:scalable=false")
+
+;;(set-default-font "Terminus-12")
+;;(add-to-list 'default-frame-alist '(font . "Terminus-12"))
+
+
+;; my-private.el ends here.

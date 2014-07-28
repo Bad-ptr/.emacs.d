@@ -1,0 +1,23 @@
+;;; 80-flashdrive.el --- flashdrive configuration.
+
+;; .==========================================[ !!! WARNING !!! ]==============================================.
+;; |                                                                                                           |
+;; | This is example file, you must edit it and save with .el extension if you want it to be loaded at startup |
+;; |                                                                                                           |
+;; '==========================================================================================================='
+
+
+;;; Code:
+
+
+(setq
+ backup-inhibited t
+ make-backup-files nil
+ version-control   nil
+ kept-new-versions 0
+ kept-old-versions 0
+ auto-save-default nil)
+(auto-save-mode -1)
+
+
+;; 80-flashdrive.el ends here

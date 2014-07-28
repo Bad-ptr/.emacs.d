@@ -1,0 +1,16 @@
+;;; 90-windows.el --- windows configuration.
+
+;; .==========================================[ !!! WARNING !!! ]==============================================.
+;; |                                                                                                           |
+;; | This is example file, you must edit it and save with .el extension if you want it to be loaded at startup |
+;; |                                                                                                           |
+;; '==========================================================================================================='
+
+
+;;; Code:
+
+
+;; MS Windows clipboard is UTF-16LE
+(set-clipboard-coding-system 'utf-16le-dos)
+
+;; 90-windows.el ends here
