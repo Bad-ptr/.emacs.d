@@ -1,5 +1,6 @@
 # Emacs config  
 Just another Emacs config. One thing that you must do to use it -- open my-private.example(it will be opened automatically if you run emacs for the first time with this config) for edit, fill it with your info and save it with .el extension.  
+Or just `cd ~/; git clone https://github.com/Bad-ptr/.emacs.d.git;` and run emacs.  
 
 # Materials used in building that configuration  
 http://milkbox.net/note/single-file-master-emacs-configuration/  
