@@ -1,6 +1,9 @@
 ;;; my-std-lib.el --- different usefull functions
 
-(require 'cl-lib)
+(if (locate-library "cl-lib")
+    (require 'cl-lib)
+  (require 'cl)
+  (defalias 'cl-labels 'labels))
 
 ;;; Code:
 
@@ -9,6 +12,13 @@
   (declare (indent defun))
   `(cl-labels ((self ,arglist ,@body))
      #'self))
+
+(defmacro add-hook-that-fire-once (hook arglist &rest body)
+  "Hook that autoremove itself after first execution"
+  (declare (indent defun))
+  `(add-hook ,hook (alambda ,arglist
+                     ,@body
+                     (remove-hook ,hook #'self))))
 
 ;; with-eval-after-load for Emacs < 24.4
 (unless (fboundp 'with-eval-after-load)
