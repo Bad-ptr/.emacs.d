@@ -7,8 +7,10 @@
 ;; ---
 ;; Support key sequencies in russian layout
 
-(when (or (> emacs-major-version 24)
-          (and (= emacs-major-version 24) (>= emacs-minor-version 3)))
+(when (and (or (> emacs-major-version 24)
+               (and (= emacs-major-version 24) (>= emacs-minor-version 3)))
+           my/-non-english-input-method)
+
   (defun reverse-input-method (input-method)
     "Build the reverse mapping of single letters from INPUT-METHOD."
     (interactive
@@ -33,13 +35,13 @@
         (activate-input-method current))))
 
   (if (not (daemonp))
-      (reverse-input-method 'russian-computer)
+      (reverse-input-method my/-non-english-input-method)
     (defun rev-inp-m-init (f)
       (lexical-let ((frame f))
         (run-at-time nil nil
                      #'(lambda () (unless (and (daemonp) (eq frame terminal-frame))
                                     (with-selected-frame frame
-                                      (reverse-input-method 'russian-computer)
+                                      (reverse-input-method my/-non-english-input-method)
                                       ;; instead of around advice
                                       (setq read-passwd-map
                                             (let ((map read-passwd-map))

@@ -35,9 +35,10 @@
                            ("MELPA" . "http://melpa.milkbox.net/packages/")))
 
 
-;; List of packages you like. Uncomment it if you want this packages to be installed.
-;; (defvar my/-favourite-packages-list
-;;   '(anaconda-mode
+;; List of packages you like. Uncomment package if you want it to be installed.
+(defvar my/-favourite-packages-list
+  '(
+;;     anaconda-mode
 ;;     adoc-mode
 ;;     backup-walker
 ;;     bison-mode
@@ -113,9 +114,14 @@
 ;;     tabbar
 ;;     vkill
 ;;     vlf
-;;     wgrep)
-;;   "List of packages I like.")
+;;     wgrep
+    )
+  "List of packages I like.")
 
+(defvar my/-input-method "russian-computer"
+  "Your additional to english input method(see M-x list-input-methods).
+It is needed to use emacs key shortcuts while you switch your keyboard to non-english layout.
+If you use only english layout in your system set this to nil.")
 
 ;; Examples of setting default font (this must be set in private or custom file):
 ;; better do it with `customize-face', but sometimes it's not flexible enough.

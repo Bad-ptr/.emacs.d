@@ -21,8 +21,9 @@ re-downloaded in order to locate PACKAGE."
         (require-package package min-version t)))))
 
 (defun my/-install-favourite-packages ()
-  (dolist (pkg my/-favourite-packages-list)
-    (require-package pkg)))
+  (when (boundp 'my/-favourite-packages-list)
+    (dolist (pkg my/-favourite-packages-list)
+      (require-package pkg))))
 
 ;; Install my packages at first run
 (unless (file-exists-p package-user-dir)
