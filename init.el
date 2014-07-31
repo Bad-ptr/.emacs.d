@@ -30,7 +30,10 @@
 
   ;; Load other parts of configuration
   (dolist (file (directory-files my/-conf-path t ".+\.el"))
-    (load file)))
+    (load file))
+
+  (when (fboundp 'my/-exec-after-all-parts-of-config-loaded)
+    (my/-exec-after-all-parts-of-config-loaded)))
 
 
 (defcustom my/-username-hook nil

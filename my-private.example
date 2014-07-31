@@ -118,10 +118,16 @@
     )
   "List of packages I like.")
 
-(defvar my/-input-method "russian-computer"
+(defvar my/-non-english-input-method "russian-computer"
   "Your additional to english input method(see M-x list-input-methods).
 It is needed to use emacs key shortcuts while you switch your keyboard to non-english layout.
 If you use only english layout in your system set this to nil.")
+
+
+(defun my/-exec-after-all-parts-of-config-loaded ()
+  "This function runs after loading of config files
+and could be used to override common configuration."
+  nil)
 
 ;; Examples of setting default font (this must be set in private or custom file):
 ;; better do it with `customize-face', but sometimes it's not flexible enough.
