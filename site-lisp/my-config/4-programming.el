@@ -104,13 +104,14 @@ of FILE in the current directory, suitable for creation"
 
 ;; Autoindent code after pasting
 (defadvice yank-pop (after indent-region activate)
-  (if (member major-mode '(emacs-lisp-mode
-                           scheme-mode lisp-mode
-                           c-mode c++-mode objc-mode
-                           latex-mode plain-tex-mode
-                           php-mode nxml-mode
-                           ruby-mode python-mode
-                           lua-mode))
+  (if (or (member major-mode '(emacs-lisp-mode
+                               scheme-mode lisp-mode
+                               c-mode c++-mode objc-mode
+                               latex-mode plain-tex-mode
+                               php-mode nxml-mode
+                               ruby-mode python-mode
+                               lua-mode))
+          (derived-mode-p 'prog-mode))
       (indent-region (region-beginning) (region-end) nil)))
 
 ;; ----------------
@@ -127,7 +128,7 @@ of FILE in the current directory, suitable for creation"
     (split-string (buffer-string) "\n" t)))
 
 
-;; lisp mode
+;; lisp modes
 (dolist (hook (list
                'emacs-lisp-mode-hook
                'lisp-mode-hook
@@ -143,7 +144,7 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "go-mode-autoloads"
   (setq-default gofmt-command "goimports")
   (with-eval-after-load 'company-autoloads
-    (require 'company-go))
+    (require 'company-go nil t))
   (with-eval-after-load "go-eldoc-autoloads"
     (add-hook 'go-mode-hook #'go-eldoc-setup)))
 

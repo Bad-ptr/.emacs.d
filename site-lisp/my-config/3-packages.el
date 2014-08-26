@@ -212,7 +212,7 @@ re-downloaded in order to locate PACKAGE."
 ;; wrap-with
 (with-eval-after-load "wrap-with"
   (wrap-with-mode t))
-(require 'wrap-with)
+(require 'wrap-with nil t)
 
 ;; company-mode https://gist.github.com/Bad-ptr/7787596
 (with-eval-after-load "company-autoloads"

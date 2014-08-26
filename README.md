@@ -2,9 +2,23 @@
 Just another Emacs config. One thing that you must do to use it -- open my-private.example(it will be opened automatically if you run emacs for the first time with this config) for edit, fill it with your info and save it with .el extension.  
 Or just `cd ~/; git clone https://github.com/Bad-ptr/.emacs.d.git;` and run emacs.  
 
+# Troubles
+
+## Debugging  
+Couse main initial function is running on timer it's not always prints all messages and fire all errors even when emacs started with --debug-init.
+So it sometimes helpful to run init function manually: `M-: (my/-do-init)`.  
+
+## Compatibility
+
+### package.el for older emacs(< 24)  
+Read here https://github.com/technomancy/package.el.  
+
+## Other  
+Also old Emacses erroring on my wrap-with.el . Just remove it!:)  
+
 # Materials used in building that configuration  
 http://milkbox.net/note/single-file-master-emacs-configuration/  
-And many other articles on the internet I don't remember), sorry guys.
+And many other articles on the internet I don't remember), sorry guys.  
 
 # Other interesting links  
 http://emacs.sexy/
