@@ -117,6 +117,11 @@ of FILE in the current directory, suitable for creation"
 ;; ----------------
 
 
+;; gdb
+(setq gdb-many-windows t
+      gdb-show-main t)
+
+
 ;; C
 (setq c-default-style "gnu")
 

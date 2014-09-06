@@ -1,4 +1,4 @@
-;;; 1-compatibility.el --- functions for different emacs versions
+;;; 1-compatibility.el --- functions for different emacs versions -*- lexical-binding: t; -*-
 
 
 ;;; Code:

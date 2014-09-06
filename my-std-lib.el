@@ -1,7 +1,13 @@
 ;;; my-std-lib.el --- different usefull functions
 
 (if (locate-library "cl-lib")
-    (require 'cl-lib)
+    (progn
+      (require 'cl-lib)
+      (unless (fboundp 'lexical-let)
+        (defmacro lexical-let (bindings &rest body)
+          (unless lexical-binding
+            (message "[Warning]: You are trying to use lexical let with lexical-binding = nil."))
+          `(let ,bindings ,@body))))
   (require 'cl)
   (defalias 'cl-labels 'labels))
 

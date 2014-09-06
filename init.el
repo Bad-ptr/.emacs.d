@@ -1,4 +1,4 @@
-;;; init.el --- my emacs configuration.
+;;; init.el --- my emacs configuration. -*- lexical-binding: t; -*-
 
 
 ;;; Code:
@@ -42,30 +42,33 @@
   :type 'hook)
 
 ;; Make sure that users set their private settings and load it.
-(add-hook 'my/-username-hook
-          (lambda ()
-            (lexical-let ((ff (alambda ()
-                                (let ((priv-file (concat user-emacs-directory
-                                                         (if my/-multiuser-private
-                                                             my/-username "my") "-private.el")))
-                                  (when (condition-case err (load priv-file)
-                                          (error
-                                           (let ((example-file (concat user-emacs-directory "my-private.example")))
-                                             (message "[Warning] You run emacs without your private settings set(first run?).\
- To fix this please create %s file (See %s)." priv-file example-file)
-                                             (set-window-buffer (selected-window)
-                                                                (with-current-buffer (find-file priv-file)
-                                                                  (add-hook 'kill-buffer-hook #'self nil t)
-                                                                  (insert-file-contents example-file nil nil nil t)
-                                                                  (current-buffer)))
-                                             nil)))
-                                    (condition-case err (my/-do-init)
-                                      (error (message "[INIT_ERROR]: %s." err))))))))
-              (if (or noninteractive (and (daemonp) (null (cdr (frame-list)))
-                                          (eq (selected-frame) terminal-frame)))
-                  (add-hook-that-fire-once 'after-make-frame-functions (fr)
-                    (run-at-time 2 nil ff))
-                (run-at-time 2 nil ff)))))
+(add-hook 'my/-username-hook (alambda (&optional arg)
+                               (lexical-let ((priv-file (concat user-emacs-directory
+                                                                (if my/-multiuser-private
+                                                                    my/-username "my") "-private.el")))
+                                 (when (condition-case err (load priv-file)
+                                         (file-error
+                                          (message "[INIT_ERROR]: %s." err)
+                                          (let ((ff (lambda ()
+                                                      (let ((example-file (concat user-emacs-directory "my-private.example")))
+                                                        (message "[Warning] You run emacs without your private settings set(first run?).\
+ To fix this please create a %s file (See %s)." priv-file example-file)
+                                                        (set-window-buffer (selected-window)
+                                                                           (with-current-buffer (find-file priv-file)
+                                                                             (add-hook 'kill-buffer-hook
+                                                                                       #'(lambda () (self t)) nil t)
+                                                                             (insert-file-contents example-file nil nil nil t)
+                                                                             (current-buffer)))
+                                                        nil))))
+                                            (if (or noninteractive (and (daemonp) (null (cdr (frame-list)))
+                                                                        (eq (selected-frame) terminal-frame)))
+                                                (add-hook-that-fire-once 'after-make-frame-functions (fr)
+                                                  (run-at-time 2 nil ff))
+                                              (run-at-time 2 nil ff))))
+                                         (error (message "[INIT_ERROR]: %s." err)))
+                                   (condition-case err (progn (my/-do-init)
+                                                              (when arg (run-hooks 'after-init-hook)))
+                                     (error (message "[INIT_ERROR]: %s." err)))))))
 
 (defcustom my/-multiuser-private nil
   "Load different private file for dufferent my/-username or not."

@@ -192,13 +192,15 @@ the syntax class ')'."
 
 
 ;; backups
-(setq make-backup-files t ;; do make backups
-      backup-by-copying t ;; and copy them here
-      backup-directory-alist `(("." . ,(concat user-emacs-directory "cache/backups"))) 
-      version-control   t
-      kept-new-versions 2
-      kept-old-versions 5
-      delete-old-versions t)
+(let ((bu-dir (concat user-emacs-directory "cache/backups")))
+  (unless (file-exists-p bu-dir) (make-directory bu-dir t))
+  (setq make-backup-files t ;; do make backups
+        backup-by-copying t ;; and copy them here
+        backup-directory-alist `(("." . ,bu-dir))
+        version-control   t
+        kept-new-versions 2
+        kept-old-versions 5
+        delete-old-versions t))
 
 (setq auto-save-list-file-prefix
       (concat user-emacs-directory "cache/auto-save-list/.saves-"))

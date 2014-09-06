@@ -288,7 +288,7 @@ re-downloaded in order to locate PACKAGE."
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
   (setq wg-morph-on nil)
-  (setq windmove-window-distance-delta 2)
+  ;;(setq windmove-window-distance-delta 2)
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 ;; 3-packages.el ends here
