@@ -129,7 +129,7 @@ If you use only english layout in your system set this to nil.")
 and could be used to override common configuration."
   nil)
 
-;; Examples of setting default font (this must be set in private or custom file):
+;; Examples of how you can set default font (this must be set in private or custom file):
 ;; better do it with `customize-face', but sometimes it's not flexible enough.
 
 ;; (add-hook 'after-make-frame-functions

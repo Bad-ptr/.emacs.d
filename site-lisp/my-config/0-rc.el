@@ -219,7 +219,7 @@ the syntax class ')'."
         save-abbrevs 'silently)  ;; don't ask
 
   (add-hook 'kill-emacs-hook     ;; write when ...
-            'write-abbrev-file)  ;; ...when exiting emacs
+            #'write-abbrev-file)  ;; ...when exiting emacs
   )
 (eval-after-load "dabbrev" '(defalias 'dabbrev-expand 'hippie-expand))
 

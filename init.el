@@ -65,7 +65,7 @@
                                                 (add-hook-that-fire-once 'after-make-frame-functions (fr)
                                                   (run-at-time 2 nil ff))
                                               (run-at-time 2 nil ff))))
-                                         (error (message "[INIT_ERROR]: %s." err)))
+                                         (error (message "[INIT_ERROR]: %s." err) nil))
                                    (condition-case err (progn (my/-do-init)
                                                               (when arg (run-hooks 'after-init-hook)))
                                      (error (message "[INIT_ERROR]: %s." err)))))))
