@@ -5,16 +5,12 @@ Or just `cd ~/; git clone https://github.com/Bad-ptr/.emacs.d.git;` and run emac
 # Troubles
 
 ## Debugging  
-Couse main initial function is running on timer it's not always prints all messages and fire all errors even when emacs started with --debug-init.
-So it sometimes helpful to run init function manually: `M-: (my/-do-init)`.  
+See `*my/-errors*` buffer.
 
 ## Compatibility
 
 ### package.el for older emacs(< 24)  
 Read here https://github.com/technomancy/package.el.  
-
-## Other  
-Also old Emacses erroring on my wrap-with.el . Just remove it!:)  
 
 # Materials used in building that configuration  
 http://milkbox.net/note/single-file-master-emacs-configuration/  

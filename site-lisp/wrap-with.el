@@ -5,7 +5,7 @@
 ;; Author: Constantin Kulikov (Bad_ptr) <zxnotdead@gmail.com>
 ;; Version: 0.9
 ;; Keywords: wrap, autopair
-;; URL: https://github.com/Bad-ptr/wrap-with.el
+;; URL: https://github.com/Bad-ptr/.emacs.d/blob/master/site-lisp/wrap-with.el
 
 ;;; License:
 
@@ -246,10 +246,10 @@ If no pair found then use p-str as opening and closing."
           (lexical-let ((op (car p))
                         (cl (cdr p)))
             (when op
-              (define-key wrap-with-mode-map (kbd op)
+              (define-key wrap-with-mode-map (read-kbd-macro op)
                 #'(lambda () (interactive) (w-w/wrap-with-pair op (w-w/wrap-beg-end) cl))))
             (when cl
-              (define-key wrap-with-mode-map (kbd cl)
+              (define-key wrap-with-mode-map (read-kbd-macro cl)
                 #'(lambda () (interactive) (w-w/wrap-with-pair cl))))))
       '(("(" . ")")
         ("[" . "]")

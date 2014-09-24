@@ -38,90 +38,97 @@
 ;; List of packages you like. Uncomment package if you want it to be installed.
 (defvar my/-favourite-packages-list
   '(
-;;     anaconda-mode
-;;     adoc-mode
-;;     backup-walker
-;;     bison-mode
-;;     bm
-;;     browse-kill-ring
-;;     caml
-;;     cmake-mode
-;;     cperl-mode
-;;     coffee-mode
-;;     cuda-mode
-;;     rainbow-identifiers ;color-identifiers-mode
-;;     company
-;;     company-anaconda
-;;     company-inf-python
-;;     company-inf-ruby
-;;     company-irony
-;;     csharp-mode
-;;     css-eldoc
-;;     diff-hl
-;;     drag-stuff
-;;     dylan-mode
-;;     edit-list
-;;     eimp
-;;     expand-region
-;;     eyedropper
-;;     find-file-in-repository
-;;     find-temp-file
-;;     flx flx-ido
-;;     flycheck
-;;     fsharp-mode
-;;     git-commit-mode git-rebase-mode
-;;     git-timemachine
-;;     glsl-mode
-;;     gnu-apl-mode
-;;     go-eldoc go-mode
-;;     golden-ratio
-;;     haml-mode
-;;     haskell-mode
-;;     hexrgb
-;;     highlight-blocks highlight-parentheses highlight-tail
-;;     httprepl
-;;     ido-at-point ido-hacks ido-ubiquitous ido-vertical-mode
-;;     inf-ruby
-;;     io-mode io-mode-inf
-;;     irony
-;;     jabber
-;;     jedi
-;;     json-mode
-;;     key-chord
-;;     lice
-;;     lua-mode
-;;     magit
-;;     manage-minor-mode
-;;     markdown-mode
-;;     miniedit
-;;     multiple-cursors
-;;     nemerle
-;;     omnisharp
-;;     pcre2el
-;;     persp-mode
-;;     php-eldoc php-mode
-;;     qml-mode
-;;     rainbow-blocks
-;;     rectangle-utils
-;;     redo+
-;;     rust-mode
-;;     sass-mode
-;;     shell-pop
-;;     skeletor
-;;     smex
-;;     smooth-scrolling
-;;     sqlup-mode
-;;     tabbar
-;;     vkill
-;;     vlf
-;;     wgrep
+    ;; anaconda-mode
+    ;; adoc-mode
+    ;; backup-walker
+    ;; bm
+    ;; browse-kill-ring
+    ;; caml
+    ;; cmake-mode
+    ;; cperl-mode
+    ;; coffee-mode
+    ;; company
+    ;; company-inf-python
+    ;; company-inf-ruby
+    ;; csharp-mode
+    ;; css-eldoc
+    ;; diff-hl
+    ;; drag-stuff
+    ;; dylan-mode
+    ;; edit-list
+    ;; eimp
+    ;; expand-region
+    ;; eyedropper
+    ;; find-file-in-repository
+    ;; flx flx-ido
+    ;; flycheck
+    ;; fsharp-mode
+    ;; git-commit-mode git-rebase-mode
+    ;; glsl-mode
+    ;; gnu-apl-mode
+    ;; go-eldoc go-mode
+    ;; golden-ratio
+    ;; haml-mode
+    ;; haskell-mode
+    ;; hexrgb
+    ;; highlight-blocks highlight-parentheses highlight-tail
+    ;; httprepl
+    ;; ido-at-point ido-hacks ido-ubiquitous ido-vertical-mode
+    ;; inf-ruby
+    ;; io-mode io-mode-inf
+    ;; jabber
+    ;; jedi
+    ;; json-mode
+    ;; key-chord
+    ;; lice
+    ;; lua-mode
+    ;; magit
+    ;; manage-minor-mode
+    ;; markdown-mode
+    ;; miniedit
+    ;; multiple-cursors
+    ;; nemerle
+    ;; omnisharp
+    ;; pcre2el
+    ;; persp-mode
+    ;; php-eldoc php-mode
+    ;; qml-mode
+    ;; rainbow-blocks rainbow-identifiers ;color-identifiers-mode
+    ;; rectangle-utils
+    ;; redo+
+    ;; rust-mode
+    ;; sass-mode
+    ;; shell-pop
+    ;; simplezen
+    ;; skeletor
+    ;; smex
+    ;; smooth-scrolling
+    ;; tabbar
+    ;; vkill
+    ;; vlf
+    ;; wgrep
     )
   "List of packages I like.")
 
-(defvar my/-non-english-input-method "russian-computer"
-  "Your additional to english input method(see M-x list-input-methods).
+(when (fboundp 'reverse-input-method)
+  (defcustom my/-non-english-input-method "russian-computer"
+    "Your additional to english input method(see M-x list-input-methods).
 It is needed to use emacs key shortcuts while you switch your keyboard to non-english layout.
-If you use only english layout in your system set this to nil.")
+If you use only english layout in your system set this to nil."
+    :group 'environment
+    :type 'string
+    :set #'(lambda (sym val)
+             (set-default sym val)
+             ;; Support key sequencies in non-english layout
+             (when val
+               (my/-exec-after-interactive-frame-available
+                 (reverse-input-method my/-non-english-input-method)
+                 (setq read-passwd-map
+                       (let ((map read-passwd-map))
+                         (set-keymap-parent map minibuffer-local-map)
+                         (define-key map [return] #'exit-minibuffer)
+                         (define-key map [backspace] #'delete-backward-char)
+                         map)))))))
 
 
 (defun my/-exec-after-all-parts-of-config-loaded ()

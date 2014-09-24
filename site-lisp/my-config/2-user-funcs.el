@@ -90,7 +90,7 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
 (defun toggle-mode-line-to header () "toggles the modeline to header"
-  (interactive) 
+  (interactive)
   (setq mode-line-format
     (if (equal mode-line-format nil)
         (progn

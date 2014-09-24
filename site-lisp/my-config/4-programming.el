@@ -1,4 +1,4 @@
-;;; 4-programming.el --- settings for programming modes
+;;; 4-programming.el --- settings for programming modes. -*- lexical-binding: t; -*-
 
 
 ;;; Code:
@@ -29,6 +29,8 @@
 
 ;; ---------------------
 ;; Common
+
+;; (electric-indent-mode 1)
 
 (defun run-current-file ()
   "Execute or compile the current file. For example,
@@ -127,8 +129,8 @@ of FILE in the current directory, suitable for creation"
 
 (defun c-get-system-includes ()
   (with-temp-buffer
-    (shell-command 
-     "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'" 
+    (shell-command
+     "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
      (current-buffer))
     (split-string (buffer-string) "\n" t)))
 
@@ -227,5 +229,10 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "sqlup-mode-autoloads"
   (add-hook 'sql-mode-hook #'(lambda () (sqlup-mode t))))
 
+;; HTML
+(with-eval-after-load "simplezen-autoloads"
+  (require 'simplezen)
+  (add-hook-that-fire-once 'html-mode-hook ()
+    (define-key html-mode-map (kbd "TAB") 'simplezen-expand-or-indent-for-tab)))
 
 ;; 4-programming.el ends here

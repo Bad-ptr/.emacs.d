@@ -8,29 +8,40 @@
 (load (concat user-emacs-directory "my-std-lib"))
 
 
-(defun my/-do-init ()
-  
-  "Actual init actions."
-  
+(defun my/-init-before-private ()
+  "Init actions before private information set."
   (add-to-list 'load-path (expand-file-name "site-lisp/" user-emacs-directory))
 
-  (defconst my/-conf-path (expand-file-name "site-lisp/my-config/" user-emacs-directory))
+  (defconst my/-common-conf-path (expand-file-name "site-lisp/my-config/" user-emacs-directory))
+
+  ;; load custom file
+  (setq custom-file (expand-file-name "my-custom.el" user-emacs-directory))
+  (load custom-file t t)
+
+  ;; Load other parts of configuration
+  (my/-load-directory my/-common-conf-path))
+
+(defun my/-init-after-private ()
+  "Init actions after private information set."
+
+  (add-to-list 'load-path (expand-file-name "site-lisp/" user-emacs-directory))
+
+  (defconst my/-conf-path (expand-file-name (concat "site-lisp/" my/-username "-config/") user-emacs-directory))
 
   ;; Packages
   (require 'package)
   (package-initialize)
 
-
   ;; load custom file
-  (setq custom-file (expand-file-name (if my/-multiuser-private
-                                          (concat my/-username "-custom.el")
-                                        "my-custom.el") user-emacs-directory))
+  (setq custom-file (expand-file-name (concat my/-username "-custom.el") user-emacs-directory))
   (load custom-file t t)
 
+  ;; Install my packages at first run
+  (unless (file-exists-p package-user-dir)
+    (when (fboundp 'my/-install-favourite-packages)
+      (my/-install-favourite-packages)))
 
-  ;; Load other parts of configuration
-  (dolist (file (directory-files my/-conf-path t ".+\.el"))
-    (load file))
+  (my/-load-directory my/-conf-path)
 
   (when (fboundp 'my/-exec-after-all-parts-of-config-loaded)
     (my/-exec-after-all-parts-of-config-loaded)))
@@ -43,32 +54,32 @@
 
 ;; Make sure that users set their private settings and load it.
 (add-hook 'my/-username-hook (alambda (&optional arg)
+                               (unless arg
+                                 (my/-init-before-private))
                                (lexical-let ((priv-file (concat user-emacs-directory
                                                                 (if my/-multiuser-private
                                                                     my/-username "my") "-private.el")))
                                  (when (condition-case err (load priv-file)
                                          (file-error
-                                          (message "[INIT_ERROR]: %s." err)
+                                          (my/-init-error-warning err)
                                           (let ((ff (lambda ()
                                                       (let ((example-file (concat user-emacs-directory "my-private.example")))
-                                                        (message "[Warning] You run emacs without your private settings set(first run?).\
- To fix this please create a %s file (See %s)." priv-file example-file)
+                                                        (my/-warning (format "You run emacs without your private settings set(first run?).\
+ To fix this please create a %s file (See %s)." priv-file example-file))
                                                         (set-window-buffer (selected-window)
-                                                                           (with-current-buffer (find-file priv-file)
-                                                                             (add-hook 'kill-buffer-hook
-                                                                                       #'(lambda () (self t)) nil t)
-                                                                             (insert-file-contents example-file nil nil nil t)
-                                                                             (current-buffer)))
+                                                                           (let ((template-auto-insert nil))
+                                                                             (with-current-buffer (find-file priv-file)
+                                                                               (add-hook 'kill-buffer-hook
+                                                                                         #'(lambda () (self t)) nil t)
+                                                                               (insert-file-contents example-file nil nil nil t)
+                                                                               (current-buffer))))
                                                         nil))))
-                                            (if (or noninteractive (and (daemonp) (null (cdr (frame-list)))
-                                                                        (eq (selected-frame) terminal-frame)))
-                                                (add-hook-that-fire-once 'after-make-frame-functions (fr)
-                                                  (run-at-time 2 nil ff))
+                                            (my/-exec-after-interactive-frame-available
                                               (run-at-time 2 nil ff))))
-                                         (error (message "[INIT_ERROR]: %s." err) nil))
-                                   (condition-case err (progn (my/-do-init)
+                                         (error (my/-init-error-fatal err) nil))
+                                   (condition-case err (progn (my/-init-after-private)
                                                               (when arg (run-hooks 'after-init-hook)))
-                                     (error (message "[INIT_ERROR]: %s." err)))))))
+                                     (error (my/-init-error-fatal err)))))))
 
 (defcustom my/-multiuser-private nil
   "Load different private file for dufferent my/-username or not."

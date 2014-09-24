@@ -1,4 +1,4 @@
-;;; 0-rc.el --- basic emacs settings 
+;;; 0-rc.el --- basic emacs settings
 
 
 ;;; Code:
@@ -81,7 +81,8 @@
 (setq font-lock-maximum-decoration t)
 
 ;; enable cua keybindings and functions
-(cua-mode 1)
+(when (> emacs-major-version 23)
+  (cua-mode 1))
 
 ;; Highlight parentheses
 (show-paren-mode 1)
@@ -100,27 +101,28 @@
 echo area. Has no effect if the character before point is not of
 the syntax class ')'."
   (interactive)
-  (let ((cb (char-before (point)))
-        (ca (char-after (point)))
-        t-beg t-end line column mesg)
-    (when (and cb (char-equal (char-syntax cb) ?\)))
-      (save-excursion (backward-list)
-                      (unless (pos-visible-in-window-p)
-                        (setq line (line-number-at-pos)
-                              column (current-column)
-                              t-beg (progn (beginning-of-line) (point))
-                              t-end (progn (end-of-line) (point))
-                              mesg (format "[%s:%s] %s" line column (buffer-substring t-beg t-end))))))
-    (when (and ca (char-equal (char-syntax ca) ?\())
-      (save-excursion (forward-list)
-                      (unless (pos-visible-in-window-p)
-                        (setq line (line-number-at-pos)
-                              column (current-column)
-                              t-beg (progn (beginning-of-line) (point))
-                              t-end (progn (end-of-line) (point))
-                              mesg (concat (and mesg (concat mesg "\n"))
-                                           (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
-    (when mesg (message "%s" mesg))))
+  (unless (minibufferp)
+    (let ((cb (char-before (point)))
+          (ca (char-after (point)))
+          t-beg t-end line column mesg)
+      (when (and cb (char-equal (char-syntax cb) ?\)))
+        (save-excursion (backward-list)
+                        (unless (pos-visible-in-window-p)
+                          (setq line (line-number-at-pos)
+                                column (current-column)
+                                t-beg (progn (beginning-of-line) (point))
+                                t-end (progn (end-of-line) (point))
+                                mesg (format "[%s:%s] %s" line column (buffer-substring t-beg t-end))))))
+      (when (and ca (char-equal (char-syntax ca) ?\())
+        (save-excursion (forward-list)
+                        (unless (pos-visible-in-window-p)
+                          (setq line (line-number-at-pos)
+                                column (current-column)
+                                t-beg (progn (beginning-of-line) (point))
+                                t-end (progn (end-of-line) (point))
+                                mesg (concat (and mesg (concat mesg "\n"))
+                                             (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
+      (when mesg (message "%s" mesg)))))
 
 (ad-enable-advice #'show-paren-function 'after 'show-matching-paren-offscreen)
 (ad-activate #'show-paren-function)
@@ -208,7 +210,7 @@ the syntax class ')'."
 ;; abbrevs (abbreviations)
 (let ((abbrev-dir (expand-file-name "data" user-emacs-directory)))
   (unless (file-exists-p abbrev-dir) (make-directory abbrev-dir t))
-  
+
   (setq abbrev-file-name  ;; tell emacs where to read abbrev
         (expand-file-name "abbrev_defs" abbrev-dir))  ;; definitions from...
 
@@ -224,7 +226,7 @@ the syntax class ')'."
 (eval-after-load "dabbrev" '(defalias 'dabbrev-expand 'hippie-expand))
 
 ;; filecache: http://www.emacswiki.org/cgi-bin/wiki/FileNameCache
-(eval-after-load "filecache" 
+(eval-after-load "filecache"
   '(progn (message "Loading file cache...")
           (file-cache-add-directory "~/")
           (file-cache-add-directory-list '("~/Desktop" "~/Documents"))))

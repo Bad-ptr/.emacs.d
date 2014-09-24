@@ -8,28 +8,6 @@
 (require 'newcomment)
 
 
-(defun require-package (package &optional min-version no-refresh)
-  "Install given PACKAGE, optionally requiring MIN-VERSION.
-If NO-REFRESH is non-nil, the available package lists will not be
-re-downloaded in order to locate PACKAGE."
-  (if (package-installed-p package min-version)
-      t
-    (if (or (assoc package package-archive-contents) no-refresh)
-        (package-install package)
-      (progn
-        (package-refresh-contents)
-        (require-package package min-version t)))))
-
-(defun my/-install-favourite-packages ()
-  (when (boundp 'my/-favourite-packages-list)
-    (dolist (pkg my/-favourite-packages-list)
-      (require-package pkg))))
-
-;; Install my packages at first run
-(unless (file-exists-p package-user-dir)
-  (my/-install-favourite-packages))
-
-
 (defun fbread-mode()
   (interactive)
   (sgml-mode)
@@ -76,7 +54,26 @@ re-downloaded in order to locate PACKAGE."
 
 ;; Tabbar
 (with-eval-after-load "tabbar-autoloads"
-  (tabbar-mode 1))
+  (tabbar-mode 1)
+  (set-face-attribute
+   'tabbar-separator nil
+   :background "gray20"
+   :height 0.6)
+  (defun tabbar-buffer-tab-label (tab)
+    "Return a label for TAB.
+That is, a string used to represent it on the tab bar."
+    (let ((label (if tabbar--buffer-show-groups
+                     (format "[%s] " (tabbar-tab-tabset tab))
+                   (format "%s " (tabbar-tab-value tab)))))
+      ;; Unless the tab bar auto scrolls to keep the selected tab
+      ;; visible, shorten the tab label to keep as many tabs as possible
+      ;; in the visible area of the tab bar.
+      (if tabbar-auto-scroll-flag
+          label
+        (tabbar-shorten
+         label (max 1 (/ (window-width)
+                         (length (tabbar-view
+                                  (tabbar-current-tabset))))))))))
 
 ;; smex
 (with-eval-after-load "smex-autoloads"
@@ -227,6 +224,19 @@ re-downloaded in order to locate PACKAGE."
         company-idle-delay 0.2
         company-show-numbers t)
 
+  (defvar-local company-col-offset 0 "Horisontal tooltip offset.")
+  (defvar-local company-row-offset 0 "Vertical tooltip offset.")
+
+  (defun company--posn-col-row (posn)
+    (let ((col (car (posn-col-row posn)))
+          ;; `posn-col-row' doesn't work well with lines of different height.
+          ;; `posn-actual-col-row' doesn't handle multiple-width characters.
+          (row (cdr (posn-actual-col-row posn))))
+      (when (and header-line-format (version< emacs-version "24.3.93.3"))
+        ;; http://debbugs.gnu.org/18384
+        (cl-decf row))
+      (cons (+ col (window-hscroll) company-col-offset) (+ row company-row-offset))))
+
   (defun company-elisp-minibuffer (command &optional arg &rest ignored)
     "`company-mode' completion back-end for Emacs Lisp in the minibuffer."
     (interactive (list 'interactive))
@@ -236,18 +246,9 @@ re-downloaded in order to locate PACKAGE."
                       ('execute-extended-command (company-grab-symbol))
                       (t (company-capf `prefix)))))
       ('candidates
-       (when (< (count-lines (point-min) (point-max)) 3)
-         (save-excursion
-           (goto-char (point-max))
-           (insert "\n\n")))
        (case company-minibuffer-mode
          ('execute-extended-command (all-completions arg obarray 'commandp))
-         (t nil)))
-      ('post-completion (when (eq company-minibuffer-mode 'execute-extended-command)
-                          (save-excursion
-                            (goto-char (point-max))
-                            (while (looking-back "\n")
-                              (delete-char -1)))))))
+         (t nil)))))
 
   (defun minibuffer-company ()
     (unless company-mode
@@ -258,8 +259,11 @@ re-downloaded in order to locate PACKAGE."
 
         (setq-local completion-at-point-functions '(lisp-completion-at-point t))
 
+        (setq-local company-show-numbers nil)
         (setq-local company-backends '((company-elisp-minibuffer company-capf)))
         (setq-local company-tooltip-limit 8)
+        (setq-local company-col-offset 1)
+        (setq-local company-row-offset 1)
         (setq-local company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
                                         company-preview-if-just-one-frontend))
 
@@ -279,7 +283,8 @@ re-downloaded in order to locate PACKAGE."
 
 ;; ido-vertical
 (with-eval-after-load "ido-vertical-mode-autoloads"
-  (ido-vertical-mode 1))
+  (when (>= emacs-major-version 24)
+    (ido-vertical-mode 1)))
 
 ;; speedbar
 (with-eval-after-load "speedbar"
