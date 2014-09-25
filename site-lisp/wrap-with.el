@@ -129,14 +129,14 @@ Set point according to point-pos."
     (let ((look-regex (if (= w-beg w-end)
                           "\\s-"
                         "\\(\\s-\\|\n\\)")))
-      (cl-flet ((opp ()
-                     (save-excursion
-                       (goto-char w-beg)
-                       (while (looking-back look-regex)
-                         (backward-char))
-                       (if (not (looking-back (regexp-quote p-open)))
-                           nil
-                         (- (point) (string-width p-open))))))
+      (flet ((opp ()
+                  (save-excursion
+                    (goto-char w-beg)
+                    (while (looking-back look-regex)
+                      (backward-char))
+                    (if (not (looking-back (regexp-quote p-open)))
+                        nil
+                      (- (point) (string-width p-open))))))
         (let ((strt (opp)))
           (save-excursion
             (goto-char w-end)
