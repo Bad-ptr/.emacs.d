@@ -238,6 +238,16 @@ If no pair found then use p-str as opening and closing."
       (newline-and-indent))
     (indent-according-to-mode)))
 
+(defun w-w/backspace-current-pair ()
+  (interactive)
+  (save-excursion
+    (backward-up-list)
+    (let ((close-pos (1- (save-excursion (forward-list)))))
+      (delete-char 1)
+      (goto-char close-pos)
+      (delete-backward-char 1))))
+
+
 ;; wrap-with-mode:
 
 (defvar wrap-with-mode-map (make-sparse-keymap)
@@ -260,7 +270,7 @@ If no pair found then use p-str as opening and closing."
 (define-key wrap-with-mode-map (kbd "C-c w w") #'w-w/wrap-with)
 (define-key wrap-with-mode-map (kbd "C-c w p") #'w-w/wrap-with-pair)
 (define-key wrap-with-mode-map (kbd "C-c w h t") #'w-w/wrap-with-html-tag)
-
+(define-key wrap-with-mode-map (kbd "M-DEL") #'w-w/backspace-current-pair)
 (define-key wrap-with-mode-map (kbd "RET") #'w-w/newline-indent)
 
 ;;;###autoload

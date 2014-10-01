@@ -95,7 +95,8 @@ That is, a string used to represent it on the tab bar."
 
 ;; golden-ratio
 (with-eval-after-load "golden-ratio-autoloads"
-  (golden-ratio-mode 1))
+  (when (>= emacs-major-version 24)
+    (golden-ratio-mode 1)))
 
 ;;Jabber
 (with-eval-after-load "jabber"
@@ -294,6 +295,8 @@ That is, a string used to represent it on the tab bar."
 (with-eval-after-load "persp-mode-autoloads"
   (setq wg-morph-on nil)
   ;;(setq windmove-window-distance-delta 2)
+  (unless (>= emacs-major-version 24)
+    (setq persp-when-kill-switch-to-buffer-in-perspective nil))
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 ;; 3-packages.el ends here
