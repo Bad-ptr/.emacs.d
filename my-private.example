@@ -11,7 +11,7 @@
  user-full-name "Vasily Pupkin"
  user-mail-address "vasya-pupkin2020@gmail.com"
  user-emacs-directory "~/.emacs.d/"
- package-user-dir (expand-file-name "elpa" user-emacs-directory)
+ package-user-dir (locate-user-emacs-file "elpa")
  ;;user-init-file "~/.emacs"
  )
 
@@ -29,10 +29,11 @@
           ("Vas_pup@jabber.ru" (:password . "jabbervasypupkina")))))
 
 ;; Package archives
-(setq package-user-dir (expand-file-name "elpa" user-emacs-directory)
-        package-archives '(;; ("ELPA" . "http://tromey.com/elpa/")
-                           ;; ("GNU/ELPA" . "http://elpa.gnu.org/packages/")
-                           ("MELPA" . "http://melpa.milkbox.net/packages/")))
+(setq package-archives '(;; ("ELPA" . "http://tromey.com/elpa/")
+                         ;; ("GNU/ELPA" . "http://elpa.gnu.org/packages/")
+                         ("MELPA" . "http://melpa.milkbox.net/packages/")))
+(when (< emacs-major-version 24)
+  (add-to-list 'package-archives '("GNU/ELPA" . "http://elpa.gnu.org/packages/")))
 
 
 ;; List of packages you like. Uncomment package if you want it to be installed.

@@ -126,25 +126,27 @@ Set point according to point-pos."
                                               &optional (w-beg-end (w-w/wrap-beg-end)))
   "If region is already wrapped wit p-open/p-close pair then include them in region."
   (multiple-value-bind (w-beg w-end) w-beg-end
-    (let ((look-regex (if (= w-beg w-end)
+    (let ((skip-regex (if (= w-beg w-end)
                           "\\s-"
-                        "\\(\\s-\\|\n\\)")))
-      (flet ((opp ()
-                  (save-excursion
-                    (goto-char w-beg)
-                    (while (looking-back look-regex)
-                      (backward-char))
-                    (if (not (looking-back (regexp-quote p-open)))
-                        nil
-                      (- (point) (string-width p-open))))))
-        (let ((strt (opp)))
-          (save-excursion
+                        "\\(\\s-\\|\n\\)"))
+          is-enlarged new-start new-end)
+
+      (when (region-active-p)
+        (save-excursion
+          (goto-char w-beg)
+          (while (looking-back skip-regex)
+            (backward-char))
+          (when (looking-back (regexp-quote p-open))
+            (setq new-start (1- (point)))
+
             (goto-char w-end)
-            (while (looking-at look-regex)
+            (while (looking-at skip-regex)
               (forward-char))
-            (if (not (and (looking-at (regexp-quote p-close)) strt))
-                (list nil w-beg-end)
-              (list t (list strt (+ (point) (string-width p-close)))))))))))
+            (when (looking-at (regexp-quote p-close))
+              (setq new-end (1+ (point))
+                    is-enlarged t)))))
+
+      (list is-enlarged (list new-start new-end)))))
 
 (defun* w-w/wrap-with-pair (p-str
                             &optional (w-beg-end (w-w/wrap-beg-end))
@@ -167,19 +169,16 @@ If no pair found then use p-str as opening and closing."
         (setq inp-is-closing-pair t)))
     (if (not inp-is-closing-pair)
         (w-w/wrap-with p-open p-close w-beg-end 'after-opening)
-      (if (looking-at (concat "\\s-*" (regexp-quote p-close)))
-          (progn
-            (while (looking-at "\\s-")
-              (forward-char))
-            (forward-char (string-width p-close)))
-        (multiple-value-bind (is-enlrgd beg-end)
-            (w-w/enlarge-region-if-wrapped p-open p-close w-beg-end)
-          (if (not is-enlrgd)
-              (w-w/wrap-with p-open p-close beg-end)
+      (multiple-value-bind (is-enlrgd beg-end)
+          (w-w/enlarge-region-if-wrapped p-open p-close w-beg-end)
+        (if is-enlrgd
             (multiple-value-bind (beg end) beg-end
               (set-mark beg)
-              (goto-char end))))))))
-
+              (goto-char end))
+          (if (or (region-active-p)
+                  (not (looking-at (regexp-quote p-close))))
+              (w-w/wrap-with p-open p-close w-beg-end)
+            (forward-char)))))))
 
 ;; Wrap with html tag:
 
@@ -247,6 +246,31 @@ If no pair found then use p-str as opening and closing."
       (goto-char close-pos)
       (delete-backward-char 1))))
 
+(defun w-w/cut-region-with-surronding-pair ()
+  (interactive)
+  (when (region-active-p)
+    (save-excursion
+      (forward-list)
+      (delete-char -1))
+    (kill-region (region-beginning) (region-end))))
+
+(defun w-w/insert-with-surrounding-pair ()
+  (interactive)
+  (if (region-active-p)
+      (let ((y-txt (first kill-ring)))
+        (when (and y-txt (> (string-width y-txt) 0))
+          (let* ((start-index (if (string-match "^[ \f\t\n\r\v]+" y-txt)
+                                  (match-end 0)
+                                0))
+                 (p-s (substring y-txt start-index (1+ start-index)))
+                 (p-e (assoc p-s (union w-w/pairs-predefined w-w/pairs))))
+            (when p-e
+              (goto-char (region-end))
+              (insert-string (cdr p-e)))
+            (goto-char (region-beginning))
+            (insert-string y-txt)
+            (deactivate-mark))))
+    (yank)))
 
 ;; wrap-with-mode:
 
@@ -267,10 +291,12 @@ If no pair found then use p-str as opening and closing."
         ("{" . "}")
         ("\"" . nil)))
 
-(define-key wrap-with-mode-map (kbd "C-c w w") #'w-w/wrap-with)
-(define-key wrap-with-mode-map (kbd "C-c w p") #'w-w/wrap-with-pair)
-(define-key wrap-with-mode-map (kbd "C-c w h t") #'w-w/wrap-with-html-tag)
+;;(define-key wrap-with-mode-map (kbd "C-c w w") #'w-w/wrap-with)
+;;(define-key wrap-with-mode-map (kbd "C-c w p") #'w-w/wrap-with-pair)
+;;(define-key wrap-with-mode-map (kbd "C-c w h t") #'w-w/wrap-with-html-tag)
 (define-key wrap-with-mode-map (kbd "M-DEL") #'w-w/backspace-current-pair)
+(define-key wrap-with-mode-map (kbd "C-s-w") #'w-w/cut-region-with-surronding-pair)
+(define-key wrap-with-mode-map (kbd "C-s-y") #'w-w/insert-with-surrounding-pair)
 (define-key wrap-with-mode-map (kbd "RET") #'w-w/newline-indent)
 
 ;;;###autoload

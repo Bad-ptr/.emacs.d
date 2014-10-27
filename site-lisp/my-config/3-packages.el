@@ -22,7 +22,7 @@
 ;; templates
 (with-eval-after-load "template"
   (add-to-list 'template-default-directories
-               (expand-file-name "site-lisp/templates/" user-emacs-directory))
+               (locate-user-emacs-file "site-lisp/templates/"))
   (setq template-auto-insert t
         template-auto-update nil)
   (add-to-list 'template-expansion-alist
@@ -32,6 +32,9 @@
   (template-initialize))
 (require 'template)
 
+;; skeletor
+(with-eval-after-load "skeletor-autoloads"
+  (skeletor-define-template "Cpp"))
 
 ;; ido
 (with-eval-after-load "ido"
@@ -43,13 +46,12 @@
         ido-max-prospects 10)
   (ido-mode t)
   (ido-everywhere t))
-;;(require 'ido)
+(require 'ido)
 
 (with-eval-after-load "ido-ubiquitous-autoloads"
   (ido-ubiquitous-mode t))
 (with-eval-after-load "ido-at-point-autoloads"
   (ido-at-point-mode 1))
-
 
 
 ;; Tabbar
@@ -76,21 +78,29 @@ That is, a string used to represent it on the tab bar."
                                   (tabbar-current-tabset))))))))))
 
 ;; smex
-(with-eval-after-load "smex-autoloads"
-  (smex-initialize)
-  (global-set-key (kbd "M-x") #'smex)
-  (global-set-key (kbd "M-X") #'smex-major-mode-commands)
-  ;; This is your old M-x.
-  (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
-  (smex-auto-update 60)
-  (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
+(if (>= emacs-major-version 24)
+    (with-eval-after-load "smex-autoloads"
+      (smex-initialize)
+      (global-set-key (kbd "M-x") #'smex)
+      (global-set-key (kbd "M-X") #'smex-major-mode-commands)
+      ;; This is your old M-x.
+      (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
+      (smex-auto-update 60)
+      (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
+  (with-eval-after-load "ido"
+    (global-set-key
+     "\M-x" (lambda ()
+              (interactive)
+              (call-interactively
+               (intern
+                (ido-completing-read "M-x " (all-completions "" obarray 'commandp))))))))
 
 ;; drag-stuff
 (with-eval-after-load "drag-stuff-autoloads"
   (drag-stuff-global-mode 1))
 
 ;; popwin
-(with-eval-after-load "popwin-autoload"
+(with-eval-after-load "popwin-autoloads"
   (setq display-buffer-function 'popwin:display-buffer))
 
 ;; golden-ratio
@@ -136,7 +146,10 @@ That is, a string used to represent it on the tab bar."
   (global-set-key (kbd "C-\"") #'mc/skip-to-previous-like-this)
 
   (global-set-key (kbd "C-;") #'mc/mark-all-like-this-dwim)
-  (global-set-key (kbd "C-'") #'mc/mark-all-symbols-like-this-in-defun))
+  (global-set-key (kbd "C-:") #'mc/mark-all-symbols-like-this-in-defun)
+  (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click)
+  (with-eval-after-load "multiple-cursors"
+    (define-key mc/keymap (kbd "C-'") 'mc-hide-unmatched-lines-mode)))
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
@@ -160,7 +173,7 @@ That is, a string used to represent it on the tab bar."
                                     (if (looking-back ";")
                                         (reindent-then-newline-and-indent)
                                       (insert ";"))))
-  (key-chord-define-global ",," #'(lambda () (interactive)(move-after-closing-bracket)(insert ", ")))
+  ;;(key-chord-define-global ",," #'(lambda () (interactive)(move-after-closing-bracket)(insert ", ")))
 
   (key-chord-define-global "qx" #'eval-region)
 
@@ -283,9 +296,14 @@ That is, a string used to represent it on the tab bar."
   (flx-ido-mode 1))
 
 ;; ido-vertical
-(with-eval-after-load "ido-vertical-mode-autoloads"
-  (when (>= emacs-major-version 24)
-    (ido-vertical-mode 1)))
+(if (>= emacs-major-version 24)
+    (with-eval-after-load "ido-vertical-mode-autoloads"
+      (ido-vertical-mode 1))
+  (with-eval-after-load "ido"
+    ;; Display ido results vertically, rather than horizontally
+    (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
+    (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
+    (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
 
 ;; speedbar
 (with-eval-after-load "speedbar"
@@ -298,5 +316,6 @@ That is, a string used to represent it on the tab bar."
   (unless (>= emacs-major-version 24)
     (setq persp-when-kill-switch-to-buffer-in-perspective nil))
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
+
 
 ;; 3-packages.el ends here

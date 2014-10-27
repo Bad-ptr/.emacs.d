@@ -5,25 +5,58 @@
 ## License: GPL either version 2 or any later version
 
 
-SOURCE_TOP_DIR  := . # source
-SOURCE_SUB_DIRS :=   #shared math gfx
+MODE :=debug
+LANGUAGE :=c
 
-BUILD_TOP_DIR := bin/release
+SOURCE_TOP_DIR  :=.
+# source
+SOURCE_SUB_DIRS :=
+#shared math gfx
 
-SOURCE_EXT := c #cpp
-OBJECT_EXT := o
 
-COMPILER   := $(CC) #$(CXX)
-LINKER	   := $(COMPILER)
 
-COMPILER_FLAGS := -Wall -ggdb -pipe -std=c11 $(CFLAGS) #$(CXXFLAGS) -std=c++14 -pthread `sdl-config --cflags`
-LINKER_FLAGS   := -s -pipe -L`gcc -print-file-name=` #-std=c++14 -pthread
-LIBS           := #-lgcc -lc -lm -lpthread #-lGL -lGLU -lGLEW `sdl-config --libs`
+BUILD_TOP_DIR :=bin/$(MODE)
 
-SOURCE_DIRS  := $(addprefix $(SOURCE_TOP_DIR)/, $(SOURCE_SUBDIRS)) $(SOURCE_TOP_DIR)
-BUILD_DIRS   := $(patsubst $(SOURCE_TOP_DIR)%, $(BUILD_TOP_DIR)%, $(SOURCE_DIRS))
-SOURCE_FILES := $(wildcard $(addsuffix /*.$(SOURCE_EXT), $(SOURCE_DIRS)))
-OBJECT_FILES := $(patsubst $(SOURCE_TOP_DIR)%.$(SOURCE_EXT), $(BUILD_TOP_DIR)%.$(OBJECT_EXT), $(SOURCE_FILES))
+SOURCE_EXT :=c
+ifeq ($(LANGUAGE),cpp)
+SOURCE_EXT :=cpp
+endif
+
+OBJECT_EXT :=o
+
+COMPILER   :=$(CC)
+ifeq ($(LANGUAGE),cpp)
+COMPILER :=$(CXX)
+endif
+
+LINKER	   :=$(COMPILER)
+
+COMPILER_FLAGS :=-pipe
+ifeq ($(LANGUAGE),c)
+COMPILER_FLAGS += $(CFLAGS) -std=c11
+endif
+ifeq ($(LANGUAGE),cpp)
+COMPILER_FLAGS += $(CXXFLAGS) -std=c++11 -pthread #`sdl-config --cflags`
+endif
+
+LINKER_FLAGS   :=-s -pipe -L`gcc -print-file-name=`
+ifeq ($(LANGUAGE),cpp)
+LINKER_FLAGS += -std=c++14 -pthread
+endif
+LIBS           :=
+#-lgcc -lc -lm -lpthread #-lGL -lGLU -lGLEW `sdl-config --libs`
+
+ifeq ($(MODE),debug)
+COMPILER_FLAGS += -Wall -ggdb
+else
+COMPILER_FLAGS += -O2
+endif
+
+
+SOURCE_DIRS  :=$(addprefix $(SOURCE_TOP_DIR)/, $(SOURCE_SUBDIRS)) $(SOURCE_TOP_DIR)
+BUILD_DIRS   :=$(patsubst $(SOURCE_TOP_DIR)%, $(BUILD_TOP_DIR)%, $(SOURCE_DIRS))
+SOURCE_FILES :=$(wildcard $(addsuffix /*.$(SOURCE_EXT), $(SOURCE_DIRS)))
+OBJECT_FILES :=$(patsubst $(SOURCE_TOP_DIR)%.$(SOURCE_EXT), $(BUILD_TOP_DIR)%.$(OBJECT_EXT), $(SOURCE_FILES))
 
 
 # example of define, info and eval

@@ -4,18 +4,30 @@
 ;;; Code:
 
 
+
+(setq inhibit-default-init t
+      load-prefer-newer t
+      message-log-max 10000)
+
+
 ;;load functions that will be used during initialization
-(load (concat user-emacs-directory "my-std-lib"))
+(load (locate-user-emacs-file "my-std-lib"))
+
+(let ((emd (expand-file-name (concat "site-lisp/emacs" (number-to-string emacs-major-version))
+                             user-emacs-directory)))
+  (when (file-directory-p emd)
+    (add-to-list 'load-path emd)
+    (load (expand-file-name "init.el" emd) t t t)))
 
 
 (defun my/-init-before-private ()
   "Init actions before private information set."
-  (add-to-list 'load-path (expand-file-name "site-lisp/" user-emacs-directory))
+  (add-to-list 'load-path (locate-user-emacs-file "site-lisp/"))
 
-  (defconst my/-common-conf-path (expand-file-name "site-lisp/my-config/" user-emacs-directory))
+  (defconst my/-common-conf-path (locate-user-emacs-file "site-lisp/my-config/"))
 
   ;; load custom file
-  (setq custom-file (expand-file-name "my-custom.el" user-emacs-directory))
+  (setq custom-file (locate-user-emacs-file "my-custom.el"))
   (load custom-file t t)
 
   ;; Load other parts of configuration
@@ -24,16 +36,16 @@
 (defun my/-init-after-private ()
   "Init actions after private information set."
 
-  (add-to-list 'load-path (expand-file-name "site-lisp/" user-emacs-directory))
+  (add-to-list 'load-path (locate-user-emacs-file "site-lisp/"))
 
-  (defconst my/-conf-path (expand-file-name (concat "site-lisp/" my/-username "-config/") user-emacs-directory))
+  (defconst my/-conf-path (locate-user-emacs-file (concat "site-lisp/" my/-username "-config/")))
 
   ;; Packages
   (require 'package)
   (package-initialize)
 
   ;; load custom file
-  (setq custom-file (expand-file-name (concat my/-username "-custom.el") user-emacs-directory))
+  (setq custom-file (locate-user-emacs-file (concat my/-username "-custom.el")))
   (load custom-file t t)
 
   ;; Install my packages at first run
@@ -56,14 +68,15 @@
 (add-hook 'my/-username-hook (alambda (&optional arg)
                                (unless arg
                                  (my/-init-before-private))
-                               (lexical-let ((priv-file (concat user-emacs-directory
-                                                                (if my/-multiuser-private
-                                                                    my/-username "my") "-private.el")))
+                               (lexical-let ((priv-file (locate-user-emacs-file
+                                                         (concat
+                                                          (if my/-multiuser-private
+                                                              my/-username "my") "-private.el"))))
                                  (when (condition-case err (load priv-file)
                                          (file-error
                                           (my/-init-error-warning err)
                                           (let ((ff (lambda ()
-                                                      (let ((example-file (concat user-emacs-directory "my-private.example")))
+                                                      (let ((example-file (locate-user-emacs-file "my-private.example")))
                                                         (my/-warning (format "You run emacs without your private settings set(first run?).\
  To fix this please create a %s file (See %s)." priv-file example-file))
                                                         (set-window-buffer (selected-window)

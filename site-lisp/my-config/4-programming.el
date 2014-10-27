@@ -183,10 +183,17 @@ of FILE in the current directory, suitable for creation"
 
 
 ;; cperl
-(with-eval-after-load "cperl-mode-autoloads"
-  (defalias 'perl-mode 'cperl-mode)
-  (setq cperl-hairy t)
-  (add-hook 'cperl-mode-hook 'eldoc-mode))
+(with-eval-after-load "cperl-mode"
+  (setq cperl-hairy t
+        cperl-lazy-help-time 1)
+  (add-hook 'cperl-mode-hook 'cperl-lazy-install)
+  (define-key cperl-mode-map (kbd "<tab>")
+    #'(lambda ()
+        (interactive)
+        (if (region-active-p)
+            (indent-region (region-beginning) (region-end))
+          (cperl-indent-command)))))
+(defalias 'perl-mode 'cperl-mode)
 
 
 ;; php

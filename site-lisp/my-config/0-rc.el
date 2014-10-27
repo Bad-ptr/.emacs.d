@@ -81,8 +81,9 @@
 (setq font-lock-maximum-decoration t)
 
 ;; enable cua keybindings and functions
-(when (> emacs-major-version 23)
-  (cua-mode 1))
+;; (when (> emacs-major-version 23)
+;;   (cua-mode 1))
+(global-set-key (kbd "C-z") #'undo)
 
 ;; Highlight parentheses
 (show-paren-mode 1)
@@ -131,7 +132,7 @@ the syntax class ')'."
 ;; Scrolling settings
 ;; seems like it overriden by smooth-scrolling package
 (setq
- scroll-margin 0
+ scroll-margin 5
  scroll-conservatively 100000
  scroll-step 1
  scroll-up-aggressively nil
@@ -177,6 +178,8 @@ the syntax class ')'."
 ; no bells please
 (setq ring-bell-function (lambda nil nil))
 
+;; disable startup echo area message
+(fset 'display-startup-echo-area-message 'ignore)
 
 ;; more comfortable window navigation
 (windmove-default-keybindings 'super)
@@ -194,7 +197,7 @@ the syntax class ')'."
 
 
 ;; backups
-(let ((bu-dir (concat user-emacs-directory "cache/backups")))
+(let ((bu-dir (locate-user-emacs-file "cache/backups")))
   (unless (file-exists-p bu-dir) (make-directory bu-dir t))
   (setq make-backup-files t ;; do make backups
         backup-by-copying t ;; and copy them here
@@ -207,8 +210,12 @@ the syntax class ')'."
 (setq auto-save-list-file-prefix
       (concat user-emacs-directory "cache/auto-save-list/.saves-"))
 
+;; tramp autosave
+(with-eval-after-load "tramp"
+  (setq tramp-auto-save-directory (locate-user-emacs-file "tramp-auto-save")))
+
 ;; abbrevs (abbreviations)
-(let ((abbrev-dir (expand-file-name "data" user-emacs-directory)))
+(let ((abbrev-dir (locate-user-emacs-file "data")))
   (unless (file-exists-p abbrev-dir) (make-directory abbrev-dir t))
 
   (setq abbrev-file-name  ;; tell emacs where to read abbrev
@@ -233,14 +240,14 @@ the syntax class ')'."
 
 ;; overrride the default function....
 (defun emacs-session-filename (SESSION-ID)
-  (expand-file-name (concat "cache/session." SESSION-ID) user-emacs-directory))
+  (locate-user-emacs-file (concat "cache/session." SESSION-ID)))
 
 ;; bookmarks
-(setq bookmark-default-file (expand-file-name "data/bookmarks" user-emacs-directory)
+(setq bookmark-default-file (locate-user-emacs-file "data/bookmarks")
       bookmark-save-flag 1) ;; bookmarks
 
 ;; saveplace: save location in file when saving files
-(setq save-place-file (expand-file-name "cache/saveplace" user-emacs-directory))
+(setq save-place-file (locate-user-emacs-file "cache/saveplace"))
 (setq-default save-place t)            ;; activate it for all buffers
 (require 'saveplace)                   ;; get the package
 
@@ -248,16 +255,18 @@ the syntax class ')'."
 (setq savehist-additional-variables     ;; also save...
       '(search ring regexp-search-ring) ;; ... my search entries
       savehist-autosave-interval 60     ;; save every minute (default: 5 min)
-      savehist-file (expand-file-name "cache/savehist" user-emacs-directory)) ;; keep my home clean
+      savehist-file (locate-user-emacs-file "cache/savehist")) ;; keep my home clean
 (savehist-mode t)
 
 ;; recentf
 (require 'recentf)    ;; save recently used files
 (setq
- recentf-save-file (expand-file-name "cache/recentf" user-emacs-directory)
+ recentf-save-file (locate-user-emacs-file "cache/recentf")
  recentf-max-saved-items 100     ;; max save 100
  recentf-max-menu-items 15)      ;; max 15 in menu
 (recentf-mode t)                 ;; turn it on
 
+
+(winner-mode)
 
 ;; 0-rc.el ends here
