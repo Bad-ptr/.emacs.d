@@ -1,4 +1,4 @@
-;;; my-std-lib.el --- different usefull functions
+;;; my-std-lib.el --- different usefull functions. -*- lexical-binding: t; -*-
 
 (if (locate-library "cl-lib")
     (progn
@@ -7,9 +7,19 @@
         (defmacro lexical-let (bindings &rest body)
           (unless lexical-binding
             (my/-warning "You are trying to use lexical let with lexical-binding = nil."))
-          `(let ,bindings ,@body))))
+          `(let ,bindings ,@body)))
+
+      (when (autoloadp (symbol-function 'cl-labels))
+        (autoload-do-load (symbol-function 'cl-labels)))
+      (lexical-let ((old-labels (symbol-function 'cl-labels)))
+        (defmacro cl-labels (bindings &rest body)
+          (unless lexical-binding
+            (my/-warning "You are trying to use cl-labels let with lexical-binding = nil."))
+          `(,old-labels ,bindings ,@body))))
   (require 'cl)
-  (defalias 'cl-labels 'labels))
+  (defalias 'cl-labels 'labels)
+  (defalias 'cl-defmacro 'defmacro*))
+
 
 ;;; Code:
 
@@ -32,13 +42,19 @@
                  (null (cdr (frame-list)))
                  (eq (selected-frame) terminal-frame)))))
 
-(defmacro my/-exec-after-interactive-frame-available (&rest body)
+(cl-defmacro my/-exec-after-interactive-frame-available ((&rest captures) &rest body)
   (declare (indent defun))
   `(if (my/-is-interactive-frame-available)
        (progn ,@body)
-     (add-hook-that-fire-once 'after-make-frame-functions (frame)
-       (with-selected-frame (frame)
-         ,@body))))
+     (lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
+       (add-hook-that-fire-once 'after-make-frame-functions (frame)
+         (with-selected-frame frame
+           ,@body)))))
+
+(cl-defmacro my/-exec-after-delay ((&rest captures) delay &rest body)
+  (declare (indent defun))
+  `(lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
+     (run-at-time ,delay nil #'(lambda () ,@body))))
 
 ;; with-eval-after-load for Emacs < 24.4
 (unless (fboundp 'with-eval-after-load)
@@ -57,23 +73,45 @@ buffer-local wherever it is set."
        (defvar ,var ,val ,docstring)
        (make-variable-buffer-local ',var))))
 
+(unless (fboundp 'setq-local)
+  (defmacro setq-local (var val)
+    (declare (indent defun))
+    "Set variable VAR to value VAL in current buffer."
+    `(set (make-local-variable ',var) ,val)))
 
-(defun my/-error-message (error-class msg &optional fatal face)
+
+(defun my/-error-message (error-class msg &optional fatal face tracedepth)
+  (unless tracedepth (setq tracedepth 8))
   (let* ((ecs (concat "[" error-class "]"))
          (errbuf (get-buffer-create "*my/-errors*"))
-         (errstr (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)))
+         (btf (let* ((i 2) bf)
+                (while (< i (+ 2 tracedepth))
+                  (push (backtrace-frame i 'my/-error-message) bf)
+                  (setq i (1+ i)))
+                bf))
+         (errstr (concat
+                  (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
+                  (and load-in-progress
+                       (format "\n\tIn %s." (or load-file-name (buffer-file-name))))
+                  (and btf
+                       (format "\n  Backtrace:\n\t\t%s"
+                               (mapconcat #'(lambda (elt) (format "%s" (cdr elt)))
+                                          btf "\n\t\t"))))))
     (message "%s" errstr)
     (with-current-buffer errbuf
       (insert-string errstr)
       (newline)
       (font-lock-add-keywords nil `((,(concat "^\\[" error-class "\\]") 0 'error t))))
-    (when fatal
-      (switch-to-buffer errbuf)
-      (search-backward ecs))))
+    (when (or fatal (not (my/-is-interactive-frame-available)))
+      (my/-exec-after-interactive-frame-available (errstr errbuf ecs)
+        (my/-exec-after-delay () 2
+          (message "%s" errstr)
+          (switch-to-buffer errbuf)
+          (search-backward ecs))))))
 (defun my/-warning (msg)
-  (my/-error-message "WARNING" msg nil 'compilation-warning))
+  (my/-error-message "WARNING" msg nil 'compilation-warning 0))
 (defun my/-init-error-warning (msg)
-  (my/-error-message "INIT_ERROR" msg))
+  (my/-error-message "INIT_ERROR" msg nil nil 5))
 (defun my/-init-error-fatal (msg)
   (my/-error-message "INIT_ERROR" msg t))
 
@@ -126,5 +164,6 @@ re-downloaded in order to locate PACKAGE."
                   (vector (append mod (list to)))))))))
       (when input-method
         (activate-input-method current)))))
+
 
 ;; my-std-lib.el ends here

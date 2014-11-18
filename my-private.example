@@ -11,7 +11,7 @@
  user-full-name "Vasily Pupkin"
  user-mail-address "vasya-pupkin2020@gmail.com"
  user-emacs-directory "~/.emacs.d/"
- package-user-dir (locate-user-emacs-file "elpa")
+ package-user-dir (expand-file-name "elpa" user-emacs-directory)
  ;;user-init-file "~/.emacs"
  )
 
@@ -31,7 +31,7 @@
 ;; Package archives
 (setq package-archives '(;; ("ELPA" . "http://tromey.com/elpa/")
                          ;; ("GNU/ELPA" . "http://elpa.gnu.org/packages/")
-                         ("MELPA" . "http://melpa.milkbox.net/packages/")))
+                         ("MELPA" . "http://melpa.org/packages/")))
 (when (< emacs-major-version 24)
   (add-to-list 'package-archives '("GNU/ELPA" . "http://elpa.gnu.org/packages/")))
 
@@ -122,7 +122,7 @@ If you use only english layout in your system set this to nil."
              (set-default sym val)
              ;; Support key sequencies in non-english layout
              (when val
-               (my/-exec-after-interactive-frame-available
+               (my/-exec-after-interactive-frame-available ()
                  (reverse-input-method my/-non-english-input-method)
                  (setq read-passwd-map
                        (let ((map read-passwd-map))
@@ -140,6 +140,8 @@ and could be used to override common configuration."
 ;; Examples of how you can set default font (this must be set in private or custom file):
 ;; better do it with `customize-face', but sometimes it's not flexible enough.
 
+;; (my/-exec-after-interactive-frame-available ()
+;;   (set-face-font 'default "Monospace-11.0:antialias=true:hinting=true:hintstyle=hintfull:rgba=rgba:dpi=96:weight=normal"))
 ;; (add-hook 'after-make-frame-functions
 ;;           (labels ((setfont (frame)
 ;;                             (unless (and (daemonp) (eq frame terminal-frame))

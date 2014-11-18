@@ -106,7 +106,12 @@ That is, a string used to represent it on the tab bar."
 ;; golden-ratio
 (with-eval-after-load "golden-ratio-autoloads"
   (when (>= emacs-major-version 24)
-    (golden-ratio-mode 1)))
+    (golden-ratio-mode 1))
+  ;; (unless (fboundp 'window--resizable-p)
+  ;;   (defun window--resizable-p (window &rest args)
+  ;;     (with-selected-window window
+  ;;       (not (minibuffer-selected-window)))))
+  )
 
 ;;Jabber
 (with-eval-after-load "jabber"
@@ -163,29 +168,41 @@ That is, a string used to represent it on the tab bar."
 ;; key-chord
 (with-eval-after-load "key-chord-autoloads"
   (key-chord-mode 1)
-  (key-chord-define-global "hj" #'undo)
-  (key-chord-define-global "cv" #'reindent-then-newline-and-indent)
   (key-chord-define-global "4r" "$")
 
   (key-chord-define-global ";;" #'(lambda ()
-                                    (interactive);
+                                    (interactive)
                                     (move-end-of-line 1)
                                     (if (looking-back ";")
                                         (reindent-then-newline-and-indent)
                                       (insert ";"))))
-  ;;(key-chord-define-global ",," #'(lambda () (interactive)(move-after-closing-bracket)(insert ", ")))
 
   (key-chord-define-global "qx" #'eval-region)
 
-  (key-chord-define-global "tn" #'tabbar-forward-tab)
+  (key-chord-define-global "tt" #'tabbar-forward-tab)
   (key-chord-define-global "tb" #'tabbar-backward-tab)
   (key-chord-define-global "gn" #'tabbar-forward-group)
-  (key-chord-define-global "gb" #'tabbar-backward-group))
+  (key-chord-define-global "gb" #'tabbar-backward-group)
+
+  (dolist (chords '(("((" . "))") ("[[" . "]]") ("{{" . "}}")
+                    (nil . ",,")))
+    (let ((chord-left (car chords))
+          (chord-right (cdr chords)))
+      (lexical-let ((chord-l-s (and chord-left (substring chord-left 0 1)))
+                    (chord-r-s (and chord-right (substring chord-right 0 1))))
+        (when chord-left
+          (key-chord-define-global chord-left #'(lambda ()
+                                                  (interactive)
+                                                  (search-backward chord-l-s))))
+        (when chord-right
+          (key-chord-define-global chord-right #'(lambda ()
+                                                   (interactive)
+                                                   (search-forward chord-r-s))))))))
 
 ;; idle-highlight-mode
 (with-eval-after-load "idle-highlight-mode-autoloads"
   (setq idle-highlight-delay 1.0)
-  (add-hook 'prog-mode-hook 'idle-highlight-mode))
+  (add-hook 'my/-prog-mode-hook 'idle-highlight-mode))
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
@@ -193,26 +210,42 @@ That is, a string used to represent it on the tab bar."
 
 ;; rainbow-mode
 (with-eval-after-load "rainbow-mode-autoloads"
-  (add-hook 'prog-mode-hook
-            ;; 'rainbow-turn-on
-            #'(lambda () (rainbow-mode 1))))
+  (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1))))
 
 
 ;; highlight-parentheses
 (with-eval-after-load "highlight-parentheses-autoloads"
-  (setq hl-paren-background-colors '())
-  (setq hl-paren-colors (list "#FF0000" "#BB7700" "#664400" nil))
-  (define-globalized-minor-mode global-highlight-parentheses-mode
-    highlight-parentheses-mode
-    (lambda ()
-      (highlight-parentheses-mode t)))
-
-  (global-highlight-parentheses-mode t))
+  (setq hl-paren-background-colors '("#FFF" "#DDCCDD" "#CCDDDD"))
+  (setq hl-paren-colors (list "#FF0000" "#FF00FF" "#00FFFF"))
+  (setq hl-paren-sizes (list 1.1))
+  (global-highlight-parentheses-mode t)
+  (defun hl-paren-create-overlays ()
+    (let ((fg hl-paren-colors)
+          (bg hl-paren-background-colors)
+          (size hl-paren-sizes)
+          attributes)
+      (while (or fg bg)
+        (setq attributes (face-attr-construct 'hl-paren-face))
+        (when (car fg)
+          (setq attributes (plist-put attributes :foreground (car fg))))
+        (pop fg)
+        (when (car bg)
+          (setq attributes (plist-put attributes :background (car bg))))
+        (pop bg)
+        (when (car size)
+          (setq attributes (plist-put attributes :height (car size)))
+          (setq attributes (plist-put attributes :weight 'bold)))
+        (pop size)
+        (dotimes (i 2) ;; front and back
+          (push (make-overlay 0 0) hl-paren-overlays)
+          (overlay-put (car hl-paren-overlays) 'face attributes)))
+      (setq hl-paren-overlays (nreverse hl-paren-overlays))))
+  )
 
 ;; highlight-blocks-mode
 ;; do not enable it as it's too slow
 ;; (with-eval-after-load "highlight-blocks-autoloads"
-;;   (add-hook 'prog-mode-hook #'(lambda () (highlight-blocks-mode 1)))
+;;   (add-hook 'my/-prog-mode-hook #'(lambda () (highlight-blocks-mode 1)))
 ;;   (add-hook 'activate-mark-hook #'(lambda () (highlight-blocks-mode -1)))
 ;;   (add-hook 'deactivate-mark-hook #'(lambda () (highlight-blocks-mode 1))))
 
@@ -288,6 +321,48 @@ That is, a string used to represent it on the tab bar."
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
   )
+
+
+;; auto-complete-mode
+(when (< emacs-major-version 24)
+  (with-eval-after-load "auto-complete-autoloads"
+    (require 'auto-complete)
+    (require 'auto-complete-config)
+    ;;(add-to-list 'ac-dictionary-directories (concat my/-conf-path "auto-complete/dict"))
+    ;;(require 'auto-complete-clang)
+    ;;(require 'go-autocomplete)
+    (ac-config-default)
+    (setq clang-completion-suppress-error t
+          ac-clang-flags (mapcar #'(lambda (item)(concat "-I" item))
+                                 (c-get-system-includes)))
+
+    (global-auto-complete-mode t)           ;enable global-mode
+    (setq ac-auto-start 2                ;automatically start (disabled)
+          ac-dwim t                        ;Do what i mean
+          ac-override-local-map nil        ;don't override local map
+          ac-use-quick-help nil ac-quick-help-delay 1.5
+          ac-use-menu-map t ac-auto-show-menu 0.5
+          ac-ignore-case t ac-delay 0.5 ac-use-fuzzy t ac-use-comphist t)
+    (custom-set-variables
+     '(ac-sources
+       '(;;ac-source-filename
+         ac-source-files-in-current-dir ;;ac-source-words-in-buffer
+         ac-source-words-in-same-mode-buffers
+         ;;ac-source-yasnippet ac-source-words-in-all-buffer ac-source-gtags
+         ;;ac-source-imenu ac-source-abbrev ac-source-semantic
+         ;;ac-source-semantic-raw ac-source-ropemacs ac-source-symbols
+         )))
+
+    (dolist (hook '(emacs-lisp-mode-hook inferior-emacs-lisp-mode
+                                         lisp-mode-hook lisp-interaction-mode-hook))
+      (add-hook hook #'(lambda () (add-to-list 'ac-sources 'ac-source-symbols))))
+    (add-hook 'haskell-mode-hook #'(lambda () (add-to-list 'ac-sources 'ac-source-haskell)))
+    (add-hook 'c-mode-common-hook #'(lambda ()
+                                      ;;(setq ac-sources '(ac-source-clang ac-source-yasnippet))
+                                      (add-to-list 'ac-sources 'ac-source-clang)
+                                      ;;(setq ac-sources '(ac-source-semantic))
+                                      ))
+    (ac-flyspell-workaround)))
 
 
 ;; flx

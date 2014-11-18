@@ -4,14 +4,72 @@
 ;;; Code:
 
 
-;; Font for parens
+;; ---------------------
+;; Common
+
+;; (electric-indent-mode 1)
+
+(require 'compile)
+
+;; make file executable if it's a script
+(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+
+(defvar my/-prog-mode-hook nil
+  "Hook to be run on programming mode activation.")
+(defvar my/-prog-modes-hooks (if (< emacs-major-version 24)
+                                 '(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
+                                                        lisp-mode-hook lisp-interaction-mode-hook
+                                                        ielm-mode-hook)
+                               '(prog-mode-hook cperl-mode-hook ielm-mode-hook
+                                                eval-expression-minibuffer-setup-hook))
+  "List of programming modes hooks.")
+
+;; Common hook place for programming modes
+(dolist (hook my/-prog-modes-hooks)
+  (add-hook hook #'(lambda () (run-hooks 'my/-prog-mode-hook))))
+
+(add-hook
+ 'my/-prog-mode-hook
+ #'(lambda ()
+     (eldoc-mode)
+
+     (font-lock-add-keywords
+      nil '(("("   . 'open-paren-face)   (")" . 'close-paren-face)
+            ("{"   . 'open-paren-face)   ("}" . 'close-paren-face)
+            ("\\[" . 'open-paren-face) ("\\]" . 'close-paren-face)
+
+            ("->" . 'access-op-face) ("::" . 'access-op-face) ("\\." . 'access-op-face)
+            ("," . 'comma-semicolon-face) (";" . 'comma-semicolon-face)
+
+            ("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend))
+      'append)
+
+     (unless (file-exists-p "Makefile")
+       (setq-local compile-command
+                   ;; emulate make's .c.o implicit pattern rule, but with
+                   ;; different defaults for the CC, CPPFLAGS, and CFLAGS
+                   ;; variables:
+                   ;; $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+                   (when buffer-file-name
+                     (let ((file (file-name-nondirectory buffer-file-name))
+                           (mkfile (get-closest-pathname)))
+                       (if mkfile
+                           (progn (format "cd %s; make" (file-name-directory mkfile)))
+                         (format "%s -c -o %s.o %s %s %s"
+                                 (or (getenv "CC") "gcc")
+                                 (file-name-sans-extension file)
+                                 (or (getenv "CPPFLAGS") "-DDEBUG=9")
+                                 (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
+                                 file))))))))
+
+;; Fonts for parens and ops
 
 (defface open-paren-face
   '((default :inherit default :height 0.9)
     (((class color) (min-colors 88) (background light))
      (:foreground "#DDD"))
     (((class color) (min-colors 88) (background dark))
-     (:foreground "#222")))
+     (:foreground "#444")))
   "Face for opening parentheses.")
 
 (defface close-paren-face
@@ -22,15 +80,34 @@
      (:foreground "#888")))
   "Face for close parentheses.")
 
-(add-hook 'prog-mode-hook
-          #'(lambda ()
-              (font-lock-add-keywords nil '(("(" . 'open-paren-face)) 'append)
-              (font-lock-add-keywords nil '((")" . 'close-paren-face)))) 'append)
+(defface access-op-face
+  '((default :inherit open-paren-face)
+    (((class color) (min-colors 88) (background light))
+     (:foreground "#666"))
+    (((class color) (min-colors 88) (background dark))
+     (:foreground "#AAA")))
+  "Face for accessor operators.")
 
-;; ---------------------
-;; Common
+(defface comma-semicolon-face
+  '((default :inherit close-paren-face :height 0.9 :slant normal))
+  "Face for comma and semicolon")
 
-;; (electric-indent-mode 1)
+(defun* get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
+  "Determine the pathname of the first instance of FILE starting from the current directory towards root.
+This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
+of FILE in the current directory, suitable for creation"
+  (let ((root (expand-file-name "/")) ; the win32 builds should translate this correctly
+        (level 0))
+    (expand-file-name file
+                      (loop
+                       for d = default-directory then (expand-file-name ".." d)
+                       do (setq level (+ level 1))
+                       if (file-exists-p (expand-file-name file d))
+                       return d
+                       if (> level maxlevel)
+                       return nil
+                       if (equal d root)
+                       return nil))))
 
 (defun run-current-file ()
   "Execute or compile the current file. For example,
@@ -58,51 +135,6 @@
           (progn (message "Running...")
                  (shell-command cmdStr "*run-current-file output*" ) )
         (message "No recognized program file suffix for this file.") ) )))
-
-
-(defun* get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
-  "Determine the pathname of the first instance of FILE starting from the current directory towards root.
-This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
-of FILE in the current directory, suitable for creation"
-  (let ((root (expand-file-name "/")) ; the win32 builds should translate this correctly
-        (level 0))
-    (expand-file-name file
-                      (loop
-                       for d = default-directory then (expand-file-name ".." d)
-                       do (setq level (+ level 1))
-                       if (file-exists-p (expand-file-name file d))
-                       return d
-                       if (> level maxlevel)
-                       return nil
-                       if (equal d root)
-                       return nil))))
-
-(require 'compile)
-(add-hook 'prog-mode-hook
-          (lambda ()
-            (font-lock-add-keywords
-             nil '(("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend)))
-            (unless (file-exists-p "Makefile")
-              (set (make-local-variable 'compile-command)
-                   ;; emulate make's .c.o implicit pattern rule, but with
-                   ;; different defaults for the CC, CPPFLAGS, and CFLAGS
-                   ;; variables:
-                   ;; $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
-                   (when buffer-file-name
-                     (let ((file (file-name-nondirectory buffer-file-name))
-                           (mkfile (get-closest-pathname)))
-                       (if mkfile
-                           (progn (format "cd %s; make" (file-name-directory mkfile)))
-                         (format "%s -c -o %s.o %s %s %s"
-                                 (or (getenv "CC") "gcc")
-                                 (file-name-sans-extension file)
-                                 (or (getenv "CPPFLAGS") "-DDEBUG=9")
-                                 (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
-                                 file))))))))
-
-
-;; make file executable if it's a script
-(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
 ;; Autoindent code after pasting
 (defadvice yank-pop (after indent-region activate)
@@ -133,18 +165,6 @@ of FILE in the current directory, suitable for creation"
      "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
      (current-buffer))
     (split-string (buffer-string) "\n" t)))
-
-
-;; lisp modes
-(dolist (hook (list
-               'emacs-lisp-mode-hook
-               'lisp-mode-hook
-               'lisp-interaction-mode-hook
-               'ielm-mode-hook))
-  (add-hook hook '(lambda ()
-                    (eldoc-mode)
-                    ;; (font-lock-add-keywords nil '(("\\((\\|)\\)" 1 font-lock-comment-face append)))
-                    )))
 
 
 ;; go-mode
@@ -178,7 +198,7 @@ of FILE in the current directory, suitable for creation"
 
 
 ;; ocaml
-(with-eval-after-load 'caml-autoloads
+(with-eval-after-load "caml-autoloads"
   (load "ocaml"))
 
 
@@ -192,7 +212,8 @@ of FILE in the current directory, suitable for creation"
         (interactive)
         (if (region-active-p)
             (indent-region (region-beginning) (region-end))
-          (cperl-indent-command)))))
+          (cperl-indent-command))))
+  (autoload 'perl-repl "inf-perl" "Run perl repl." t nil))
 (defalias 'perl-mode 'cperl-mode)
 
 
@@ -232,14 +253,17 @@ of FILE in the current directory, suitable for creation"
   (setq file-coding-system-alist (append '(("/*.\.vala$" . utf-8)) file-coding-system-alist))
   (setq file-coding-system-alist (append '(("/*.\.vapi$" . utf-8)) file-coding-system-alist)))
 
+
 ;; SQL
 (with-eval-after-load "sqlup-mode-autoloads"
   (add-hook 'sql-mode-hook #'(lambda () (sqlup-mode t))))
+
 
 ;; HTML
 (with-eval-after-load "simplezen-autoloads"
   (require 'simplezen)
   (add-hook-that-fire-once 'html-mode-hook ()
     (define-key html-mode-map (kbd "TAB") 'simplezen-expand-or-indent-for-tab)))
+
 
 ;; 4-programming.el ends here

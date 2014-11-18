@@ -86,7 +86,7 @@
 (global-set-key (kbd "C-z") #'undo)
 
 ;; Highlight parentheses
-(show-paren-mode 1)
+(show-paren-mode -1)
 (setq show-paren-style 'expression ;выделять все выражение в скобках
       blink-matching-paren-distance nil)
 (defvar show-paren-deactivated-until-active-mark nil)
@@ -189,7 +189,23 @@ the syntax class ')'."
 
 
 ;; indent automatically
-(global-set-key (kbd "RET") #'newline-and-indent)
+;;(global-set-key (kbd "RET") #'newline-and-indent)
+(defvar my/-double-key-timeout 0.25)
+(defvar my/-double-key-timer nil)
+(defun my/-ret ()
+  (interactive)
+  (let ((last-called (get this-command 'my/-last-call-time)))
+    (if (and (eq last-command this-command)
+             last-called
+             (<= (time-to-seconds (time-since last-called)) my/-double-key-timeout))
+        (progn
+          (cancel-timer my/-double-key-timer)
+          (put this-command 'my/-last-call-time nil)
+          (reindent-then-newline-and-indent))
+      (put this-command 'my/-last-call-time (current-time))
+      (setq my/-double-key-timer
+            (run-at-time my/-double-key-timeout nil #'newline-and-indent)))))
+(global-set-key (kbd "RET") #'my/-ret)
 
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)
 (define-key minibuffer-local-map (kbd "<down>") 'next-complete-history-element)

@@ -1,4 +1,4 @@
-;;; 2-user-funcs.el --- different useful functions
+;;; 2-user-funcs.el --- different useful functions. -*- lexical-binding: t; -*-
 
 
 ;;; Code:

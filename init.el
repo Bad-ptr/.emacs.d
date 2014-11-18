@@ -30,6 +30,7 @@
   (setq custom-file (locate-user-emacs-file "my-custom.el"))
   (load custom-file t t)
 
+  (setq package-enable-at-startup t)
   ;; Load other parts of configuration
   (my/-load-directory my/-common-conf-path))
 
@@ -67,7 +68,8 @@
 ;; Make sure that users set their private settings and load it.
 (add-hook 'my/-username-hook (alambda (&optional arg)
                                (unless arg
-                                 (my/-init-before-private))
+                                 (condition-case err (my/-init-before-private)
+                                   (error (my/-init-error-fatal err))))
                                (lexical-let ((priv-file (locate-user-emacs-file
                                                          (concat
                                                           (if my/-multiuser-private
@@ -87,7 +89,7 @@
                                                                                (insert-file-contents example-file nil nil nil t)
                                                                                (current-buffer))))
                                                         nil))))
-                                            (my/-exec-after-interactive-frame-available
+                                            (my/-exec-after-interactive-frame-available ()
                                               (run-at-time 2 nil ff))))
                                          (error (my/-init-error-fatal err) nil))
                                    (condition-case err (progn (my/-init-after-private)

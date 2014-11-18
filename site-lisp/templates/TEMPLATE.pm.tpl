@@ -22,10 +22,16 @@ binmode STDOUT, ":utf8";
 binmode STDIN, ":utf8";
 binmode STDERR, ":utf8";
 
-use feature 'unicode_strings';
+use feature qw(unicode_strings say);
+
+use parent 'Exporter';
+our @EXPORT=qw();
+our @EXPORT_OK=qw();
+
+use Carp;
 
 
-__PACKAGE__->run(@ARGV) unless caller();
+#__PACKAGE__->run(@ARGV) unless caller();
 
 
 (>>>POINT<<<)

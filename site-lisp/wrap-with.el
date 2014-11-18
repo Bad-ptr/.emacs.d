@@ -55,7 +55,6 @@ newline, indent, then go to previous line."
   :group 'wrap-with
   :type 'bool)
 
-
 (defun w-w/wrap-beg-end ()
   "Get begin and end position of region to wrap."
   (let ((wbeg (mark))
@@ -89,7 +88,7 @@ Set point according to point-pos."
     (insert w-end-str)
     (case point-pos
       ('before-opening (goto-char w-beg))
-      ('before-closing (goto-char (+ w-end (string-width w-beg-str))))
+      ('before-closing (backward-char (string-width w-end-str)))
       ('after-opening (goto-char (+ w-beg (string-width w-beg-str))))
       ('after-closing (forward-char (string-width w-end-str))))))
 
@@ -249,10 +248,14 @@ If no pair found then use p-str as opening and closing."
 (defun w-w/cut-region-with-surronding-pair ()
   (interactive)
   (when (region-active-p)
-    (save-excursion
-      (forward-list)
-      (delete-char -1))
-    (kill-region (region-beginning) (region-end))))
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (save-excursion
+        (when (> (region-beginning) (region-end))
+          (goto-char (region-end)))
+        (forward-list)
+        (delete-char -1)
+        (kill-region (region-beginning) (region-end))))))
 
 (defun w-w/insert-with-surrounding-pair ()
   (interactive)
@@ -266,13 +269,29 @@ If no pair found then use p-str as opening and closing."
                  (p-e (assoc p-s (union w-w/pairs-predefined w-w/pairs))))
             (when p-e
               (goto-char (region-end))
-              (insert-string (cdr p-e)))
+              (insert (cdr p-e)))
             (goto-char (region-beginning))
-            (insert-string y-txt)
+            (insert y-txt)
             (deactivate-mark))))
     (yank)))
 
 ;; wrap-with-mode:
+
+(defmacro w-w/with-term-funcs (&rest body)
+  `(let ((t-ch-m))
+     (when (eq major-mode 'term-mode)
+       (setq t-ch-m (term-in-char-mode))
+       (term-line-mode))
+     (let ((ret (progn ,@body)))
+       (when t-ch-m
+         (term-char-mode))
+       ret)))
+
+(defmacro w-w/define-key (key &rest body)
+  (declare (indent defun))
+  `(define-key wrap-with-mode-map ,key
+     #'(lambda () (interactive) (w-w/with-term-funcs ,@body))))
+
 
 (defvar wrap-with-mode-map (make-sparse-keymap)
   "Keymap for wrap-with-mode.")
@@ -280,11 +299,11 @@ If no pair found then use p-str as opening and closing."
           (lexical-let ((op (car p))
                         (cl (cdr p)))
             (when op
-              (define-key wrap-with-mode-map (read-kbd-macro op)
-                #'(lambda () (interactive) (w-w/wrap-with-pair op (w-w/wrap-beg-end) cl))))
+              (w-w/define-key (read-kbd-macro op)
+                (w-w/wrap-with-pair op (w-w/wrap-beg-end) cl)))
             (when cl
-              (define-key wrap-with-mode-map (read-kbd-macro cl)
-                #'(lambda () (interactive) (w-w/wrap-with-pair cl))))))
+              (w-w/define-key (read-kbd-macro cl)
+                (w-w/wrap-with-pair cl)))))
       '(("(" . ")")
         ("[" . "]")
         ;;("<" . ">")

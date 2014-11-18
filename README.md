@@ -10,7 +10,10 @@ See `*my/-errors*` buffer.
 ## Compatibility
 
 ### package.el for older emacs(< 24)  
-Read here https://github.com/technomancy/package.el.  
+Read here https://github.com/technomancy/package.el.
+
+### color.el (needed by rainbow-mode for old emacs)
+https://github.com/emacs-mirror/emacs/blob/ac34b6b2b9aec5bc262ae1f6c54036de11fa44e9/lisp/color.el
 
 # Materials used in building that configuration  
 http://milkbox.net/note/single-file-master-emacs-configuration/  
