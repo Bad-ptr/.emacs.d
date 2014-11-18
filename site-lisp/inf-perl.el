@@ -8,7 +8,7 @@
 ;; Date: 2014/11/11 17:53:52
 ;; License: GPL either version 2 or any later version
 ;; Keywords: perl, repl, inferior
-;; X-URL: 
+;; X-URL: https://github.com/Bad-ptr/.emacs.d/blob/master/site-lisp/inf-perl.el
 
 ;;; License:
 

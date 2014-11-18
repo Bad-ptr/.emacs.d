@@ -251,11 +251,11 @@ If no pair found then use p-str as opening and closing."
     (let ((beg (region-beginning))
           (end (region-end)))
       (save-excursion
-        (when (> (region-beginning) (region-end))
-          (goto-char (region-end)))
+        (when (> (point) beg)
+          (goto-char beg))
         (forward-list)
         (delete-char -1)
-        (kill-region (region-beginning) (region-end))))))
+        (kill-region beg end)))))
 
 (defun w-w/insert-with-surrounding-pair ()
   (interactive)
