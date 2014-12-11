@@ -123,7 +123,8 @@ the syntax class ')'."
                                 t-end (progn (end-of-line) (point))
                                 mesg (concat (and mesg (concat mesg "\n"))
                                              (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
-      (when mesg (message "%s" mesg)))))
+      (when mesg (let ((message-log-max nil))
+                   (message "%s" mesg))))))
 
 (ad-enable-advice #'show-paren-function 'after 'show-matching-paren-offscreen)
 (ad-activate #'show-paren-function)
@@ -214,7 +215,7 @@ the syntax class ')'."
 
 ;; backups
 (let ((bu-dir (locate-user-emacs-file "cache/backups")))
-  (unless (file-exists-p bu-dir) (make-directory bu-dir t))
+  (unless (file-directory-p bu-dir) (make-directory bu-dir t))
   (setq make-backup-files t ;; do make backups
         backup-by-copying t ;; and copy them here
         backup-directory-alist `(("." . ,bu-dir))

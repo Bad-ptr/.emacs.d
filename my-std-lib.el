@@ -80,11 +80,26 @@ buffer-local wherever it is set."
     `(set (make-local-variable ',var) ,val)))
 
 
+(when (version< emacs-version "24.4")
+  (lexical-let ((original-backtrace-frame (symbol-function 'backtrace-frame)))
+    (defun backtrace-frame (nframes &optional base)
+      (let ((i nframes))
+        (if base
+            (let ((k 11) found)
+              (while (and (not found)
+                          (setq bt (cadr (funcall original-backtrace-frame
+                                                  (incf k)))))
+                (message "%s:%s" k (backtrace-frame k))
+                (when (eq bt base) (setq found t)))
+              (if found (setq i (+ i (- k 6)))
+                (setq i (+ nframes 5))))
+          (setq i (+ nframes 5)))
+        (funcall original-backtrace-frame i)))))
 (defun my/-error-message (error-class msg &optional fatal face tracedepth)
   (unless tracedepth (setq tracedepth 8))
   (let* ((ecs (concat "[" error-class "]"))
          (errbuf (get-buffer-create "*my/-errors*"))
-         (btf (let* ((i 2) bf)
+         (btf (let ((i 2) bf)
                 (while (< i (+ 2 tracedepth))
                   (push (backtrace-frame i 'my/-error-message) bf)
                   (setq i (1+ i)))
@@ -106,7 +121,7 @@ buffer-local wherever it is set."
       (my/-exec-after-interactive-frame-available (errstr errbuf ecs)
         (my/-exec-after-delay () 2
           (message "%s" errstr)
-          (switch-to-buffer errbuf)
+          (pop-to-buffer errbuf)
           (search-backward ecs))))))
 (defun my/-warning (msg)
   (my/-error-message "WARNING" msg nil 'compilation-warning 0))
@@ -140,8 +155,7 @@ re-downloaded in order to locate PACKAGE."
         (require-package pkg)))))
 
 
-(when (or (> emacs-major-version 24)
-               (and (= emacs-major-version 24) (>= emacs-minor-version 3)))
+(unless (version< emacs-version "24.1")
   (defun reverse-input-method (input-method)
     "Build the reverse mapping of single letters from INPUT-METHOD."
     (interactive

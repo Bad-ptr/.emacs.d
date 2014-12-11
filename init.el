@@ -7,7 +7,7 @@
 
 (setq inhibit-default-init t
       load-prefer-newer t
-      message-log-max 10000)
+      message-log-max 1000)
 
 
 ;;load functions that will be used during initialization
@@ -66,35 +66,40 @@
   :type 'hook)
 
 ;; Make sure that users set their private settings and load it.
-(add-hook 'my/-username-hook (alambda (&optional arg)
-                               (unless arg
-                                 (condition-case err (my/-init-before-private)
-                                   (error (my/-init-error-fatal err))))
-                               (lexical-let ((priv-file (locate-user-emacs-file
-                                                         (concat
-                                                          (if my/-multiuser-private
-                                                              my/-username "my") "-private.el"))))
-                                 (when (condition-case err (load priv-file)
-                                         (file-error
-                                          (my/-init-error-warning err)
-                                          (let ((ff (lambda ()
-                                                      (let ((example-file (locate-user-emacs-file "my-private.example")))
-                                                        (my/-warning (format "You run emacs without your private settings set(first run?).\
- To fix this please create a %s file (See %s)." priv-file example-file))
-                                                        (set-window-buffer (selected-window)
-                                                                           (let ((template-auto-insert nil))
-                                                                             (with-current-buffer (find-file priv-file)
-                                                                               (add-hook 'kill-buffer-hook
-                                                                                         #'(lambda () (self t)) nil t)
-                                                                               (insert-file-contents example-file nil nil nil t)
-                                                                               (current-buffer))))
-                                                        nil))))
-                                            (my/-exec-after-interactive-frame-available ()
-                                              (run-at-time 2 nil ff))))
-                                         (error (my/-init-error-fatal err) nil))
-                                   (condition-case err (progn (my/-init-after-private)
-                                                              (when arg (run-hooks 'after-init-hook)))
-                                     (error (my/-init-error-fatal err)))))))
+(add-hook
+ 'my/-username-hook
+ (alambda (&optional arg)
+   (unless arg
+     (condition-case err (my/-init-before-private)
+       (error (my/-init-error-fatal err))))
+   (lexical-let ((priv-file (locate-user-emacs-file
+                             (concat
+                              (if my/-multiuser-private
+                                  my/-username "my") "-private.el"))))
+     (when (condition-case err (load priv-file)
+             (file-error
+              (message "%s" err)
+              (let ((ff (lambda ()
+                          (let ((example-file (locate-user-emacs-file "my-private.example"))
+                                (cw (selected-window)))
+                            (my/-warning (format "You run emacs without your private settings set(first run?).\n\
+ To fix this please create a %s file (See %s as example)." priv-file example-file))
+                            (set-window-buffer cw
+                                               (let ((template-auto-insert nil))
+                                                 (with-current-buffer (find-file priv-file)
+                                                   (add-hook 'kill-buffer-hook
+                                                             #'(lambda () (self t)) nil t)
+                                                   (insert-file-contents example-file nil nil nil t)
+                                                   (current-buffer))))
+                            (display-buffer-pop-up-window (get-buffer "*my/-errors*") nil)
+                            (select-window cw t)
+                            nil))))
+                (my/-exec-after-interactive-frame-available ()
+                  (run-at-time 2 nil ff))))
+             (error (my/-init-error-fatal err) nil))
+       (condition-case err (progn (my/-init-after-private)
+                                  (when arg (run-hooks 'after-init-hook)))
+         (error (my/-init-error-fatal err)))))))
 
 (defcustom my/-multiuser-private nil
   "Load different private file for dufferent my/-username or not."

@@ -1,4 +1,4 @@
-;;; (>>>FILE<<<) --- (>>>Short_description<<<)
+;;; (>>>FILE<<<) --- (>>>Short_description<<<). -*- lexical-binding: t; -*-
 
 ;; Copyright (C) (>>>YEAR<<<) (>>>USER_NAME<<<)
 ;;
@@ -37,8 +37,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 
 (>>>POINT<<<)

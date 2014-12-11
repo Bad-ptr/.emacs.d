@@ -245,35 +245,80 @@ If no pair found then use p-str as opening and closing."
       (goto-char close-pos)
       (delete-backward-char 1))))
 
+(defun check-string-parens (str mode)
+  (let (unmatched-s matched-s (dir))
+    (with-temp-buffer
+      (funcall mode)
+      (goto-char (point-min))
+      (insert str)
+      (goto-char (point-min))
+      (condition-case err (check-parens)
+        (error (setq unmatched-s (char-to-string (char-after))))))
+    (when unmatched-s
+      (unless (setq dir 'right
+                    matched-s
+                    (cdr (assoc unmatched-s
+                                (union w-w/pairs-predefined w-w/pairs))))
+        (setq dir 'left
+              matched-s (car (rassoc unmatched-s
+                                     (union w-w/pairs-predefined w-w/pairs)))))
+      (when matched-s
+        (list matched-s dir)))))
+
 (defun w-w/cut-region-with-surronding-pair ()
   (interactive)
-  (when (region-active-p)
-    (let ((beg (region-beginning))
-          (end (region-end)))
-      (save-excursion
-        (when (> (point) beg)
-          (goto-char beg))
-        (forward-list)
-        (delete-char -1)
-        (kill-region beg end)))))
+  (if (region-active-p)
+      (let* ((beg (region-beginning))
+             (end (region-end))
+             (m-d (check-string-parens
+                   (buffer-substring beg end) major-mode)))
+        (save-excursion
+          (when m-d
+            (destructuring-bind (matched-s dir) m-d
+              (case dir
+                ('right (when (> (point) beg)
+                          (goto-char beg))
+                        (forward-list)
+                        (delete-char -1))
+                (t (when (< (point) end)
+                     (goto-char end))
+                   (backward-list)
+                   (delete-char 1)
+                   (setq beg (1- beg)
+                         end (1- end)))))))
+        (kill-region beg end))
+    (let (beg end)
+      (backward-up-list)
+      (setq beg (point))
+      (forward-list)
+      (setq end (point))
+      (kill-region beg end))))
 
 (defun w-w/insert-with-surrounding-pair ()
   (interactive)
-  (if (region-active-p)
-      (let ((y-txt (first kill-ring)))
-        (when (and y-txt (> (string-width y-txt) 0))
-          (let* ((start-index (if (string-match "^[ \f\t\n\r\v]+" y-txt)
-                                  (match-end 0)
-                                0))
-                 (p-s (substring y-txt start-index (1+ start-index)))
-                 (p-e (assoc p-s (union w-w/pairs-predefined w-w/pairs))))
-            (when p-e
-              (goto-char (region-end))
-              (insert (cdr p-e)))
-            (goto-char (region-beginning))
-            (insert y-txt)
-            (deactivate-mark))))
-    (yank)))
+  (let* ((y-txt (first kill-ring))
+         (m-d (check-string-parens y-txt major-mode)))
+    (if (and (region-active-p) m-d)
+        (let ((beg (region-beginning))
+              (end (region-end)))
+          (destructuring-bind (matched-s dir) m-d
+            (case dir
+              ('right (save-excursion
+                        (goto-char beg)
+                        (yank)
+                        (goto-char (+ end (string-width y-txt)))
+                        (insert matched-s)))
+              (t (save-excursion
+                   (goto-char end)
+                   (yank)
+                   (goto-char beg)
+                   (insert matched-s))))))
+      (if m-d
+          (destructuring-bind (matched-s dir) m-d
+            (case dir
+              ('right (yank)(insert matched-s))
+              (t (insert matched-s)(yank))))
+        (yank)))))
 
 ;; wrap-with-mode:
 
