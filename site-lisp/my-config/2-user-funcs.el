@@ -3,6 +3,15 @@
 
 ;;; Code:
 
+(defun my/-create-dir-for-file ()
+  (let ((dir (file-name-directory buffer-file-name)))
+    (unless (file-directory-p dir)
+      (when (y-or-n-p-with-timeout
+             (format "No such directory: %s. Do you want to create it?" dir)
+             10 t)
+        (make-directory dir t)))))
+(add-hook 'find-file-not-found-functions #'my/-create-dir-for-file)
+
 
 (defun move-cfile (dirname)
   (interactive "Dmove to: ")

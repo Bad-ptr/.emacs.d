@@ -79,7 +79,7 @@ only set it's dead flag.")
 
 (defvar q-m/-classify-msg-rxs
   '(("^\\(Failing\\( \\(over\\)?wrapped\\)? \\|Overwrapped \\)?I-search.*" . "isearch")
-    ("^Indent.*"                  . "indent")
+    ;; ("^Indent.*"                  . "indent")
     ("^History item.*"            . "history")
     ("^\\(Wr[oi]te\\|Read\\|\\((No .+ need .+\\)?[Ss]av[ie]\\|Load\\).*"
      . "write/read")
@@ -99,7 +99,10 @@ only set it's dead flag.")
            (dolist (item q-m/-classify-msg-rxs)
              (when (string-match-p (car item) msg-s)
                (setf (q-m/Msg-replace-tag msg) (cdr item))
-               (return-from 'rx-loop)))))))
+               (return-from 'rx-loop)))
+           (when (string-match ".*\\.\\{3\\}" msg-s)
+             (destructuring-bind (start end) (match-data)
+               (setf (q-m/Msg-replace-tag msg) (substring msg-s start end))))))))
   "List of functions that get message structure as argument and must return
 replace-tag or nil.")
 
@@ -321,8 +324,8 @@ placed in the `q-m/-display-list'.")
     (unless q-m/-do-not-delete-on-timer
       (setq q-m/-display-list (delq msg q-m/-display-list))
       (when (q-m/Msg-replace-tag msg)
-        (remhash (q-m/Msg-replace-tag msg) q-m/-replace-tag-hash))
-      (q-m/-update-display-list))))
+        (remhash (q-m/Msg-replace-tag msg) q-m/-replace-tag-hash)))
+    (q-m/-update-display-list)))
 
 (defun q-m/-suspend (&optional msg)
   (if msg

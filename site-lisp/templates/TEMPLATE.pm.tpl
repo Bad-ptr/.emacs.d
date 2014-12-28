@@ -22,7 +22,7 @@ binmode STDOUT, ":utf8";
 binmode STDIN, ":utf8";
 binmode STDERR, ":utf8";
 
-use feature qw(unicode_strings say);
+use feature qw(unicode_strings say switch);
 
 use parent 'Exporter';
 our @EXPORT=qw();
