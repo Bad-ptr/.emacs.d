@@ -64,6 +64,9 @@
                                   (t 3))
   "Maximum number of messages to display at once.")
 
+(defvar *q-m/-suspended* nil
+  "Is messages suspended or not.")
+
 (defvar q-m/-do-not-delete-on-timer t
   "If t -- do not really delete a message from the display-list,
 only set it's dead flag.")
@@ -85,6 +88,7 @@ only set it's dead flag.")
      . "write/read")
     ("^\\(Importing package-keyring\\|\\(Install\\|Delete\\) th\\|Generating autoloads\\|Package \\).*"
      . "packages/elisp")
+    ("^\\(Running \\)?[Gg]it .*"  . "git")
     ("^Compil.*"                  . "compile")
     ("^Tramp:.*"                  . "tramp")
     ("^Password.*"                . "password")
@@ -149,9 +153,10 @@ placed in the `q-m/-display-list'.")
   (setf (q-m/Msg-kill-timer msg) nil))
 (defun q-m/Msg-reset-kill-timer (msg)
   (q-m/Msg-cancel-kill-timer msg)
-  (setf (q-m/Msg-kill-timer msg)
-        (run-at-time (q-m/Msg-life-time msg) nil
-                     #'q-m/-msg-kill-timer-func msg)))
+  (unless *q-m/-suspended*
+    (setf (q-m/Msg-kill-timer msg)
+          (run-at-time (q-m/Msg-life-time msg) nil
+                       #'q-m/-msg-kill-timer-func msg))))
 
 (defun q-m/Msg-run-on-show (msg)
   (when (q-m/Msg-on-show msg)
@@ -330,13 +335,15 @@ placed in the `q-m/-display-list'.")
 (defun q-m/-suspend (&optional msg)
   (if msg
       (q-m/Msg-cancel-kill-timer msg)
+    (setq *q-m/-suspended* t)
     (dolist (msg1 q-m/-display-list)
       (when msg1
         (q-m/-suspend msg1)))))
 
 (defun q-m/-resume (&optional msg)
   (if msg
-      (q-m/Msg-reset-timer msg)
+      (q-m/Msg-reset-kill-timer msg)
+    (setq *q-m/-suspended* nil)
     (dolist (msg1 q-m/-display-list)
       (when msg1
         (q-m/-resume msg1)))
@@ -362,6 +369,10 @@ placed in the `q-m/-display-list'.")
 (defun q-m/restore-message ()
   (interactive)
   (fset 'message (symbol-value 'q-m/-emacs-message-func)))
+
+
+(add-hook 'minibuffer-setup-hook #'q-m/-suspend)
+(add-hook 'minibuffer-exit-hook  #'q-m/-resume)
 
 
 (provide 'queued-message)
