@@ -24,6 +24,11 @@ binmode STDERR, ":utf8";
 
 use feature qw(unicode_strings say switch);
 
+# use Scalar::Util qw(blessed reftype looks_like_number);
+# use List::Util
+# use Try::Tiny;
+# use Carp;
+
 
 __PACKAGE__->run(@ARGV) unless caller();
 

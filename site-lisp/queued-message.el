@@ -92,7 +92,8 @@ only set it's dead flag.")
     ("^Compil.*"                  . "compile")
     ("^Tramp:.*"                  . "tramp")
     ("^Password.*"                . "password")
-    ("^Parsing .+ file.*"         . "parsing/decompress"))
+    ("^Parsing .+ file.*"         . "parsing/decompress")
+    ("^.*\\([Uu]n\\|[Rr]e\\)do.*" . "undo/redo"))
   "If message match car then set replace-tag as cdr.")
 
 (defvar q-m/-preprocess-msg-functions
@@ -107,8 +108,8 @@ only set it's dead flag.")
            (when (string-match ".*\\.\\{3\\}" msg-s)
              (destructuring-bind (start end) (match-data)
                (setf (q-m/Msg-replace-tag msg) (substring msg-s start end))))))))
-  "List of functions that get message structure as argument and must return
-replace-tag or nil.")
+  "List of functions that get message structure and transforms it somehow.
+If you set message string as empty string -- that message will not be shown.")
 
 (defvar q-m/-prep-msg-for-display-func
   #'(lambda (msg i)
@@ -211,31 +212,32 @@ placed in the `q-m/-display-list'.")
                   :on-show on-show :replace-tag replace-tag)))
     (dolist (fun q-m/-preprocess-msg-functions)
       (funcall fun new-msg))
-    (cl-flet
-        ((enq-msg
-          (&optional puthash)
-          (when (and (q-m/Msg-msg-s new-msg) (> (string-width (q-m/Msg-msg-s new-msg)) 0))
-            (when puthash (puthash (q-m/Msg-replace-tag new-msg) new-msg q-m/-replace-tag-hash))
-            (q-m/-enqueue-message new-msg))))
-      (if (q-m/Msg-replace-tag new-msg)
-          (let ((old-msg (gethash (q-m/Msg-replace-tag new-msg) q-m/-replace-tag-hash nil)))
-            (if old-msg
-                (let ((lst (q-m/Msg-list-in old-msg)))
-                  (q-m/Msg-cancel-kill-timer old-msg)
-                  (setf (q-m/Msg-msg-s old-msg)     (q-m/Msg-msg-s new-msg)
-                        (q-m/Msg-urgent old-msg)    (q-m/Msg-urgent new-msg)
-                        (q-m/Msg-life-time old-msg) (q-m/Msg-life-time new-msg)
-                        (q-m/Msg-on-show old-msg)   (q-m/Msg-on-show new-msg))
-                  (q-m/-lift-up-msg-in-list lst old-msg)
-                  (if (eq lst 'q-m/-display-list)
-                      (progn
-                        (q-m/Msg-run-on-show old-msg)
-                        (q-m/Msg-reset-kill-timer old-msg)
-                        (q-m/-invalidate-cache)
-                        (q-m/-redisplay))
-                    (q-m/-update-display-list)))
-              (enq-msg t)))
-        (enq-msg)))))
+    (when (q-m/Msg-msg-s new-msg)
+      (cl-flet
+          ((enq-msg
+            (&optional puthash)
+            (when (and (q-m/Msg-msg-s new-msg) (> (string-width (q-m/Msg-msg-s new-msg)) 0))
+              (when puthash (puthash (q-m/Msg-replace-tag new-msg) new-msg q-m/-replace-tag-hash))
+              (q-m/-enqueue-message new-msg))))
+        (if (q-m/Msg-replace-tag new-msg)
+            (let ((old-msg (gethash (q-m/Msg-replace-tag new-msg) q-m/-replace-tag-hash nil)))
+              (if old-msg
+                  (let ((lst (q-m/Msg-list-in old-msg)))
+                    (q-m/Msg-cancel-kill-timer old-msg)
+                    (setf (q-m/Msg-msg-s old-msg)     (q-m/Msg-msg-s new-msg)
+                          (q-m/Msg-urgent old-msg)    (q-m/Msg-urgent new-msg)
+                          (q-m/Msg-life-time old-msg) (q-m/Msg-life-time new-msg)
+                          (q-m/Msg-on-show old-msg)   (q-m/Msg-on-show new-msg))
+                    (q-m/-lift-up-msg-in-list lst old-msg)
+                    (if (eq lst 'q-m/-display-list)
+                        (progn
+                          (q-m/Msg-run-on-show old-msg)
+                          (q-m/Msg-reset-kill-timer old-msg)
+                          (q-m/-invalidate-cache)
+                          (q-m/-redisplay))
+                      (q-m/-update-display-list)))
+                (enq-msg t)))
+          (enq-msg))))))
 
 (defun q-m/-enqueue-message (msg)
   (when msg
