@@ -12,6 +12,7 @@ package (>>>FILE_SANS<<<);
 use utf8;
 use strict;
 use warnings;
+no warnings 'experimental';
 
 #use encoding 'utf8';
 use Encode;
@@ -32,7 +33,8 @@ use feature qw(unicode_strings say switch);
 
 __PACKAGE__->run(@ARGV) unless caller();
 
-
-(>>>POINT<<<)
+sub run {
+  (>>>POINT<<<)
+}
 
 

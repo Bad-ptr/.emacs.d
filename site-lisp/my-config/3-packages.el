@@ -179,10 +179,10 @@ That is, a string used to represent it on the tab bar."
 
   (key-chord-define-global "qx" #'eval-region)
 
-  (key-chord-define-global "tt" #'tabbar-forward-tab)
-  (key-chord-define-global "tb" #'tabbar-backward-tab)
-  (key-chord-define-global "gn" #'tabbar-forward-group)
-  (key-chord-define-global "gb" #'tabbar-backward-group)
+  (key-chord-define-global "t4" #'tabbar-backward-tab)
+  (key-chord-define-global "t5" #'tabbar-forward-tab)
+  ;; (key-chord-define-global "gn" #'tabbar-forward-group)
+  ;; (key-chord-define-global "gb" #'tabbar-backward-group)
 
   (dolist (chords '(("((" . "))") ("[[" . "]]") ("{{" . "}}")
                     (nil . ",,")))
@@ -383,6 +383,7 @@ That is, a string used to represent it on the tab bar."
 ;; speedbar
 (with-eval-after-load "speedbar"
   (add-to-list 'speedbar-frame-parameters (cons 'persp-ignore-wconf t)))
+
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"

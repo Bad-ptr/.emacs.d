@@ -12,6 +12,7 @@ package Test(>>>FILE_SANS<<<)Test;
 use utf8;
 use strict;
 use warnings FATAL => 'all';
+#no warnings 'experimental';
 use diagnostics;
 
 #use encoding 'utf8';
@@ -31,7 +32,7 @@ use Test::More;
 __PACKAGE__->run(@ARGV) unless caller();
 
 sub run {
-  my $self = shift;  
+  my $self = shift;
 
   use lib '../../lib';
 

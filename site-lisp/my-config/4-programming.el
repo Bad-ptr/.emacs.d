@@ -16,7 +16,7 @@
 
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
-(defvar my/-prog-modes-hooks (if (< emacs-major-version 24)
+(defvar my/-prog-mode-hooks (if (< emacs-major-version 24)
                                  '(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
                                                         lisp-mode-hook lisp-interaction-mode-hook
                                                         ielm-mode-hook)
@@ -25,13 +25,19 @@
   "List of programming modes hooks.")
 
 ;; Common hook place for programming modes
-(dolist (hook my/-prog-modes-hooks)
+(dolist (hook my/-prog-mode-hooks)
   (add-hook hook #'(lambda () (run-hooks 'my/-prog-mode-hook))))
+
+
+(unless (version< emacs-version "24.4")
+  (global-prettify-symbols-mode 1))
 
 (add-hook
  'my/-prog-mode-hook
  #'(lambda ()
      (eldoc-mode)
+
+     (setq show-trailing-whitespace t)
 
      (font-lock-add-keywords
       nil '(("("   . 'open-paren-face)   (")" . 'close-paren-face)

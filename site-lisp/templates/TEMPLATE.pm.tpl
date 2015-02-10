@@ -12,6 +12,7 @@ package (>>>FILE_SANS<<<);
 use utf8;
 use strict;
 use warnings;
+# no warnings 'experimental';
 
 #use encoding 'utf8';
 use Encode;
@@ -38,6 +39,27 @@ use Carp;
 
 #__PACKAGE__->run(@ARGV) unless caller();
 
+
+sub new ($%) {
+  my $self = shift;
+  my $class = ref $self || $self;
+
+  my $ret = bless {}, $class;
+  return $ret->_init(@_);
+}
+
+sub _init ($%) {
+  my $self = shift;
+  my ($params) = @_;
+  unless (ref $params eq 'HASH') {
+    my %th = @_;
+    $params = \%th;
+  }
+
+  $self->{$_} = $params->{$_} foreach keys %$params;
+
+  return $self;
+}
 
 (>>>POINT<<<)
 
