@@ -1,0 +1,23 @@
+# C++ objects and libs
+
+*.exe
+*.out
+*.app
+*.slo
+*.lo
+*.o
+*.a
+*.lib
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# Qt-es
+
+*.pro.user
+*.pro.user.*
+moc_*.cpp
+qrc_*.cpp
+*-build-*

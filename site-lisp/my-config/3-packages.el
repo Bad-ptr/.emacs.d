@@ -25,16 +25,42 @@
                (locate-user-emacs-file "site-lisp/templates/"))
   (setq template-auto-insert t
         template-auto-update nil)
-  (add-to-list 'template-expansion-alist
-               '("USER_MAIL" (insert user-mail-address)))
-  (add-to-list 'template-expansion-alist
-               '("USER_NICKNAME" (insert user-nickname)))
-  (template-initialize))
+  (setq template-expansion-alist
+        (append '(("USER_MAIL" (insert user-mail-address))
+                  ("USER_NICKNAME" (insert user-nickname)))
+                template-expansion-alist))
+  (template-initialize)
+  (defun template-expand-to-string-for-virtual-file (file &optional template)
+    (flet ((template-make-directory (dir) dir))
+      (unless template
+        (setq template (cdr (template-derivation file t)))))
+    (with-temp-buffer
+      (let (find-file-hooks)
+        (flet ((buffer-file-name (&optional buffer) file))
+          (template-new-file nil template)))
+      (buffer-substring (point-min) (point-max)))))
 (require 'template)
 
 ;; skeletor
 (with-eval-after-load "skeletor-autoloads"
-  (skeletor-define-template "Cpp"))
+
+  (skeletor-define-template "Cpp"
+    :substitutions
+    '(("__MAINCPP__" .
+       (lambda ()
+         (if (fboundp 'template-expand-to-string-for-virtual-file)
+             (template-expand-to-string-for-virtual-file
+              (concat skeletor--current-project-root  "/main.cpp"))
+           "#include <iostream>
+int main (int argc, char **argv) {
+  std::cout << \"Hello World\" << std::endl;
+  exit(0);
+}")))))
+
+  (add-to-list 'skeletor-global-substitutions
+               '("__DATE-TIME__" . (lambda () (format-time-string "%d/%m/%Y %H:%M"))))
+  (add-to-list 'skeletor-global-substitutions
+               '("__USER-NICKNAME__" . (lambda () user-nickname))))
 
 ;; ido
 (with-eval-after-load "ido"

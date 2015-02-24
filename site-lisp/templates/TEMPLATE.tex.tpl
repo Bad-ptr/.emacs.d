@@ -1,7 +1,10 @@
 %%% TEMPLATE.tex.tpl --- (>>>Short_description<<<)
 
-%% Author: (>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<))
+%% Copyright (C) (>>>YEAR<<<) (>>>USER_NAME<<<)
+%%
+%% Author: (>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>
 %% Date: (>>>VC_DATE<<<)
+%% License: (>>>LICENSE<<<)
 
 
 \documentclass[12pt,draft,a4paper]{article}

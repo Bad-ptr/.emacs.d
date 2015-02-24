@@ -1,9 +1,9 @@
 #|
  * Copyright (C) (>>>YEAR<<<) (>>>USER_NAME<<<)
- * 
+ *
  * Author: (>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>
  * Date: (>>>VC_DATE<<<)
- * License: GPL either version 2 or any later version
+ * License: (>>>LICENSE<<<)
 |#
 
 
@@ -17,7 +17,7 @@
 (defsystem (>>>FILE_SANS<<<)
   :version "(>>>Version_number<<<)"
   :author "(>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>"
-  :license "GPL version 2 or any higher."
+  :license "(>>>LICENSE<<<)."
   :description "(>>>Short_description<<<)"
   :long-description "(>>>Long_description<<<)"
   :depends-on ()

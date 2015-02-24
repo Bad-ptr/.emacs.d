@@ -8,6 +8,9 @@ custom.el
 !init.el
 !my-std-lib.el
 
+!project-skeletons
+!project-skeletons/**
+
 !site-lisp
 !site-lisp/*.el
 

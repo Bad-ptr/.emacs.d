@@ -14,7 +14,7 @@
       (lexical-let ((old-labels (symbol-function 'cl-labels)))
         (defmacro cl-labels (bindings &rest body)
           (unless lexical-binding
-            (my/-warning "You are trying to use cl-labels let with lexical-binding = nil."))
+            (my/-warning "You are trying to use cl-labels with lexical-binding = nil."))
           `(,old-labels ,bindings ,@body))))
   (require 'cl)
   (defalias 'cl-labels 'labels)

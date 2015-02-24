@@ -14,6 +14,15 @@
 ;; make file executable if it's a script
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
+(defvar default-license "GPL either version 2 or any later version"
+  "Default license for new files.")
+
+(with-eval-after-load "template"
+  (add-to-list 'template-expansion-alist
+               '("LICENSE"
+                 (insert (or (and (boundp 'project-license) project-license)
+                             default-license)))))
+
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
 (defvar my/-prog-mode-hooks (if (< emacs-major-version 24)
@@ -173,6 +182,13 @@ of FILE in the current directory, suitable for creation"
     (split-string (buffer-string) "\n" t)))
 
 
+;; lisp
+(let ((q-s-h-file (expand-file-name "~/quicklisp/slime-helper.el")))
+  (when (file-exists-p q-s-h-file)
+    (load q-s-h-file)))
+(setq inferior-lisp-program "sbcl")
+
+
 ;; go-mode
 (with-eval-after-load "go-mode-autoloads"
   (setq-default gofmt-command "goimports")
@@ -208,18 +224,69 @@ of FILE in the current directory, suitable for creation"
   (load "ocaml"))
 
 
-;; cperl
+;; perl
+(defun perl-fname-to-package (fname &optional no-lib n-parts)
+  (unless n-parts (setq n-parts 2))
+  (or
+   (when fname
+     (let* ((fname-parts (split-string fname "[/\\]"))
+            (lib-pos
+             (and (not no-lib)
+                  (search '("lib") fname-parts :test #'equal :from-end t))))
+       (if lib-pos
+           (setq fname-parts (nthcdr (1+ lib-pos) fname-parts))
+         (let* ((fn-l (length fname-parts))
+                (d (- fn-l n-parts)))
+           (when (> d 0)
+             (setq fname-parts (nthcdr d fname-parts)))))
+       (let* ((ret (mapconcat #'identity fname-parts "::"))
+              (s-m (string-match "\\..*$" ret)))
+         (if s-m
+             (substring ret 0 s-m)
+           ret))))
+   ""))
+
+(with-eval-after-load "template"
+  (setq template-expansion-alist
+        (append '(("PERL_PACKAGE_NAME"
+                   (insert (perl-fname-to-package (nth 0 template-file))))
+                  ("PERL_VERSION"
+                   (insert (or (and (boundp 'perl-version) perl-version) "5.018"))))
+                template-expansion-alist)))
+
 (with-eval-after-load "cperl-mode"
   (setq cperl-hairy t
         cperl-lazy-help-time 1)
+
   (add-hook 'cperl-mode-hook 'cperl-lazy-install)
+
   (define-key cperl-mode-map (kbd "<tab>")
     #'(lambda ()
         (interactive)
         (if (region-active-p)
             (indent-region (region-beginning) (region-end))
           (cperl-indent-command))))
-  (autoload 'perl-repl "inf-perl" "Run perl repl." t nil))
+
+  (autoload 'perl-repl "inf-perl" "Run perl repl." t nil)
+
+  (defun cperl-list-imenu-functions (&optional one-line)
+    (interactive "P")
+    (let ((bufname "*imenu-function-list*"))
+      (let* ((functions
+              (delete-if-not #'identity
+                             (mapcar
+                              #'(lambda (cc)
+                                  (let ((fname (car cc)))
+                                    (unless (string-prefix-p "package" fname)
+                                      (when (string-match "^\\(?:.+::\\)?\\(\\(?:\\\w\\|\\s_\\)+\\)" fname)
+                                        (match-string-no-properties 1 fname)))))
+                              (cdr (second (imenu--make-index-alist))))))
+             (text (mapconcat #'identity functions (if one-line " " "\n"))))
+        (with-current-buffer (get-buffer-create bufname)
+          (erase-buffer)
+          (insert text))
+        (pop-to-buffer bufname)))))
+
 (defalias 'perl-mode 'cperl-mode)
 
 
@@ -227,12 +294,12 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "php-mode-autoloads"
   (setq auto-mode-alist (append '(("/*.\.php[345]?$" . php-mode)) auto-mode-alist))
   (add-hook 'before-save-hook #'(lambda ()
-                                  (if (string= "php-mode" major-mode)
-                                      (save-excursion
-                                        (goto-char (point-min))
-                                        (delete-blank-lines)
-                                        (goto-char (point-max))
-                                        (delete-blank-lines))))))
+                                  (when (string= "php-mode" major-mode)
+                                    (save-excursion
+                                      (goto-char (point-min))
+                                      (delete-blank-lines)
+                                      (goto-char (point-max))
+                                      (delete-blank-lines))))))
 
 
 ;; haskell

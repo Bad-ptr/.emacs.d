@@ -4,10 +4,14 @@
 ##
 ## Author: (>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>
 ## Date: (>>>VC_DATE<<<)
-## License: GPL either version 2 or any later version
+## License: (>>>LICENSE<<<)
 
 
-package Test(>>>FILE_SANS<<<)Test;
+package Test(>>>FILE_SANS<<<)Test 1.0;
+
+use (>>>PERL_VERSION<<<);
+
+(>>>PERL_DEFAULT_USES<<<)
 
 use utf8;
 use strict;
@@ -24,7 +28,14 @@ binmode STDOUT, ":utf8";
 binmode STDIN, ":utf8";
 binmode STDERR, ":utf8";
 
-use feature qw(unicode_strings say);
+use feature qw(unicode_strings say switch);
+
+# use Scalar::Util qw(blessed reftype looks_like_number); #set_prototype
+# use List::Util
+# use Try::Tiny;
+
+use Data::Dumper;
+use Carp;
 
 use Test::More;
 

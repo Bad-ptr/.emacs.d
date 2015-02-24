@@ -2,7 +2,7 @@
  */
 /**
  * Copyright (C) (>>>YEAR<<<) (>>>USER_NAME<<<)
- * License: GPL either version 2 or any later version
+ * License: (>>>LICENSE<<<)
  *
  * @author <a href="mailto:(>>>USER_MAIL<<<)">(>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<))</a>
  */
