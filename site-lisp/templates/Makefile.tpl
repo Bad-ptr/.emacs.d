@@ -7,7 +7,7 @@
 
 MODE :=debug
 
-LANGUAGE :=(>>>LANGUAGE<<<)
+LANGUAGE :=(>>>language<<<)
 
 SOURCE_TOP_DIR  :=.
 # source
@@ -49,7 +49,7 @@ endif
 
 LINKER	   :=$(COMPILER)
 
-LINKER_FLAGS   :=-s -pipe -L`gcc -print-file-name=`
+LINKER_FLAGS   :=-s -L`gcc -print-file-name=`
 
 LIBS           :=
 #-lgcc -lc -lm -lpthread #-lGL -lGLU -lGLEW `sdl-config --libs`
@@ -116,3 +116,5 @@ rebuild: clean all
 
 
 ### (>>>FILE<<<) ends here
+>>>TEMPLATE-DEFINITION-SECTION<<<
+("language" "Language(c or cpp)" "" "" "c")

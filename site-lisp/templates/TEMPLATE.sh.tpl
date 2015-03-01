@@ -16,7 +16,7 @@ function main () {
 
 signals="SIGHUP SIGTERM SIGQUIT SIGINT SIGKILL SIGSTOP EXIT"
 for signal in $signals;do
-    trap "{ log \"Caught ${signal}.\"; }" "$signal"
+    trap "{ echo \"Caught ${signal}.\"; }" "$signal"
 done
 
 

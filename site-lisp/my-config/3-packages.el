@@ -26,7 +26,7 @@
   (setq template-auto-insert t
         template-auto-update nil)
   (setq template-expansion-alist
-        (append '(("USER_MAIL" (insert user-mail-address))
+        (append '(("USER_MAIL"     (insert user-mail-address))
                   ("USER_NICKNAME" (insert user-nickname)))
                 template-expansion-alist))
   (template-initialize)
@@ -44,23 +44,61 @@
 ;; skeletor
 (with-eval-after-load "skeletor-autoloads"
 
+  (defun skeletor-project-license-type ()
+    (substring skeletor-project-license
+               (1+ (search "/" skeletor-project-license :from-end t))))
+
+  (defun skeletor--ctor-runtime-spec (spec)
+    "Concatenate the given macro SPEC with values evaluated at runtime."
+    (let* ((project-name (skeletor--read-project-name))
+           (dest (f-join skeletor-project-directory project-name)))
+      (let-alist spec
+        (setq skeletor--current-project-root dest
+              skeletor-project-root dest
+              skeletor-project-name project-name
+              skeletor-project-license (when .create-license?
+                                         (skeletor--read-license "License: " .license-file-name))
+              skeletor-project-spec (-concat
+                                     (list
+                                      (cons 'project-name project-name)
+                                      (cons 'project-dir skeletor-project-directory)
+                                      (cons 'dest dest)
+                                      (cons 'skeleton (skeletor--get-named-skeleton .name))
+                                      (cons 'license-file skeletor-project-license))
+                                     spec))
+        (setq skeletor-project-spec
+              (-concat
+               (list
+                (cons 'repls (-map 'skeletor--eval-substitution
+                                   (-concat
+                                    skeletor-global-substitutions
+                                    (list (cons "__PROJECT-NAME__" project-name)
+                                          (cons "__LICENSE-FILE-NAME__" .license-file-name))
+                                    .substitutions))))
+               skeletor-project-spec)))))
+
   (skeletor-define-template "Cpp"
     :substitutions
-    '(("__MAINCPP__" .
-       (lambda ()
-         (if (fboundp 'template-expand-to-string-for-virtual-file)
-             (template-expand-to-string-for-virtual-file
-              (concat skeletor--current-project-root  "/main.cpp"))
-           "#include <iostream>
+    (list
+     (cons "__MAINCPP__"
+           #'(lambda ()
+               (if (fboundp 'template-expand-to-string-for-virtual-file)
+                   (let ((project-license (skeletor-project-license-type)))
+                     (template-expand-to-string-for-virtual-file
+                      (concat skeletor--current-project-root  "/main.cpp")))
+                 "#include <iostream>
 int main (int argc, char **argv) {
   std::cout << \"Hello World\" << std::endl;
   exit(0);
 }")))))
 
   (add-to-list 'skeletor-global-substitutions
-               '("__DATE-TIME__" . (lambda () (format-time-string "%d/%m/%Y %H:%M"))))
+               (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M"))))
   (add-to-list 'skeletor-global-substitutions
-               '("__USER-NICKNAME__" . (lambda () user-nickname))))
+               (cons "__USER-NICKNAME__" #'(lambda () user-nickname)))
+  (add-to-list 'skeletor-global-substitutions
+               (cons "__LICENSE__" #'skeletor-project-license-type)))
+
 
 ;; ido
 (with-eval-after-load "ido"

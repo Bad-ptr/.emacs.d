@@ -14,14 +14,12 @@
 ;; make file executable if it's a script
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
-(defvar default-license "GPL either version 2 or any later version"
+(defvar project-license "GPL either version 2 or any later version"
   "Default license for new files.")
 
 (with-eval-after-load "template"
   (add-to-list 'template-expansion-alist
-               '("LICENSE"
-                 (insert (or (and (boundp 'project-license) project-license)
-                             default-license)))))
+               '("LICENSE" (insert project-license))))
 
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
@@ -249,7 +247,8 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "template"
   (setq template-expansion-alist
         (append '(("PERL_PACKAGE_NAME"
-                   (insert (perl-fname-to-package (nth 0 template-file))))
+                   (insert (perl-fname-to-package
+                            (concat (nth 0 template-file) (nth 1 template-file)))))
                   ("PERL_VERSION"
                    (insert (or (and (boundp 'perl-version) perl-version) "5.018"))))
                 template-expansion-alist)))

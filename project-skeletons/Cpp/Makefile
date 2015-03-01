@@ -1,4 +1,9 @@
+## Copyright (C) __YEAR__ __USER-NAME__
 ##
+## Author: __USER-NAME__ (__USER-NICKNAME__) <(__USER-MAIL-ADDRESS__)>
+## Date: __DATE-TIME__
+## License: __LICENSE__
+
 
 MODE :=debug
 
@@ -44,12 +49,12 @@ OBJECT_FILES :=$(patsubst $(SOURCE_TOP_DIR)%.$(SOURCE_EXT), $(BUILD_TOP_DIR)%.$(
 $(info [STARTING: $(shell date -R)])
 
 all: main
-	@echo "[FINISED BUILDING: `date -R`]"
+	@echo "[FINISHED BUILDING: `date -R`]"
 
 main: $(OBJECT_FILES)
-	@echo "[FINISED COMPILING: `date -R`]"
+	@echo "[FINISHED COMPILING: `date -R`]"
 	$(info [$(LINKER)] $^ => $@)
-	@$(LINKER) $(COMPILER_FLAGS) $(LINKER_FLAGS) $^ $(LIBS) -o $(BUILD_TOP_DIR)/$@ && echo "[FINISED LINKING: `date -R`]"
+	@$(LINKER) $(COMPILER_FLAGS) $(LINKER_FLAGS) $^ $(LIBS) -o $(BUILD_TOP_DIR)/$@ && echo "[FINISHED LINKING: `date -R`]"
 
 $(OBJECT_FILES): | $(BUILD_DIRS)
 $(BUILD_DIRS):
