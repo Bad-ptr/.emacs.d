@@ -18,7 +18,8 @@
           `(,old-labels ,bindings ,@body))))
   (require 'cl)
   (defalias 'cl-labels 'labels)
-  (defalias 'cl-defmacro 'defmacro*))
+  (defalias 'cl-defmacro 'defmacro*)
+  (defalias 'cl-defun 'defun*))
 
 
 ;;; Code:

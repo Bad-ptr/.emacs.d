@@ -12,7 +12,7 @@
 (require 'compile)
 
 ;; make file executable if it's a script
-(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
 
 (defvar project-license "GPL either version 2 or any later version"
   "Default license for new files.")
@@ -29,7 +29,7 @@
                                                         ielm-mode-hook)
                                '(prog-mode-hook cperl-mode-hook ielm-mode-hook
                                                 eval-expression-minibuffer-setup-hook))
-  "List of programming modes hooks.")
+  "List of programming mode hooks.")
 
 ;; Common hook place for programming modes
 (dolist (hook my/-prog-mode-hooks)
@@ -62,18 +62,18 @@
                    ;; emulate make's .c.o implicit pattern rule, but with
                    ;; different defaults for the CC, CPPFLAGS, and CFLAGS
                    ;; variables:
-                   ;; $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
+                   ;; $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
                    (when buffer-file-name
                      (let ((file (file-name-nondirectory buffer-file-name))
                            (mkfile (get-closest-pathname)))
                        (if mkfile
                            (progn (format "cd %s; make" (file-name-directory mkfile)))
-                         (format "%s -c -o %s.o %s %s %s"
+                         (format "%s %s %s -c %s -o %s.o"
                                  (or (getenv "CC") "gcc")
-                                 (file-name-sans-extension file)
                                  (or (getenv "CPPFLAGS") "-DDEBUG=9")
                                  (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
-                                 file))))))))
+                                 file
+                                 (file-name-sans-extension file)))))))))
 
 ;; Fonts for parens and ops
 
@@ -105,7 +105,7 @@
   '((default :inherit close-paren-face :height 0.9 :slant normal))
   "Face for comma and semicolon")
 
-(defun* get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
+(cl-defun get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
   "Determine the pathname of the first instance of FILE starting from the current directory towards root.
 This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
 of FILE in the current directory, suitable for creation"
@@ -169,7 +169,7 @@ of FILE in the current directory, suitable for creation"
       gdb-show-main t)
 
 
-;; C
+;; C/Cpp
 (setq c-default-style "gnu")
 
 (defun c-get-system-includes ()
