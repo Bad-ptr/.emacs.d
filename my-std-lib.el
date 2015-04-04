@@ -84,18 +84,17 @@ buffer-local wherever it is set."
 (when (version< emacs-version "24.4")
   (lexical-let ((original-backtrace-frame (symbol-function 'backtrace-frame)))
     (defun backtrace-frame (nframes &optional base)
-      (let ((i nframes))
-        (if base
-            (let ((k 11) found)
-              (while (and (not found)
-                          (setq bt (cadr (funcall original-backtrace-frame
-                                                  (incf k)))))
-                (message "%s:%s" k (backtrace-frame k))
-                (when (eq bt base) (setq found t)))
-              (if found (setq i (+ i (- k 6)))
-                (setq i (+ nframes 5))))
-          (setq i (+ nframes 5)))
-        (funcall original-backtrace-frame i)))))
+      (let ((i (if base
+                   (let ((k 8) found)
+                     (while (and (not found)
+                                 (setq bt (cadr (funcall original-backtrace-frame
+                                                         (incf k)))))
+                       ;; (message "%s:%s" k (backtrace-frame k))
+                       (when (eq bt base) (setq found t)))
+                     (when found (+ nframes (- k 3))))
+                 (+ nframes 6))))
+        (when i
+          (funcall original-backtrace-frame i))))))
 (defun my/-error-message (error-class msg &optional fatal face tracedepth)
   (unless tracedepth (setq tracedepth 8))
   (let* ((ecs (concat "[" error-class "]"))

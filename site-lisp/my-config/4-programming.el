@@ -4,7 +4,7 @@
 ;;; Code:
 
 
-;; ---------------------
+;; -----------------------
 ;; Common
 
 ;; (electric-indent-mode 1)
@@ -54,7 +54,10 @@
             ("->" . 'access-op-face) ("::" . 'access-op-face) ("\\." . 'access-op-face)
             ("," . 'comma-semicolon-face) (";" . 'comma-semicolon-face)
 
-            ("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend))
+            ("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend)
+
+            ("--_--.*?--_--" 0 'underline prepend)
+            ("--/--.*?--/--" 0 'overstriked-face prepend))
       'append)
 
      (unless (file-exists-p "Makefile")
@@ -104,6 +107,10 @@
 (defface comma-semicolon-face
   '((default :inherit close-paren-face :height 0.9 :slant normal))
   "Face for comma and semicolon")
+
+(defface overstriked-face
+  '((t :strike-through "#E11"))
+  "Face with overstrike.")
 
 (cl-defun get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
   "Determine the pathname of the first instance of FILE starting from the current directory towards root.
@@ -160,6 +167,26 @@ of FILE in the current directory, suitable for creation"
                                lua-mode))
           (derived-mode-p 'prog-mode))
       (indent-region (region-beginning) (region-end) nil)))
+
+
+
+(unless (version< emacs-version "24.1")
+  (add-hook 'grep-mode-hook
+            (lambda nil
+              (setq display-buffer-alist
+                    (list
+                     (cons ".*"
+                           (cons
+                            (lambda
+                              (bufer alist)
+                              (when (eq (selected-window) (previous-window))
+                                (split-window-horizontally))
+                              (with-selected-window
+                                  (previous-window)
+                                (switch-to-buffer bufer)
+                                (selected-window)))
+                            nil)))))))
+
 
 ;; ----------------
 
