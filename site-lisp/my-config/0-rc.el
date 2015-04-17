@@ -33,6 +33,27 @@
 ;;==================================
 
 
+;; Large files
+
+(defvar my/-find-large-file-hook nil
+  "Hooks to be run when you open large file(see `large-file-warning-threshold').")
+
+(add-hook 'find-file-hook
+          #'(lambda ()
+              (when (>= (buffer-size) large-file-warning-threshold)
+                (run-hooks 'my/-find-large-file-hook))))
+
+(add-hook 'my/-find-large-file-hook
+          #'(lambda ()
+              (fundamental-mode)
+              (font-lock-mode nil)
+              (jit-lock-mode nil)
+              (setq-local font-lock-support-mode nil)
+              (setq buffer-read-only t
+                    bidi-display-reordering nil)
+              (buffer-disable-undo)))
+
+
 ;; Terminal
 (standard-display-8bit 128 255)
 
@@ -97,34 +118,38 @@
                                                (setq show-paren-deactivated-until-active-mark nil)
                                                (show-paren-mode 1))))
 
+(defvar-local show-paren-advice-enabled t)
+(add-hook 'my/-find-large-file-hook
+          #'(lambda () (setq-local show-paren-advice-enabled nil)))
 (defadvice show-paren-function (after show-matching-paren-offscreen activate)
   "If the matching paren is offscreen, show the matching line in the
 echo area. Has no effect if the character before point is not of
 the syntax class ')'."
   (interactive)
-  (unless (minibufferp)
-    (let ((cb (char-before (point)))
-          (ca (char-after (point)))
-          t-beg t-end line column mesg)
-      (when (and cb (char-equal (char-syntax cb) ?\)))
-        (save-excursion (backward-list)
-                        (unless (pos-visible-in-window-p)
-                          (setq line (line-number-at-pos)
-                                column (current-column)
-                                t-beg (progn (beginning-of-line) (point))
-                                t-end (progn (end-of-line) (point))
-                                mesg (format "[%s:%s] %s" line column (buffer-substring t-beg t-end))))))
-      (when (and ca (char-equal (char-syntax ca) ?\())
-        (save-excursion (forward-list)
-                        (unless (pos-visible-in-window-p)
-                          (setq line (line-number-at-pos)
-                                column (current-column)
-                                t-beg (progn (beginning-of-line) (point))
-                                t-end (progn (end-of-line) (point))
-                                mesg (concat (and mesg (concat mesg "\n"))
-                                             (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
-      (when mesg (let ((message-log-max nil))
-                   (message "%s" mesg))))))
+  (when show-paren-advice-enabled
+    (unless (minibufferp)
+      (let ((cb (char-before (point)))
+            (ca (char-after (point)))
+            t-beg t-end line column mesg)
+        (when (and cb (char-equal (char-syntax cb) ?\)))
+          (save-excursion (backward-list)
+                          (unless (pos-visible-in-window-p)
+                            (setq line (line-number-at-pos)
+                                  column (current-column)
+                                  t-beg (progn (beginning-of-line) (point))
+                                  t-end (progn (end-of-line) (point))
+                                  mesg (format "[%s:%s] %s" line column (buffer-substring t-beg t-end))))))
+        (when (and ca (char-equal (char-syntax ca) ?\())
+          (save-excursion (forward-list)
+                          (unless (pos-visible-in-window-p)
+                            (setq line (line-number-at-pos)
+                                  column (current-column)
+                                  t-beg (progn (beginning-of-line) (point))
+                                  t-end (progn (end-of-line) (point))
+                                  mesg (concat (and mesg (concat mesg "\n"))
+                                               (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
+        (when mesg (let ((message-log-max nil))
+                     (message "%s" mesg)))))))
 
 (ad-enable-advice #'show-paren-function 'after 'show-matching-paren-offscreen)
 (ad-activate #'show-paren-function)

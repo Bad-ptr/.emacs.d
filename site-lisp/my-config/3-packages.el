@@ -270,11 +270,13 @@ That is, a string used to represent it on the tab bar."
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
-  (highlight-tail-mode 1))
+  (highlight-tail-mode 1)
+  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
 
 ;; rainbow-mode
 (with-eval-after-load "rainbow-mode-autoloads"
-  (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1))))
+  (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1)))
+  (add-hook 'my/-find-large-file-hook #'(lambda () (rainbow-mode -1))))
 
 
 ;; highlight-parentheses
@@ -304,7 +306,7 @@ That is, a string used to represent it on the tab bar."
           (push (make-overlay 0 0) hl-paren-overlays)
           (overlay-put (car hl-paren-overlays) 'face attributes)))
       (setq hl-paren-overlays (nreverse hl-paren-overlays))))
-  )
+  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1))))
 
 ;; highlight-blocks-mode
 ;; do not enable it as it's too slow

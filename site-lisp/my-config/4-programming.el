@@ -177,8 +177,7 @@ of FILE in the current directory, suitable for creation"
                     (list
                      (cons ".*"
                            (cons
-                            (lambda
-                              (bufer alist)
+                            (lambda (bufer alist)
                               (when (eq (selected-window) (previous-window))
                                 (split-window-horizontally))
                               (with-selected-window
@@ -216,7 +215,8 @@ of FILE in the current directory, suitable for creation"
 
 ;; go-mode
 (with-eval-after-load "go-mode-autoloads"
-  (setq-default gofmt-command "goimports")
+  (when (executable-find "goimports")
+    (setq-default gofmt-command "goimports"))
   (with-eval-after-load 'company-autoloads
     (require 'company-go nil t))
   (with-eval-after-load "go-eldoc-autoloads"
@@ -250,14 +250,14 @@ of FILE in the current directory, suitable for creation"
 
 
 ;; perl
-(defun perl-fname-to-package (fname &optional no-lib n-parts)
+(defun perl-fname-to-package (fname &optional lib n-parts)
   (unless n-parts (setq n-parts 2))
   (or
    (when fname
      (let* ((fname-parts (split-string fname "[/\\]"))
             (lib-pos
-             (and (not no-lib)
-                  (search '("lib") fname-parts :test #'equal :from-end t))))
+             (and lib
+                  (search (list lib) fname-parts :test #'equal :from-end t))))
        (if lib-pos
            (setq fname-parts (nthcdr (1+ lib-pos) fname-parts))
          (let* ((fn-l (length fname-parts))
