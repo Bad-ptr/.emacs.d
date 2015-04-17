@@ -275,7 +275,7 @@ of FILE in the current directory, suitable for creation"
   (setq template-expansion-alist
         (append '(("PERL_PACKAGE_NAME"
                    (insert (perl-fname-to-package
-                            (concat (nth 0 template-file) (nth 1 template-file)))))
+                            (concat (nth 0 template-file) (nth 1 template-file)) "lib")))
                   ("PERL_VERSION"
                    (insert (or (and (boundp 'perl-version) perl-version) "5.018"))))
                 template-expansion-alist)))
