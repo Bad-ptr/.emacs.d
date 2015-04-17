@@ -90,7 +90,7 @@ Set point according to point-pos."
       ('before-opening (goto-char w-beg))
       ('before-closing (backward-char (string-width w-end-str)))
       ('after-opening (goto-char (+ w-beg (string-width w-beg-str))))
-      ('after-closing (forward-char (string-width w-end-str))))))
+      ('after-closing (point)))))
 
 ;; Wrap with pairs:
 
@@ -160,12 +160,11 @@ If no pair found then use p-str as opening and closing."
     (unless p-close
       (setq p-close (cdr (assoc p-str (union w-w/pairs-predefined w-w/pairs)))))
     (unless p-close
-      (setq p-close (car (rassoc p-str (union w-w/pairs-predefined w-w/pairs))))
+      (setq p-close (car (rassoc p-str (union w-w/pairs-predefined w-w/pairs)))
+            inp-is-closing-pair t)
       (if (not p-close)
-          (setq p-close p-open
-                inp-is-closing-pair t)
-        (rotatef p-open p-close)
-        (setq inp-is-closing-pair t)))
+          (setq p-close p-open)
+        (rotatef p-open p-close)))
     (if (not inp-is-closing-pair)
         (w-w/wrap-with p-open p-close w-beg-end 'after-opening)
       (multiple-value-bind (is-enlrgd beg-end)
@@ -176,7 +175,12 @@ If no pair found then use p-str as opening and closing."
               (goto-char end))
           (if (or (region-active-p)
                   (not (looking-at (regexp-quote p-close))))
-              (w-w/wrap-with p-open p-close w-beg-end)
+              (multiple-value-bind (beg end) w-beg-end
+                (w-w/wrap-with p-open p-close w-beg-end
+                               (if (and (eq beg end)
+                                        (not (string= p-open p-close)))
+                                   'after-closing
+                                 'before-closing)))
             (forward-char)))))))
 
 ;; Wrap with html tag:
