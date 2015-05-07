@@ -85,7 +85,7 @@ buffer-local wherever it is set."
   (lexical-let ((original-backtrace-frame (symbol-function 'backtrace-frame)))
     (defun backtrace-frame (nframes &optional base)
       (let ((i (if base
-                   (let ((k 8) found)
+                   (let ((k 8) found bt)
                      (while (and (not found)
                                  (setq bt (cadr (funcall original-backtrace-frame
                                                          (incf k)))))
