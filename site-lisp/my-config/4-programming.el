@@ -136,25 +136,25 @@ of FILE in the current directory, suitable for creation"
  File suffix is used to determine what program to run."
   (interactive)
   (let (suffixMap fname suffix progName cmdStr) ;; a keyed list of file suffix to comand-line program path/name
-    (setq suffixMap '( ("php" . "php")
-                       ("pl" . "perl")
-                       ("py" . "python")
-                       ("rb" . "ruby")
-                       ("js" . "js")
-                       ("sh" . "bash")
-                       ("ml" . "ocaml")
-                       ("vbs" . "cscript")
-                       ("pov" . "/usr/local/bin/povray +R2 +A0.1 +J1.2 +Am2 +Q9 +H480 +W640") ) )
-    (setq fname (buffer-file-name))
-    (setq suffix (file-name-extension fname))
-    (setq progName (cdr (assoc suffix suffixMap)))
-    (setq cmdStr (concat progName " \"" fname "\""))
+    (setq suffixMap '(("php" . "php")
+                      ("pl" . "perl")
+                      ("py" . "python")
+                      ("rb" . "ruby")
+                      ("js" . "js")
+                      ("sh" . "bash")
+                      ("ml" . "ocaml")
+                      ("vbs" . "cscript")
+                      ("pov" . "/usr/local/bin/povray +R2 +A0.1 +J1.2 +Am2 +Q9 +H480 +W640")))
+    (setq fname (buffer-file-name)
+          suffix (file-name-extension fname)
+          progName (cdr (assoc suffix suffixMap))
+          cmdStr (concat progName " \"" fname "\""))
     (if (string-equal suffix "el") ; special case for emacs lisp
         (load-file fname)
       (if progName
           (progn (message "Running...")
-                 (shell-command cmdStr "*run-current-file output*" ) )
-        (message "No recognized program file suffix for this file.") ) )))
+                 (shell-command cmdStr "*run-current-file output*"))
+        (message "No recognized program file suffix for this file.")))))
 
 ;; Autoindent code after pasting
 (defadvice yank-pop (after indent-region activate)
@@ -228,10 +228,10 @@ of FILE in the current directory, suitable for creation"
   (require 'company-jedi)
   ;;(setq company-jedi-command (format "python3 -m start_jedi -p %s" company-jedi-port))
   ;;(setq company-jedi-show-eldoc-as-single-line t)
-  (add-hook 'python-mode-hook #'company-jedi-start)
+  ;;(add-hook 'python-mode-hook #'company-jedi-start)
   ;;(add-hook 'python-mode-hook #'company-jedi-eldoc-setup)
   (with-eval-after-load "company-autoloads"
-    (add-to-list 'company-backends 'company-jedi)
+    ;;(add-to-list 'company-backends 'company-jedi)
     (setq company-backends (delete 'company-ropemacs company-backends)))
   (with-eval-after-load "python"
     (define-key python-mode-map (kbd ".") 'company-jedi-complete-on-dot)
@@ -332,24 +332,25 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "haskell-mode-autoloads"
   (setq auto-mode-alist (append '(("\\.hs$" . haskell-mode)) auto-mode-alist))
   (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent))
+  ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+  (with-eval-after-load "shm-autoloads"
+    (set-face-background 'shm-current-face "#eee8d5")
+    (set-face-background 'shm-quarantine-face "lemonchiffon")))
 
 
 ;; C#
 (with-eval-after-load "csharp-mode-autoloads"
   (setq auto-mode-alist (append '(("\\.cs$" . csharp-mode)) auto-mode-alist))
-  (add-hook 'csharp-mode-hook #'(lambda ()
-                                  (omnisharp-mode t)
-                                  (add-to-list 'company-backends 'company-omnisharp))))
+  ;; (add-hook 'csharp-mode-hook #'(lambda ()
+  ;;                                 (omnisharp-mode t)
+  ;;                                 (add-to-list 'company-backends 'company-omnisharp)))
+  )
 
 
 ;; vala
 (with-eval-after-load "vala-mode-autoloads"
   (setq auto-mode-alist (append '(("/*.\.vala$" . vala-mode)) auto-mode-alist))
-  (setq auto-mode-alist (append '(("/*.\.vapi$" . vala-mode)) auto-mode-alist))
-  (setq file-coding-system-alist (append '(("/*.\.vala$" . utf-8)) file-coding-system-alist))
   (setq file-coding-system-alist (append '(("/*.\.vapi$" . utf-8)) file-coding-system-alist)))
 
 
