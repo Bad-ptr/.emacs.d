@@ -218,7 +218,11 @@ of FILE in the current directory, suitable for creation"
   (when (executable-find "goimports")
     (setq-default gofmt-command "goimports"))
   (with-eval-after-load 'company-autoloads
-    (require 'company-go nil t))
+    (require 'company-go nil t)
+    (with-eval-after-load "company-go"
+      (add-hook 'go-mode-hook
+                #'(lambda ()
+                    (add-to-list 'company-backends 'company-go)))))
   (with-eval-after-load "go-eldoc-autoloads"
     (add-hook 'go-mode-hook #'go-eldoc-setup)))
 

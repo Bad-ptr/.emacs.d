@@ -9,9 +9,13 @@
 
 ;;; Code:
 
+
+(require 'company)
+;; (require 'company-template)
+
 (eval-when-compile
-  (require 'cl)
-  (require 'company))
+  (require 'cl))
+
 
 (defun company-go--invoke-autocomplete ()
   (let ((temp-buffer (generate-new-buffer "*gocode*")))
@@ -103,7 +107,11 @@
                       (let ((ttext (if (string-match-p "\\.\\.\\." sig)
                                        " "
                                      (substring sig 0 (or (string-match "\s-*" sig) (string-width sig))))))
-                        (company-template-add-field templ beg ttext sig)))))
+                        (company-template-add-field templ (progn (goto-char beg)
+                                                                 (point))
+                                                    (progn (insert ttext)
+                                                           (point))
+                                                    sig)))))
                 (company-template-move-to-first templ)))))))))
 
 (defun company-go (command &optional arg &rest ignored)
