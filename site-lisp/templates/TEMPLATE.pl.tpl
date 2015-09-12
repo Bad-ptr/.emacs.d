@@ -19,11 +19,16 @@ no warnings 'experimental';
 #use encoding 'utf8';
 use Encode;
 
-use open qw(:std :utf8);
+#use open qw(:std :utf8);
 
-binmode STDOUT, ":utf8";
-binmode STDIN, ":utf8";
-binmode STDERR, ":utf8";
+# binmode STDOUT, ":utf8";
+# binmode STDIN, ":utf8";
+# binmode STDERR, ":utf8";
+use open qw( :encoding(UTF-8) :std );
+binmode(DATA, ":encoding(UTF-8)");
+
+use charnames qw( :full :short );
+
 
 use feature qw(unicode_strings say switch);
 
@@ -35,6 +40,7 @@ use feature qw(unicode_strings say switch);
 
 
 __PACKAGE__->run(@ARGV) unless caller();
+
 
 sub run {
   (>>>POINT<<<)

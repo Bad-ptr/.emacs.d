@@ -217,7 +217,7 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "go-mode-autoloads"
   (when (executable-find "goimports")
     (setq-default gofmt-command "goimports"))
-  (with-eval-after-load 'company-autoloads
+  (with-eval-after-load "company-autoloads"
     (require 'company-go nil t)
     (with-eval-after-load "company-go"
       (add-hook 'go-mode-hook
