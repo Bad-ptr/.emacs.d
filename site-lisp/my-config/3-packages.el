@@ -282,12 +282,20 @@ That is, a string used to represent it on the tab bar."
 ;; highlight-parentheses
 (with-eval-after-load "highlight-parentheses-autoloads"
   (setq hl-paren-background-colors '("#FFF" "#DDCCDD" "#CCDDDD"))
+  (setq hl-paren-background-colors-dark '("#333" "#444" "#555"))
   (setq hl-paren-colors (list "#FF0000" "#FF00FF" "#00FFFF"))
+  (setq hl-paren-colors-dark (list "#FF0000" "#FF00FF" "#00FFFF"))
   (setq hl-paren-sizes (list 1.1))
   (global-highlight-parentheses-mode t)
   (defun hl-paren-create-overlays ()
-    (let ((fg hl-paren-colors)
-          (bg hl-paren-background-colors)
+    (let ((fg (if (eq (frame-parameter (selected-frame) 'background-mode)
+                      'light)
+                  hl-paren-colors
+                hl-paren-colors-dark))
+          (bg (if (eq (frame-parameter (selected-frame) 'background-mode)
+                      'light)
+                  hl-paren-background-colors
+                hl-paren-background-colors-dark))
           (size hl-paren-sizes)
           attributes)
       (while (or fg bg)
