@@ -273,6 +273,10 @@ That is, a string used to represent it on the tab bar."
   (highlight-tail-mode 1)
   (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
 
+;; beacon-mode
+(with-eval-after-load "beacon-autoloads"
+  (beacon-mode 1))
+
 ;; rainbow-mode
 (with-eval-after-load "rainbow-mode-autoloads"
   (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1)))
