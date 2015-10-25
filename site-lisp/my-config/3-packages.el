@@ -448,10 +448,13 @@ That is, a string used to represent it on the tab bar."
   (setq ido-use-faces nil)
   (flx-ido-mode 1))
 
-;; ido-vertical
+;; ido-vertical or ido-grid-mode
 (if (>= emacs-major-version 24)
-    (with-eval-after-load "ido-vertical-mode-autoloads"
-      (ido-vertical-mode 1))
+    (progn
+      ;; (with-eval-after-load "ido-vertical-mode-autoloads"
+      ;;   (ido-vertical-mode 1))
+      (with-eval-after-load "ido-grid-mode-autoloads"
+        (ido-grid-mode 1)))
   (with-eval-after-load "ido"
     ;; Display ido results vertically, rather than horizontally
     (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
