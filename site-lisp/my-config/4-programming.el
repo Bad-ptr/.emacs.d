@@ -112,6 +112,23 @@
   '((t :strike-through "#E11"))
   "Face with overstrike.")
 
+
+(with-eval-after-load "dash"
+  (defun my/-renormalize-faces ()
+    (interactive)
+    (let* ((c-bg (color-name-to-rgb (frame-parameter (selected-frame) 'background-color)))
+           (c-op (color-name-to-rgb (face-foreground 'open-paren-face)))
+           (c-cp (color-name-to-rgb (face-foreground 'close-paren-face)))
+           (bg-mode (frame-parameter (selected-frame) 'background-mode))
+           (dif-o-c-p (-zip-with #'- c-op c-cp)))
+      ;;(message "%s - %s = %s" c-op c-cp dif-o-c-p)
+      (setq c-op (-zip-with #'- c-bg dif-o-c-p)
+            c-cp (-zip-with #'- c-op dif-o-c-p))
+      ;;(message "%s - %s = %s" c-bg dif-o-c-p c-op)
+      (set-face-foreground 'open-paren-face (apply #'color-rgb-to-hex c-op))
+      (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex c-cp)))))
+
+
 (cl-defun get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
   "Determine the pathname of the first instance of FILE starting from the current directory towards root.
 This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
