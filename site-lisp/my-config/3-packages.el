@@ -222,6 +222,23 @@ That is, a string used to represent it on the tab bar."
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
+  (defun my/-er/mark-outside-inside-pairs ()
+    (if (er--looking-at-pair)
+        (er/mark-outside-pairs)
+      (er/mark-inside-pairs)))
+  (setq er/try-expand-list
+        '(er/mark-word
+          er/mark-symbol
+          er/mark-symbol-with-prefix
+          er/mark-next-accessor
+          er/mark-method-call
+          er/mark-inside-quotes
+          er/mark-outside-quotes
+          my/-er/mark-outside-inside-pairs
+          er/mark-comment
+          er/mark-url
+          er/mark-email
+          er/mark-defun))
   (global-set-key (kbd "M-o") 'er/expand-region))
 
 ;; redo+
