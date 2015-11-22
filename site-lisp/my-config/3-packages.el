@@ -223,7 +223,7 @@ That is, a string used to represent it on the tab bar."
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
   (defun my/-er/mark-outside-inside-pairs ()
-    (if (er--looking-at-pair)
+    (if (or (er--looking-at-pair) (looking-back "[])}]"))
         (er/mark-outside-pairs)
       (er/mark-inside-pairs)))
   (setq er/try-expand-list
@@ -287,6 +287,52 @@ That is, a string used to represent it on the tab bar."
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
+  (defun highlight-tail-get-bgcolor-hex (point)
+    "Get the background color of point.
+Do not take highlight-tail's overlays into consideration.  This means
+that if there is ht's overlay at at the top then return 'default"
+    (let ((point-face (get-char-property point 'face))
+          point-face-from-cache
+          point-face-bgcolor
+          point-face-bgcolor-hex)
+      (when point-face
+        (when (listp point-face) (setq point-face (car point-face)))
+        ;; This is weird because for howm-reminder-today-face, the
+        ;; (get-char-property) function returns a list:
+        ;; (howm-reminder-today-face), so it's needed to get car of
+        ;; it...
+        (when (stringp point-face) (setq point-face (intern point-face)))
+        ;; This is weird because for faces used by ediff, the
+        ;; (get-char-property) function returns a string:
+        ;; "xxx-face", so it's needed to intern it...
+        (unless (facep point-face) (setq point-face 'default)))
+      (if point-face
+          (progn
+            (setq point-face-from-cache
+                  (assoc point-face highlight-tail-nonhtfaces-bgcolors))
+            (if point-face-from-cache
+                (setq point-face-bgcolor-hex (cdr point-face-from-cache))
+              (setq point-face-bgcolor
+                    (highlight-tail-get-face-background point-face))
+              (when (or (eq point-face-bgcolor nil)
+                        (eq point-face-bgcolor 'unspecified))
+                (setq point-face-bgcolor 'default))))
+        (setq point-face-bgcolor 'default))
+      (when (not point-face-bgcolor-hex)  ; not read from cache
+        (if (eq point-face-bgcolor 'default)
+            (setq point-face-bgcolor-hex 'default)
+          ;; else
+          (setq point-face-bgcolor-hex
+                (highlight-tail-hex-from-colorname point-face-bgcolor))
+          (setq highlight-tail-nonhtfaces-bgcolors
+                (cons (cons point-face point-face-bgcolor-hex)
+                      highlight-tail-nonhtfaces-bgcolors))
+          (highlight-tail-add-colors-fade-table point-face-bgcolor-hex)
+          (highlight-tail-make-faces
+           (highlight-tail-get-colors-fade-table-with-key
+            point-face-bgcolor-hex))))
+      ;; return value
+      point-face-bgcolor-hex))
   (highlight-tail-mode 1)
   (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
 
