@@ -167,6 +167,13 @@ That is, a string used to represent it on the tab bar."
 (with-eval-after-load "popwin-autoloads"
   (setq display-buffer-function 'popwin:display-buffer))
 
+;; shackle
+(with-eval-after-load "shackle-autoloads"
+  (shackle-mode)
+  (setq shackle-lighter "s"
+        shackle-default-rule '(:other t))
+  (add-to-list 'shackle-rules '(grep-mode :align t)))
+
 ;; golden-ratio
 (with-eval-after-load "golden-ratio-autoloads"
   (when (>= emacs-major-version 24)
@@ -222,23 +229,6 @@ That is, a string used to represent it on the tab bar."
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
-  (defun my/-er/mark-outside-inside-pairs ()
-    (if (or (er--looking-at-pair) (looking-back "[])}]"))
-        (er/mark-outside-pairs)
-      (er/mark-inside-pairs)))
-  (setq er/try-expand-list
-        '(er/mark-word
-          er/mark-symbol
-          er/mark-symbol-with-prefix
-          er/mark-next-accessor
-          er/mark-method-call
-          er/mark-inside-quotes
-          er/mark-outside-quotes
-          my/-er/mark-outside-inside-pairs
-          er/mark-comment
-          er/mark-url
-          er/mark-email
-          er/mark-defun))
   (global-set-key (kbd "M-o") 'er/expand-region))
 
 ;; redo+

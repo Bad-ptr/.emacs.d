@@ -187,21 +187,21 @@ of FILE in the current directory, suitable for creation"
 
 
 
-(unless (version< emacs-version "24.1")
-  (add-hook 'grep-mode-hook
-            (lambda nil
-              (setq display-buffer-alist
-                    (list
-                     (cons ".*"
-                           (cons
-                            (lambda (bufer alist)
-                              (when (eq (selected-window) (previous-window))
-                                (split-window-horizontally))
-                              (with-selected-window
-                                  (previous-window)
-                                (switch-to-buffer bufer)
-                                (selected-window)))
-                            nil)))))))
+;; (unless (version< emacs-version "24.1")
+;;   (add-hook 'grep-mode-hook
+;;             (lambda nil
+;;               (setq display-buffer-alist
+;;                     (list
+;;                      (cons ".*"
+;;                            (cons
+;;                             (lambda (bufer alist)
+;;                               (when (eq (selected-window) (previous-window))
+;;                                 (split-window-horizontally))
+;;                               (with-selected-window
+;;                                   (previous-window)
+;;                                 (switch-to-buffer bufer)
+;;                                 (selected-window)))
+;;                             nil)))))))
 
 
 ;; ----------------
