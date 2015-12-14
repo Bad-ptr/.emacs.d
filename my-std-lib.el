@@ -17,6 +17,7 @@
             (my/-warning "You are trying to use cl-labels with lexical-binding = nil."))
           `(,old-labels ,bindings ,@body))))
   (require 'cl)
+  (defalias 'cl-letf 'letf)
   (defalias 'cl-labels 'labels)
   (defalias 'cl-defmacro 'defmacro*)
   (defalias 'cl-defun 'defun*))
@@ -24,18 +25,27 @@
 
 ;;; Code:
 
-(defmacro alambda (arglist &rest body)
-  "Anaphoric lambda."
-  (declare (indent defun))
-  `(cl-labels ((self ,arglist ,@body))
-     #'self))
+;; old and potentially buggy
+;; (defmacro alambda (arglist &rest body)
+;;   "Anaphoric lambda."
+;;   (declare (indent defun))
+;;   `(cl-labels ((self ,arglist ,@body))
+;;      #'self))
+
+;; new and potentially better than old
+(defmacro alambda (args &rest body)
+  `(lexical-let ((self))
+     (setq self #'(lambda ,args
+                    (cl-letf (((symbol-function 'self) self))
+                      ,@body)))
+     self))
 
 (defmacro add-hook-that-fire-once (hook arglist &rest body)
   "Hook that autoremove itself after first execution"
   (declare (indent defun))
   `(add-hook ,hook (alambda ,arglist
-                     ,@body
-                     (remove-hook ,hook #'self))))
+                            ,@body
+                            (remove-hook ,hook self))))
 
 (defun my/-is-interactive-frame-available ()
   (and (not noninteractive)
@@ -99,21 +109,30 @@ buffer-local wherever it is set."
   (unless tracedepth (setq tracedepth 8))
   (let* ((ecs (concat "[" error-class "]"))
          (errbuf (get-buffer-create "*my/-errors*"))
-         (btf (let ((i 2) bf)
-                (while (< i (+ 2 tracedepth))
-                  (push (backtrace-frame i 'my/-error-message) bf)
+         call-stack
+         (btf (let ((i 2) ci bf)
+                (while (setq ci (backtrace-frame i 'my/-error-message))
+                  (when (eq (car ci) t)
+                    (push (cdr ci) call-stack))
+                  (when (< i (+ 2 tracedepth))
+                    (push (cdr ci) bf))
                   (setq i (1+ i)))
                 bf))
          (errstr (concat
                   (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
                   (and load-in-progress
                        (format "\n\tIn %s." (or load-file-name (buffer-file-name))))
+                  (and call-stack
+                       (format "\n Call stack:\n\t\t%s"
+                               (mapconcat #'(lambda (elt) (format "%s" elt))
+                                          call-stack "\n\t\t")))
                   (and btf
                        (format "\n  Backtrace:\n\t\t%s"
-                               (mapconcat #'(lambda (elt) (format "%s" (cdr elt)))
+                               (mapconcat #'(lambda (elt) (format "%s" elt))
                                           btf "\n\t\t"))))))
     (message "%s" errstr)
     (with-current-buffer errbuf
+      (goto-char (point-min))
       (insert-string errstr)
       (newline)
       (font-lock-add-keywords nil `((,(concat "^\\[" error-class "\\]") 0 'error t))))
