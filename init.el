@@ -87,8 +87,9 @@
                             (set-window-buffer cw
                                                (let ((template-auto-insert nil))
                                                  (with-current-buffer (find-file priv-file)
+                                                   (setq-local lexical-binding t)
                                                    (add-hook 'kill-buffer-hook
-                                                             #'(lambda () (self t)) nil t)
+                                                             #'(lambda () (funcall self t)) nil t)
                                                    (insert-file-contents example-file nil nil nil t)
                                                    (current-buffer))))
                             (display-buffer-pop-up-window (get-buffer "*my/-errors*") nil)

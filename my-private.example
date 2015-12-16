@@ -1,4 +1,4 @@
-;;; my-private.el -- This file is ignored by git. Set here your private settings.
+;;; my-private.el -- This file is ignored by git. Set here your private settings. -*- lexical-binding: t; -*-
 
 ;; This file is ignored by git. Set here your private settings, save as ~/.emacs.d/my-private.el,
 ;; then kill this buffer with C-x k and you're done.
