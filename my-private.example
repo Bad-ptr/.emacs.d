@@ -74,7 +74,7 @@
     ;; hexrgb
     ;; highlight-blocks highlight-parentheses highlight-tail
     ;; httprepl
-    ;; ido-at-point ido-hacks ido-ubiquitous ido-vertical-mode
+    ;; ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
     ;; inf-ruby
     ;; io-mode io-mode-inf
     ;; jabber

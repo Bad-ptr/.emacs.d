@@ -13,12 +13,16 @@
 ;;load functions that will be used during initialization
 (load (locate-user-emacs-file "my-std-lib"))
 
-(let ((emd (expand-file-name (concat "site-lisp/emacs" (number-to-string emacs-major-version))
-                             user-emacs-directory)))
-  (when (file-directory-p emd)
-    (add-to-list 'load-path emd)
-    (load (expand-file-name "init.el" emd) t t t)))
-
+;;load compatibility code
+(dolist (dirname (mapcar #'(lambda (dirn)
+                             (expand-file-name (concat "site-lisp/emacs-" dirn)
+                                               user-emacs-directory))
+                         (list
+                          (number-to-string emacs-major-version)
+                          emacs-version
+                          (symbol-name system-type))))
+  (add-to-list 'load-path dirname)
+  (load (expand-file-name "init.el" dirname) t t t))
 
 (defun my/-init-before-private ()
   "Init actions before private information set."
