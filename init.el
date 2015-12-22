@@ -15,7 +15,7 @@
 
 ;;load compatibility code
 (dolist (dirname (mapcar #'(lambda (dirn)
-                             (expand-file-name (concat "site-lisp/emacs-" dirn)
+                             (expand-file-name (concat "emacs-" dirn)
                                                user-emacs-directory))
                          (list
                           (number-to-string emacs-major-version)

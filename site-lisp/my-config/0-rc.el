@@ -68,7 +68,7 @@
 
 ;; Make emacs use the clipboard
 (setq x-select-enable-clipboard t
-      interprogram-paste-function 'x-cut-buffer-or-selection-value)
+      interprogram-paste-function #'x-cut-buffer-or-selection-value)
 
 ;; always end a file with a newline
 (setq require-final-newline t)
