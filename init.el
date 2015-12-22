@@ -24,6 +24,7 @@
   (add-to-list 'load-path dirname)
   (load (expand-file-name "init.el" dirname) t t t))
 
+
 (defun my/-init-before-private ()
   "Init actions before private information set."
   (add-to-list 'load-path (locate-user-emacs-file "site-lisp/"))
@@ -37,6 +38,12 @@
   (setq package-enable-at-startup t)
   ;; Load other parts of configuration
   (my/-load-directory my/-common-conf-path))
+
+
+(defcustom my/-config-loaded-hook nil
+  "Hook to run after all parts of config have been loaded."
+  :group 'initialization
+  :type 'hook)
 
 (defun my/-init-after-private ()
   "Init actions after private information set."
@@ -60,6 +67,7 @@
 
   (my/-load-directory my/-conf-path)
 
+  (run-hooks 'my/-config-loaded-hook)
   (when (fboundp 'my/-exec-after-all-parts-of-config-loaded)
     (my/-exec-after-all-parts-of-config-loaded)))
 
