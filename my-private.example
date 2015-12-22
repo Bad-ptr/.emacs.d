@@ -11,7 +11,9 @@
  user-full-name "Vasily Pupkin"
  user-mail-address "vasya-pupkin2020@gmail.com"
  user-emacs-directory "~/.emacs.d/"
- package-user-dir (expand-file-name "elpa" user-emacs-directory)
+ package-user-dir
+ (expand-file-name (concat "elpa-" (number-to-string emacs-major-version))
+                   user-emacs-directory)
  ;;user-init-file "~/.emacs"
  )
 
