@@ -11,6 +11,9 @@ custom.el
 !project-skeletons
 !project-skeletons/**
 
+!emacs-*
+!emacs-*/*.el
+
 !site-lisp
 !site-lisp/*.el
 
