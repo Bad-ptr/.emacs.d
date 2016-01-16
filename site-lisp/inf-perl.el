@@ -45,9 +45,10 @@
 
 (define-derived-mode inferior-perl-mode comint-mode "Inf-Perl"
   "TODO: Docstring."
-  (setq comint-prompt-regexp "^$ ?")
+  (setq-local comint-prompt-regexp "\$ ")
   (setq-local comment-start "#")
-  (setq-local comment-end "\n"))
+  (setq-local comment-end "\n")
+  (setq-local comint-prompt-read-only t))
 
 (defun perl-repl (&optional cmd)
   (interactive (list (read-from-minibuffer "Perl command to run: " inferior-perl-program)))

@@ -117,6 +117,24 @@ int main (int argc, char **argv) {
 (with-eval-after-load "ido-at-point-autoloads"
   (ido-at-point-mode 1))
 
+;; flx
+(with-eval-after-load "flx-ido-autoloads"
+  (setq ido-use-faces nil)
+  (flx-ido-mode 1))
+
+;; ido-vertical or ido-grid-mode
+(if (>= emacs-major-version 24)
+    (progn
+      ;; (with-eval-after-load "ido-vertical-mode-autoloads"
+      ;;   (ido-vertical-mode 1))
+      (with-eval-after-load "ido-grid-mode-autoloads"
+        (ido-grid-mode 1)))
+  (with-eval-after-load "ido"
+    ;; Display ido results vertically, rather than horizontally
+    (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
+    (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
+    (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
+
 
 ;; Tabbar
 (with-eval-after-load "tabbar-autoloads"
@@ -384,6 +402,12 @@ that if there is ht's overlay at at the top then return 'default"
 (with-eval-after-load "smart-mode-line-autoloads"
   (sml/setup))
 
+;; prompt-text-el
+(with-eval-after-load "prompt-text-autoloads"
+  (setq prompt-text-format
+        `("[" (:eval (symbol-name this-command)) "] "))
+  (prompt-text-mode))
+
 ;; wrap-with
 (with-eval-after-load "wrap-with"
   (wrap-with-mode t))
@@ -495,24 +519,6 @@ that if there is ht's overlay at at the top then return 'default"
                                       ))
     (ac-flyspell-workaround)))
 
-
-;; flx
-(with-eval-after-load "flx-ido-autoloads"
-  (setq ido-use-faces nil)
-  (flx-ido-mode 1))
-
-;; ido-vertical or ido-grid-mode
-(if (>= emacs-major-version 24)
-    (progn
-      ;; (with-eval-after-load "ido-vertical-mode-autoloads"
-      ;;   (ido-vertical-mode 1))
-      (with-eval-after-load "ido-grid-mode-autoloads"
-        (ido-grid-mode 1)))
-  (with-eval-after-load "ido"
-    ;; Display ido results vertically, rather than horizontally
-    (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
-    (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
-    (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
 
 ;; speedbar
 (with-eval-after-load "speedbar"
