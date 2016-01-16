@@ -37,6 +37,8 @@
   (unless (fboundp 'self)
     (fset 'self nil)))
 (defmacro alambda (args &rest body)
+  "Anaphoric lambda."
+  (declare (indent defun))
   `(lexical-let ((self))
      (setq self #'(lambda ,args
                     (cl-letf (((symbol-function 'self) self))

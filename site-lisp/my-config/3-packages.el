@@ -475,7 +475,8 @@ that if there is ht's overlay at at the top then return 'default"
 
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
-  )
+  (with-eval-after-load "company-flx-autoloads"
+    (company-flx-mode)))
 
 
 ;; auto-complete-mode
