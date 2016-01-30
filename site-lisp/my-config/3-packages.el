@@ -101,39 +101,39 @@ int main (int argc, char **argv) {
 
 
 ;; ido
-(with-eval-after-load "ido"
-  (setq ido-enable-prefix nil
-        ido-enable-flex-matching t
-        ido-create-new-buffer 'always
-        ido-use-filename-at-point 'guess
-        ido-default-file-method 'selected-window
-        ido-max-prospects 10)
-  (ido-mode t)
-  (ido-everywhere t))
-(require 'ido)
+;; (with-eval-after-load "ido"
+;;   (setq ido-enable-prefix nil
+;;         ido-enable-flex-matching t
+;;         ido-create-new-buffer 'always
+;;         ido-use-filename-at-point 'guess
+;;         ido-default-file-method 'selected-window
+;;         ido-max-prospects 10)
+;;   (ido-mode t)
+;;   (ido-everywhere t))
+;; (require 'ido)
 
-(with-eval-after-load "ido-ubiquitous-autoloads"
-  (ido-ubiquitous-mode t))
-(with-eval-after-load "ido-at-point-autoloads"
-  (ido-at-point-mode 1))
+;; (with-eval-after-load "ido-ubiquitous-autoloads"
+;;   (ido-ubiquitous-mode t))
+;; (with-eval-after-load "ido-at-point-autoloads"
+;;   (ido-at-point-mode 1))
 
-;; flx
-(with-eval-after-load "flx-ido-autoloads"
-  (setq ido-use-faces nil)
-  (flx-ido-mode 1))
+;; ;; flx
+;; (with-eval-after-load "flx-ido-autoloads"
+;;   (setq ido-use-faces nil)
+;;   (flx-ido-mode 1))
 
-;; ido-vertical or ido-grid-mode
-(if (>= emacs-major-version 24)
-    (progn
-      ;; (with-eval-after-load "ido-vertical-mode-autoloads"
-      ;;   (ido-vertical-mode 1))
-      (with-eval-after-load "ido-grid-mode-autoloads"
-        (ido-grid-mode 1)))
-  (with-eval-after-load "ido"
-    ;; Display ido results vertically, rather than horizontally
-    (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
-    (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
-    (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
+;; ;; ido-vertical or ido-grid-mode
+;; (if (>= emacs-major-version 24)
+;;     (progn
+;;       ;; (with-eval-after-load "ido-vertical-mode-autoloads"
+;;       ;;   (ido-vertical-mode 1))
+;;       (with-eval-after-load "ido-grid-mode-autoloads"
+;;         (ido-grid-mode 1)))
+;;   (with-eval-after-load "ido"
+;;     ;; Display ido results vertically, rather than horizontally
+;;     (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
+;;     (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
+;;     (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
 
 
 ;; Tabbar
@@ -160,22 +160,22 @@ That is, a string used to represent it on the tab bar."
                                   (tabbar-current-tabset))))))))))
 
 ;; smex
-(if (>= emacs-major-version 24)
-    (with-eval-after-load "smex-autoloads"
-      (smex-initialize)
-      (global-set-key (kbd "M-x") #'smex)
-      (global-set-key (kbd "M-X") #'smex-major-mode-commands)
-      ;; This is your old M-x.
-      (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
-      (smex-auto-update 60)
-      (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
-  (with-eval-after-load "ido"
-    (global-set-key
-     "\M-x" (lambda ()
-              (interactive)
-              (call-interactively
-               (intern
-                (ido-completing-read "M-x " (all-completions "" obarray 'commandp))))))))
+;; (if (>= emacs-major-version 24)
+;;     (with-eval-after-load "smex-autoloads"
+;;       (smex-initialize)
+;;       (global-set-key (kbd "M-x") #'smex)
+;;       (global-set-key (kbd "M-X") #'smex-major-mode-commands)
+;;       ;; This is your old M-x.
+;;       (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
+;;       (smex-auto-update 60)
+;;       (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
+;;   (with-eval-after-load "ido"
+;;     (global-set-key
+;;      "\M-x" (lambda ()
+;;               (interactive)
+;;               (call-interactively
+;;                (intern
+;;                 (ido-completing-read "M-x " (all-completions "" obarray 'commandp))))))))
 
 ;; drag-stuff
 (with-eval-after-load "drag-stuff-autoloads"
@@ -525,6 +525,31 @@ that if there is ht's overlay at at the top then return 'default"
 (with-eval-after-load "speedbar"
   (add-to-list 'speedbar-frame-parameters (cons 'persp-ignore-wconf t)))
 
+;; helm
+(add-hook 'my/-packages-initialized-hook (lambda () (require 'helm-config)))
+(with-eval-after-load "helm-config"
+  (global-set-key (kbd "C-c h") 'helm-command-prefix)
+
+  (setq helm-split-window-in-side-p t
+        helm-move-to-line-cycle-in-source t)
+
+  (with-eval-after-load "golden-ratio-autoloads"
+    (add-to-list 'golden-ratio-inhibit-functions #'helm-alive-p))
+
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (setq helm-M-x-fuzzy-match t)
+
+  (global-set-key (kbd "M-y") #'helm-show-kill-ring)
+
+  (global-set-key (kbd "C-x b") #'helm-mini)
+  (setq helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t)
+
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+
+  (helm-mode 1)
+  (helm-autoresize-mode t))
+
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
@@ -532,7 +557,42 @@ that if there is ht's overlay at at the top then return 'default"
   ;;(setq windmove-window-distance-delta 2)
   (unless (>= emacs-major-version 24)
     (setq persp-when-kill-switch-to-buffer-in-perspective nil))
-  (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
+  (defun helm-persp-buffer-list-bridge
+      (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
+    (or
+     (helm :sources (helm-build-in-buffer-source name
+                      :init (lambda () (helm-init-candidates-in-buffer 'global
+                                    (let ((rl (mapcar #'(lambda (b) (buffer-name b))
+                                                      (persp-buffer-list-restricted))))
+                                      (when default
+                                        (setq rl (cons default (delete default rl))))
+                                      rl)))
+                      :fuzzy-match helm-mode-fuzzy-match)
+           :fuzzy-match helm-mode-fuzzy-match
+           :prompt prompt
+           :buffer buffer
+           :input init
+           :history hist
+           :resume 'noresume
+           :default (or default ""))
+     (helm-mode--keyboard-quit)))
+
+  (with-eval-after-load "helm-mode"
+    (setq helm-completing-read-handlers-alist
+          (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
+                    (kill-buffer                      . helm-persp-buffer-list-bridge)
+                    (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
+                    (persp-add-buffer                 . helm-persp-buffer-list-bridge)
+                    (persp-remove-buffer              . helm-persp-buffer-list-bridge))
+                  helm-completing-read-handlers-alist)))
+
+  (add-to-list 'command-switch-alist
+               (cons "persp-q"
+                     #'(lambda (p)
+                         (setq persp-auto-resume-time -1
+                               persp-auto-save-opt 0))))
+
+  (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
 
 ;; 3-packages.el ends here

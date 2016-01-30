@@ -40,11 +40,6 @@
   (my/-load-directory my/-common-conf-path))
 
 
-(defcustom my/-config-loaded-hook nil
-  "Hook to run after all parts of config have been loaded."
-  :group 'initialization
-  :type 'hook)
-
 (defun my/-init-after-private ()
   "Init actions after private information set."
 
@@ -55,6 +50,7 @@
   ;; Packages
   (require 'package)
   (package-initialize)
+  (run-hooks 'my/-packages-initialized-hook)
 
   ;; load custom file
   (setq custom-file (locate-user-emacs-file (concat my/-username "-custom.el")))
@@ -71,6 +67,16 @@
   (when (fboundp 'my/-exec-after-all-parts-of-config-loaded)
     (my/-exec-after-all-parts-of-config-loaded)))
 
+
+(defcustom my/-packages-initialized-hook nil
+  "Hoot that runs after packages-initialize."
+  :group 'initialization
+  :type 'hook)
+
+(defcustom my/-config-loaded-hook nil
+  "Hook to run after all parts of config have been loaded."
+  :group 'initialization
+  :type 'hook)
 
 (defcustom my/-username-hook nil
   "Hook to run when `my/-username' changes."

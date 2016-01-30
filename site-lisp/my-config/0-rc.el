@@ -108,7 +108,7 @@
 
 ;; Highlight parentheses
 (show-paren-mode -1)
-(setq show-paren-style 'expression ;выделять все выражение в скобках
+(setq show-paren-style 'expression
       blink-matching-paren-distance nil)
 (defvar show-paren-deactivated-until-active-mark nil)
 (add-hook 'activate-mark-hook   #'(lambda () (when show-paren-mode
@@ -126,7 +126,9 @@
 echo area. Has no effect if the character before point is not of
 the syntax class ')'."
   (interactive)
-  (when show-paren-advice-enabled
+  (when (and show-paren-advice-enabled
+             (let ((ctx (syntax-ppss-context (syntax-ppss))))
+               (null ctx)))
     (unless (minibufferp)
       (let ((cb (char-before (point)))
             (ca (char-after (point)))
