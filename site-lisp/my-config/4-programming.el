@@ -207,6 +207,15 @@ of FILE in the current directory, suitable for creation"
 ;; ----------------
 
 
+;; cedet
+;;(load "~/projects/cedet/cedet-devel-load.el")
+;;(global-ede-mode t)
+;; Example ede project:
+;; (ede-cpp-root-project "Test"
+;;                       :name "Test"
+;;                       :file "~/projects/Test/Makefile"
+;;                       :include-path '("/inc"))
+
 ;; gdb
 (setq gdb-many-windows t
       gdb-show-main t)
@@ -215,12 +224,38 @@ of FILE in the current directory, suitable for creation"
 ;; C/Cpp
 (setq c-default-style "gnu")
 
-(defun c-get-system-includes ()
-  (with-temp-buffer
-    (shell-command
-     "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
-     (current-buffer))
-    (split-string (buffer-string) "\n" t)))
+(defvar my/-c-include-paths nil
+  "List of dirs with includes for c.")
+(defun my/-c-get-includes ()
+  (concatenate 'list
+               (when (and global-ede-mode ede-object)
+                 (append
+                  (ede-system-include-path ede-object)
+                  (when ede-object-project
+                    (mapcar #'(lambda (s)
+                                (when (string-prefix-p "/" s)
+                                  ;;(ede-project-root-directory ede-object-project)
+                                  (ede-expand-filename ede-object
+                                                       (concat "." s)
+                                                       ;;(substring s 1)
+                                                       )))
+                            (oref ede-object-project include-path)))))
+               (when semantic-mode
+                 semantic-dependency-system-include-path)
+               (or my/-c-include-paths
+                   (setq my/-c-include-paths
+                         (with-temp-buffer
+                           (shell-command
+                            "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
+                            (current-buffer))
+                           (split-string (buffer-string) "\n" t))))))
+
+(with-eval-after-load "company-c-headers-autoloads"
+  (setq company-c-headers-path-system #'my/-c-get-includes)
+  (dolist (hook '(c-mode-hook c++-mode-hook))
+    (add-hook hook
+              #'(lambda ()
+                  (add-to-list 'company-backends 'company-c-headers)))))
 
 
 ;; lisp

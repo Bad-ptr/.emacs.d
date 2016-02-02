@@ -334,4 +334,6 @@ the syntax class ')'."
 
 (winner-mode)
 
+;;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+
 ;; 0-rc.el ends here

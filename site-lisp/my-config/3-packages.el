@@ -490,7 +490,7 @@ that if there is ht's overlay at at the top then return 'default"
     (ac-config-default)
     (setq clang-completion-suppress-error t
           ac-clang-flags (mapcar #'(lambda (item)(concat "-I" item))
-                                 (c-get-system-includes)))
+                                 (my/-c-get-includes)))
 
     (global-auto-complete-mode t)           ;enable global-mode
     (setq ac-auto-start 2                ;automatically start (disabled)
@@ -594,5 +594,6 @@ that if there is ht's overlay at at the top then return 'default"
                                persp-auto-save-opt 0))))
 
   (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
+
 
 ;; 3-packages.el ends here
