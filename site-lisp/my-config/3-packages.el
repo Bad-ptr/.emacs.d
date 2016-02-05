@@ -526,8 +526,9 @@ that if there is ht's overlay at at the top then return 'default"
   (add-to-list 'speedbar-frame-parameters (cons 'persp-ignore-wconf t)))
 
 ;; helm
-(add-hook 'my/-packages-initialized-hook (lambda () (require 'helm-config)))
-(with-eval-after-load "helm-config"
+;; (with-eval-after-load "helm-autoloads"
+;;   (add-hook 'my/-packages-initialized-hook (lambda () (require 'helm-config))))
+(with-eval-after-load "helm-autoloads";"helm-config"
   (global-set-key (kbd "C-c h") 'helm-command-prefix)
 
   (setq helm-split-window-in-side-p t

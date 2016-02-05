@@ -109,6 +109,7 @@
 ;; Highlight parentheses
 (show-paren-mode -1)
 (setq show-paren-style 'expression
+      blink-matching-paren nil
       blink-matching-paren-distance nil)
 (defvar show-paren-deactivated-until-active-mark nil)
 (add-hook 'activate-mark-hook   #'(lambda () (when show-paren-mode
