@@ -109,8 +109,17 @@
 ;; Highlight parentheses
 (show-paren-mode -1)
 (setq show-paren-style 'expression
+      show-paren-when-point-in-periphery t
+      show-paren-when-point-inside-paren t
       blink-matching-paren nil
       blink-matching-paren-distance nil)
+(defface show-paren-match-face
+  '((default :inherit nil)
+    (((class color) (min-colors 88) (background light))
+     (:background "#eafff5"))
+    (((class color) (min-colors 88) (background dark))
+     (:background "#002005")))
+  "Face for show-paren mode, when parens match.")
 (defvar show-paren-deactivated-until-active-mark nil)
 (add-hook 'activate-mark-hook   #'(lambda () (when show-paren-mode
                                                (setq show-paren-deactivated-until-active-mark t)

@@ -140,9 +140,13 @@ buffer-local wherever it is set."
                                           btf "\n\t\t"))))))
     (message "%s" errstr)
     (with-current-buffer errbuf
+      (unless (eq major-mode 'special-mode)
+        (special-mode))
+      (read-only-mode -1)
       (goto-char (point-min))
       (insert-string errstr)
       (newline)
+      (read-only-mode 1)
       (font-lock-add-keywords nil `((,(concat "^\\[" error-class "\\]") 0 'error t))))
     (when (or fatal (not (my/-is-interactive-frame-available)))
       (my/-exec-after-interactive-frame-available (errstr errbuf ecs)

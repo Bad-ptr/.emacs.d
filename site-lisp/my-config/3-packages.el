@@ -583,6 +583,7 @@ that if there is ht's overlay at at the top then return 'default"
     (setq helm-completing-read-handlers-alist
           (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
                     (kill-buffer                      . helm-persp-buffer-list-bridge)
+                    (persp-kill-buffer                . helm-persp-buffer-list-bridge)
                     (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
                     (persp-add-buffer                 . helm-persp-buffer-list-bridge)
                     (persp-remove-buffer              . helm-persp-buffer-list-bridge))
@@ -594,7 +595,8 @@ that if there is ht's overlay at at the top then return 'default"
                          (setq persp-auto-resume-time -1
                                persp-auto-save-opt 0))))
 
-  (add-hook 'after-init-hook #'(lambda () (persp-mode 1))))
+  (add-hook 'after-init-hook #'(lambda () (persp-mode 1)
+                                 (global-set-key (kbd "C-x k") #'persp-kill-buffer))))
 
 
 ;; 3-packages.el ends here
