@@ -336,23 +336,29 @@ If no pair found then use p-str as opening and closing."
          (term-char-mode))
        ret)))
 
-(defmacro w-w/define-key (key &rest body)
+(defun w-w/define-key (key body)
   (declare (indent defun))
-  `(define-key wrap-with-mode-map ,key
-     #'(lambda () (interactive) (w-w/with-term-funcs ,@body))))
-
+  ;; `(define-key wrap-with-mode-map ,key
+  ;;    #'(lambda () (interactive) (w-w/with-term-funcs ,@body)))
+  (let ((fun-name (intern (concat "w-w/insert-for-" key)))
+        (key-seq (read-kbd-macro key)))
+    (eval
+     `(defun ,fun-name ()
+        (interactive)
+        (w-w/with-term-funcs ,body)))
+    (define-key wrap-with-mode-map key-seq fun-name)))
 
 (defvar wrap-with-mode-map (make-sparse-keymap)
   "Keymap for wrap-with-mode.")
 (mapc #'(lambda (p)
-          (lexical-let ((op (car p))
-                        (cl (cdr p)))
+          (let ((op (car p))
+                (cl (cdr p)))
             (when op
-              (w-w/define-key (read-kbd-macro op)
-                (w-w/wrap-with-pair op (w-w/wrap-beg-end) cl)))
+              (w-w/define-key op
+                `(w-w/wrap-with-pair ,op (w-w/wrap-beg-end) ,cl)))
             (when cl
-              (w-w/define-key (read-kbd-macro cl)
-                (w-w/wrap-with-pair cl)))))
+              (w-w/define-key cl
+                `(w-w/wrap-with-pair ,cl)))))
       '(("(" . ")")
         ("[" . "]")
         ;;("<" . ">")

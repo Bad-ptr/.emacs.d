@@ -9,13 +9,14 @@
             (my/-warning "You are trying to use lexical let with lexical-binding = nil."))
           `(let ,bindings ,@body)))
 
-      (when (autoloadp (symbol-function 'cl-labels))
-        (autoload-do-load (symbol-function 'cl-labels)))
-      (lexical-let ((old-labels (symbol-function 'cl-labels)))
-        (defmacro cl-labels (bindings &rest body)
-          (unless lexical-binding
-            (my/-warning "You are trying to use cl-labels with lexical-binding = nil."))
-          `(,old-labels ,bindings ,@body))))
+      ;; (when (autoloadp (symbol-function 'cl-labels))
+      ;;   (autoload-do-load (symbol-function 'cl-labels)))
+      ;; (lexical-let ((old-labels (symbol-function 'cl-labels)))
+      ;;   (defmacro cl-labels (bindings &rest body)
+      ;;     (unless lexical-binding
+      ;;       (my/-warning "You are trying to use cl-labels with lexical-binding = nil."))
+      ;;     `(,old-labels ,bindings ,@body)))
+      )
   (require 'cl)
   (defalias 'cl-letf 'letf)
   (defalias 'cl-labels 'labels)
@@ -126,10 +127,13 @@ buffer-local wherever it is set."
                     (push (cdr ci) bf))
                   (setq i (1+ i)))
                 bf))
+         (errbrief (concat
+                    (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
+                    (and load-in-progress
+                         (format "\n\tIn %s." (or load-file-name (buffer-file-name))))))
          (errstr (concat
-                  (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
-                  (and load-in-progress
-                       (format "\n\tIn %s." (or load-file-name (buffer-file-name))))
+                  errbrief
+                  ;;(format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
                   (and call-stack
                        (format "\n Call stack:\n\t\t%s"
                                (mapconcat #'(lambda (elt) (format "%s" elt))
@@ -138,7 +142,7 @@ buffer-local wherever it is set."
                        (format "\n  Backtrace:\n\t\t%s"
                                (mapconcat #'(lambda (elt) (format "%s" elt))
                                           btf "\n\t\t"))))))
-    (message "%s" errstr)
+    (message "%s" errbrief)
     (with-current-buffer errbuf
       (unless (eq major-mode 'special-mode)
         (special-mode))

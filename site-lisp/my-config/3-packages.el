@@ -21,8 +21,7 @@
 
 ;; templates
 (with-eval-after-load "template"
-  (add-to-list 'template-default-directories
-               (locate-user-emacs-file "site-lisp/templates/"))
+  (push (locate-user-emacs-file "site-lisp/templates/") template-default-directories)
   (setq template-auto-insert t
         template-auto-update nil)
   (setq template-expansion-alist
@@ -43,7 +42,21 @@
 
 ;; skeletor
 (with-eval-after-load "skeletor-autoloads"
-
+  (skeletor-define-template "Cpp"
+    :substitutions
+    (list
+     (cons "__MAINCPP__"
+           #'(lambda ()
+               (if (fboundp 'template-expand-to-string-for-virtual-file)
+                   (let ((project-license (skeletor-project-license-type)))
+                     (template-expand-to-string-for-virtual-file
+                      (concat skeletor--current-project-root  "/main.cpp")))
+                 "#include <iostream>
+int main (int argc, char **argv) {
+  std::cout << \"Hello World\" << std::endl;
+  exit(0);
+}"))))))
+(with-eval-after-load "skeletor"
   (defun skeletor-project-license-type ()
     (substring skeletor-project-license
                (1+ (search "/" skeletor-project-license :from-end t))))
@@ -76,28 +89,12 @@
                                           (cons "__LICENSE-FILE-NAME__" .license-file-name))
                                     .substitutions))))
                skeletor-project-spec)))))
-
-  (skeletor-define-template "Cpp"
-    :substitutions
-    (list
-     (cons "__MAINCPP__"
-           #'(lambda ()
-               (if (fboundp 'template-expand-to-string-for-virtual-file)
-                   (let ((project-license (skeletor-project-license-type)))
-                     (template-expand-to-string-for-virtual-file
-                      (concat skeletor--current-project-root  "/main.cpp")))
-                 "#include <iostream>
-int main (int argc, char **argv) {
-  std::cout << \"Hello World\" << std::endl;
-  exit(0);
-}")))))
-
-  (add-to-list 'skeletor-global-substitutions
-               (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M"))))
-  (add-to-list 'skeletor-global-substitutions
-               (cons "__USER-NICKNAME__" #'(lambda () user-nickname)))
-  (add-to-list 'skeletor-global-substitutions
-               (cons "__LICENSE__" #'skeletor-project-license-type)))
+  (setq skeletor-global-substitutions
+        (nconc
+         (list (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M")))
+               (cons "__USER-NICKNAME__" #'(lambda () user-nickname))
+               (cons "__LICENSE__" #'skeletor-project-license-type))
+         skeletor-global-substitutions)))
 
 
 ;; ido
@@ -143,6 +140,7 @@ int main (int argc, char **argv) {
    'tabbar-separator nil
    :background "gray20"
    :height 0.6)
+
   (defun tabbar-buffer-tab-label (tab)
     "Return a label for TAB.
 That is, a string used to represent it on the tab bar."
@@ -190,7 +188,7 @@ That is, a string used to represent it on the tab bar."
   (shackle-mode)
   (setq shackle-lighter "s"
         shackle-default-rule '(:other t))
-  (add-to-list 'shackle-rules '(grep-mode :align t)))
+  (push '(grep-mode :align t) shackle-rules))
 
 ;; golden-ratio
 (with-eval-after-load "golden-ratio-autoloads"
@@ -241,9 +239,9 @@ That is, a string used to represent it on the tab bar."
 
   (global-set-key (kbd "C-;") #'mc/mark-all-like-this-dwim)
   (global-set-key (kbd "C-:") #'mc/mark-all-symbols-like-this-in-defun)
-  (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click)
-  (with-eval-after-load "multiple-cursors"
-    (define-key mc/keymap (kbd "C-'") 'mc-hide-unmatched-lines-mode)))
+  (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click))
+(with-eval-after-load "multiple-cursors-core"
+  (define-key mc/keymap (kbd "C-'") 'mc-hide-unmatched-lines-mode))
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
@@ -295,6 +293,9 @@ That is, a string used to represent it on the tab bar."
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
+  (highlight-tail-mode 1)
+  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
+(with-eval-after-load "highlight-tail"
   (defun highlight-tail-get-bgcolor-hex (point)
     "Get the background color of point.
 Do not take highlight-tail's overlays into consideration.  This means
@@ -340,9 +341,7 @@ that if there is ht's overlay at at the top then return 'default"
            (highlight-tail-get-colors-fade-table-with-key
             point-face-bgcolor-hex))))
       ;; return value
-      point-face-bgcolor-hex))
-  (highlight-tail-mode 1)
-  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
+      point-face-bgcolor-hex)))
 
 ;; beacon-mode
 (with-eval-after-load "beacon-autoloads"
@@ -362,6 +361,8 @@ that if there is ht's overlay at at the top then return 'default"
   (setq hl-paren-colors-dark (list "#FF0000" "#FF00FF" "#00FFFF"))
   (setq hl-paren-sizes (list 1.1))
   (global-highlight-parentheses-mode t)
+  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1))))
+(with-eval-after-load "highlight-parentheses"
   (defun hl-paren-create-overlays ()
     (let ((fg (if (eq (frame-parameter (selected-frame) 'background-mode)
                       'light)
@@ -388,8 +389,7 @@ that if there is ht's overlay at at the top then return 'default"
         (dotimes (i 2) ;; front and back
           (push (make-overlay 0 0) hl-paren-overlays)
           (overlay-put (car hl-paren-overlays) 'face attributes)))
-      (setq hl-paren-overlays (nreverse hl-paren-overlays))))
-  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1))))
+      (setq hl-paren-overlays (nreverse hl-paren-overlays)))))
 
 ;; highlight-blocks-mode
 ;; do not enable it as it's too slow
@@ -475,8 +475,9 @@ that if there is ht's overlay at at the top then return 'default"
 
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
-  (with-eval-after-load "company-flx-autoloads"
-    (company-flx-mode)))
+  ;; (with-eval-after-load "company-flx-autoloads"
+  ;;   (company-flx-mode))
+  )
 
 
 ;; auto-complete-mode
@@ -523,7 +524,7 @@ that if there is ht's overlay at at the top then return 'default"
 
 ;; speedbar
 (with-eval-after-load "speedbar"
-  (add-to-list 'speedbar-frame-parameters (cons 'persp-ignore-wconf t)))
+  (push (cons 'persp-ignore-wconf t) speedbar-frame-parameters))
 
 ;; helm
 ;; (with-eval-after-load "helm-autoloads"
@@ -535,7 +536,7 @@ that if there is ht's overlay at at the top then return 'default"
         helm-move-to-line-cycle-in-source t)
 
   (with-eval-after-load "golden-ratio-autoloads"
-    (add-to-list 'golden-ratio-inhibit-functions #'helm-alive-p))
+    (push #'helm-alive-p golden-ratio-inhibit-functions))
 
   (global-set-key (kbd "M-x") #'helm-M-x)
   (setq helm-M-x-fuzzy-match t)
@@ -551,6 +552,12 @@ that if there is ht's overlay at at the top then return 'default"
   (helm-mode 1)
   (helm-autoresize-mode t))
 
+;; (with-eval-after-load "scroll-restore-autoloads"
+;;   (setq scroll-restore-jump-back t
+;;         scroll-restore-handle-cursor t
+;;         scroll-restore-handle-region t)
+;;   ;; (scroll-restore-mode)
+;;   )
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
@@ -559,44 +566,107 @@ that if there is ht's overlay at at the top then return 'default"
   (unless (>= emacs-major-version 24)
     (setq persp-when-kill-switch-to-buffer-in-perspective nil))
 
-  (defun helm-persp-buffer-list-bridge
-      (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
-    (or
-     (helm :sources (helm-build-in-buffer-source name
-                      :init (lambda () (helm-init-candidates-in-buffer 'global
-                                    (let ((rl (mapcar #'(lambda (b) (buffer-name b))
-                                                      (persp-buffer-list-restricted))))
-                                      (when default
-                                        (setq rl (cons default (delete default rl))))
-                                      rl)))
-                      :fuzzy-match helm-mode-fuzzy-match)
-           :fuzzy-match helm-mode-fuzzy-match
-           :prompt prompt
-           :buffer buffer
-           :input init
-           :history hist
-           :resume 'noresume
-           :default (or default ""))
-     (helm-mode--keyboard-quit)))
+  (setq command-switch-alist
+        (cons
+         (cons "persp-q"
+               #'(lambda (p)
+                   (setq persp-auto-resume-time -1
+                         persp-auto-save-opt 0)))
+         command-switch-alist))
 
-  (with-eval-after-load "helm-mode"
-    (setq helm-completing-read-handlers-alist
-          (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
-                    (kill-buffer                      . helm-persp-buffer-list-bridge)
-                    (persp-kill-buffer                . helm-persp-buffer-list-bridge)
-                    (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
-                    (persp-add-buffer                 . helm-persp-buffer-list-bridge)
-                    (persp-remove-buffer              . helm-persp-buffer-list-bridge))
-                  helm-completing-read-handlers-alist)))
+  (push #'(lambda () (persp-mode 1)
+            (global-set-key (kbd "C-x k") #'persp-kill-buffer))
+        after-init-hook)
 
-  (add-to-list 'command-switch-alist
-               (cons "persp-q"
-                     #'(lambda (p)
-                         (setq persp-auto-resume-time -1
-                               persp-auto-save-opt 0))))
+  (with-eval-after-load "persp-mode"
+    (with-eval-after-load "helm-buffers"
 
-  (add-hook 'after-init-hook #'(lambda () (persp-mode 1)
-                                 (global-set-key (kbd "C-x k") #'persp-kill-buffer))))
+      (defun helm-buffers-toggle-persp-filter ()
+        (interactive)
+        (with-helm-alive-p
+          (let ((filter-attrs (helm-attr 'candidate-transformer
+                                         helm-source-persp-buffers)))
+            (if (memq #'helm-persp-buffers-filter-transformer filter-attrs)
+                (helm-attrset 'candidate-transformer
+                              (delq #'helm-persp-buffers-filter-transformer
+                                    filter-attrs)
+                              helm-source-persp-buffers t)
+              (helm-attrset 'candidate-transformer
+                            (cons #'helm-persp-buffers-filter-transformer
+                                  filter-attrs)
+                            helm-source-persp-buffers t))
+            (helm-force-update))))
+      (put 'helm-buffers-toggle-persp-filter 'helm-only t)
+
+      (define-key helm-buffer-map
+        persp-toggle-read-persp-filter-keys #'helm-buffers-toggle-persp-filter)
+
+      (defvar helm-persp-filtered-buffers-cache nil)
+
+      (defun helm-persp-buffers-filter-transformer (candidates)
+        (let ((persp (get-frame-persp)))
+          (cl-delete-if-not #'(lambda (bn)
+                                (let* ((ret (persp-contain-buffer-p (get-buffer bn) persp)))
+                                  (unless ret
+                                    (push bn  helm-persp-filtered-buffers-cache))
+                                  ret))
+                            candidates)))
+
+      (defclass helm-persp-buffers-source (helm-source-buffers)
+        ((buffer-list
+          :initarg :buffer-list
+          :initform #'(lambda () (mapcar #'buffer-name (persp-buffer-list-restricted nil -1 nil)))
+          :custom function
+          :documentation
+          "  A function with no arguments to create buffer list.")
+         (init :initform #'(lambda ()
+                             (setq helm-persp-filtered-buffers-cache nil)
+                             (helm-buffers-list--init)))
+         (candidate-transformer :initform '(helm-persp-buffers-filter-transformer))))
+
+      (defvar helm-source-persp-buffers
+        (helm-make-source "Current perspective buffers"
+            'helm-persp-buffers-source
+          :fuzzy-match t))
+
+      (defclass helm-persp-filtered-buffers-source (helm-source-buffers)
+        ((init :initform nil)
+         (candidates :initform helm-persp-filtered-buffers-cache)))
+
+      (defvar helm-source-persp-filtered-buffers
+        (helm-make-source "Buffers not in the current perspective"
+            'helm-persp-filtered-buffers-source
+          :fuzzy-match t))
+
+      (defun helm-persp-buffer-list-bridge
+          (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
+        (or
+         (helm :sources '(helm-source-persp-buffers helm-source-persp-filtered-buffers)
+               :fuzzy-match helm-mode-fuzzy-match
+               :prompt prompt
+               :buffer buffer
+               :input init
+               :history hist
+               :resume 'noresume
+               :keymap helm-buffer-map
+               :truncate-lines helm-buffers-truncate-lines
+               :default (or default "")
+               :preselect default)
+         (helm-mode--keyboard-quit)))
+
+      (setq helm-mini-default-sources
+            (cons helm-source-persp-buffers
+                  (cons helm-source-persp-filtered-buffers
+                        (cdr helm-mini-default-sources))))
+
+      (setq helm-completing-read-handlers-alist
+            (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
+                      (kill-buffer                      . helm-persp-buffer-list-bridge)
+                      (persp-kill-buffer                . helm-persp-buffer-list-bridge)
+                      (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
+                      (persp-add-buffer                 . helm-persp-buffer-list-bridge)
+                      (persp-remove-buffer              . helm-persp-buffer-list-bridge))
+                    helm-completing-read-handlers-alist)))))
 
 
 ;; 3-packages.el ends here

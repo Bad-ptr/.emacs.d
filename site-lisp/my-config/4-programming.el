@@ -18,8 +18,7 @@
   "Default license for new files.")
 
 (with-eval-after-load "template"
-  (add-to-list 'template-expansion-alist
-               '("LICENSE" (insert project-license))))
+  (push '("LICENSE" (insert project-license)) template-expansion-alist))
 
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
@@ -328,13 +327,12 @@ of FILE in the current directory, suitable for creation"
    ""))
 
 (with-eval-after-load "template"
-  (setq template-expansion-alist
-        (append '(("PERL_PACKAGE_NAME"
-                   (insert (perl-fname-to-package
-                            (concat (nth 0 template-file) (nth 1 template-file)) "lib")))
-                  ("PERL_VERSION"
-                   (insert (or (and (boundp 'perl-version) perl-version) "5.018"))))
-                template-expansion-alist)))
+  (push '("PERL_PACKAGE_NAME"
+          (insert (perl-fname-to-package (concat (nth 0 template-file) (nth 1 template-file)) "lib")))
+        template-expansion-alist)
+  (push '("PERL_VERSION"
+          (insert (or (and (boundp 'perl-version) perl-version) "5.018")))
+        template-expansion-alist))
 
 (with-eval-after-load "cperl-mode"
   (setq cperl-hairy t
@@ -374,9 +372,9 @@ of FILE in the current directory, suitable for creation"
 
 ;; php
 (with-eval-after-load "php-mode-autoloads"
-  (setq auto-mode-alist (append '(("/*.\.php[345]?$" . php-mode)) auto-mode-alist))
+  (push '("/*.\.php[345]?$" . php-mode) auto-mode-alist)
   (add-hook 'before-save-hook #'(lambda ()
-                                  (when (string= "php-mode" major-mode)
+                                  (when (eq 'php-mode major-mode)
                                     (save-excursion
                                       (goto-char (point-min))
                                       (delete-blank-lines)
@@ -386,18 +384,18 @@ of FILE in the current directory, suitable for creation"
 
 ;; haskell
 (with-eval-after-load "haskell-mode-autoloads"
-  (setq auto-mode-alist (append '(("\\.hs$" . haskell-mode)) auto-mode-alist))
+  (push '("\\.hs$" . haskell-mode) auto-mode-alist)
   (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
   ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
-  (with-eval-after-load "shm-autoloads"
+  ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+  (with-eval-after-load "shm"
     (set-face-background 'shm-current-face "#eee8d5")
     (set-face-background 'shm-quarantine-face "lemonchiffon")))
 
 
 ;; C#
 (with-eval-after-load "csharp-mode-autoloads"
-  (setq auto-mode-alist (append '(("\\.cs$" . csharp-mode)) auto-mode-alist))
+  (push '("\\.cs$" . csharp-mode) auto-mode-alist)
   ;; (add-hook 'csharp-mode-hook #'(lambda ()
   ;;                                 (omnisharp-mode t)
   ;;                                 (add-to-list 'company-backends 'company-omnisharp)))
@@ -406,8 +404,8 @@ of FILE in the current directory, suitable for creation"
 
 ;; vala
 (with-eval-after-load "vala-mode-autoloads"
-  (setq auto-mode-alist (append '(("/*.\.vala$" . vala-mode)) auto-mode-alist))
-  (setq file-coding-system-alist (append '(("/*.\.vapi$" . utf-8)) file-coding-system-alist)))
+  (push '("/*.\.vala$" . vala-mode) auto-mode-alist)
+  (push '("/*.\.vapi$" . utf-8) file-coding-system-alist))
 
 
 ;; SQL

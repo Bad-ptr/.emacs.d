@@ -21,13 +21,13 @@
                           (number-to-string emacs-major-version)
                           emacs-version
                           (symbol-name system-type))))
-  (add-to-list 'load-path dirname)
+  (push dirname load-path)
   (load (expand-file-name "init.el" dirname) t t t))
 
 
 (defun my/-init-before-private ()
   "Init actions before private information set."
-  (add-to-list 'load-path (locate-user-emacs-file "site-lisp/"))
+  (push (locate-user-emacs-file "site-lisp/") load-path)
 
   (defconst my/-common-conf-path (locate-user-emacs-file "site-lisp/my-config/"))
 
@@ -43,7 +43,7 @@
 (defun my/-init-after-private ()
   "Init actions after private information set."
 
-  (add-to-list 'load-path (locate-user-emacs-file "site-lisp/"))
+  (push (locate-user-emacs-file "site-lisp/") load-path)
 
   (defconst my/-conf-path (locate-user-emacs-file (concat "site-lisp/" my/-username "-config/")))
 
