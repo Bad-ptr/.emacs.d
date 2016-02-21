@@ -459,7 +459,7 @@ that if there is ht's overlay at at the top then return 'default"
 
         (setq-local company-minibuffer-mode this-command)
 
-        (setq-local completion-at-point-functions '(lisp-completion-at-point t))
+        (setq-local completion-at-point-functions '(elisp-completion-at-point t))
 
         (setq-local company-show-numbers nil)
         (setq-local company-backends '((company-elisp-minibuffer company-capf)))
@@ -474,6 +474,7 @@ that if there is ht's overlay at at the top then return 'default"
           (company-complete)))))
 
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
+  ;;(remove-hook 'minibuffer-setup-hook #'minibuffer-company)
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
   ;; (with-eval-after-load "company-flx-autoloads"
   ;;   (company-flx-mode))
@@ -561,6 +562,16 @@ that if there is ht's overlay at at the top then return 'default"
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
+  (defvar after-switch-to-buffer-functions nil)
+  (defvar after-display-buffer-functions nil)
+
+  (defun after-switch-to-buffer-adv (&rest r)
+    (apply #'run-hook-with-args 'after-switch-to-buffer-functions r))
+  (defun after-display-buffer-adv (&rest r)
+    (apply #'run-hook-with-args 'after-display-buffer-functions r))
+  (advice-add #'switch-to-buffer :after #'after-switch-to-buffer-adv)
+  (advice-add #'display-buffer   :after #'after-display-buffer-adv)
+
   (setq wg-morph-on nil)
   ;;(setq windmove-window-distance-delta 2)
   (unless (>= emacs-major-version 24)
@@ -574,72 +585,101 @@ that if there is ht's overlay at at the top then return 'default"
                          persp-auto-save-opt 0)))
          command-switch-alist))
 
+  (with-eval-after-load "dired"
+    (def-auto-persp "dired"
+      :parameters '((dont-save-to-file . t))
+      :mode dired-mode
+      :dyn-env (after-switch-to-buffer-functions
+                (persp-add-buffer-on-find-file nil)
+                persp-add-buffer-on-after-change-major-mode)
+      :hooks (after-switch-to-buffer-functions)
+      :after-match #'(lambda (p b h ha)
+                       (persp-window-switch (safe-persp-name p)))))
+
   (push #'(lambda () (persp-mode 1)
             (global-set-key (kbd "C-x k") #'persp-kill-buffer))
-        after-init-hook)
+        after-init-hook))
 
-  (with-eval-after-load "persp-mode"
-    (with-eval-after-load "helm-buffers"
 
-      (defun helm-buffers-toggle-persp-filter ()
-        (interactive)
-        (with-helm-alive-p
-          (let ((filter-attrs (helm-attr 'candidate-transformer
-                                         helm-source-persp-buffers)))
-            (if (memq #'helm-persp-buffers-filter-transformer filter-attrs)
+(with-eval-after-load "persp-mode"
+  (with-eval-after-load "helm-mode"
+
+    (defun helm-buffers-toggle-persp-filter ()
+      (interactive)
+      (with-helm-alive-p
+        (let ((filter-attrs (helm-attr 'candidate-transformer
+                                       helm-source-persp-buffers)))
+          (if (memq #'helm-persp-buffers-filter-transformer filter-attrs)
+              (progn
                 (helm-attrset 'candidate-transformer
                               (delq #'helm-persp-buffers-filter-transformer
                                     filter-attrs)
                               helm-source-persp-buffers t)
-              (helm-attrset 'candidate-transformer
-                            (cons #'helm-persp-buffers-filter-transformer
-                                  filter-attrs)
-                            helm-source-persp-buffers t))
-            (helm-force-update))))
-      (put 'helm-buffers-toggle-persp-filter 'helm-only t)
+                (helm-attrset 'name
+                              "Buffers"
+                              helm-source-persp-buffers t)
+                (setq helm-persp-filtered-buffers-cache nil))
+            (helm-attrset 'candidate-transformer
+                          (cons #'helm-persp-buffers-filter-transformer
+                                filter-attrs)
+                          helm-source-persp-buffers t)
+            (helm-attrset 'name
+                          "Current perspective buffers"
+                          helm-source-persp-buffers t))
+          (helm-force-update))))
+    (put 'helm-buffers-toggle-persp-filter 'helm-only t)
 
-      (define-key helm-buffer-map
-        persp-toggle-read-persp-filter-keys #'helm-buffers-toggle-persp-filter)
+    (define-key helm-buffer-map
+      persp-toggle-read-persp-filter-keys #'helm-buffers-toggle-persp-filter)
 
-      (defvar helm-persp-filtered-buffers-cache nil)
 
-      (defun helm-persp-buffers-filter-transformer (candidates)
-        (let ((persp (get-frame-persp)))
-          (cl-delete-if-not #'(lambda (bn)
-                                (let* ((ret (persp-contain-buffer-p (get-buffer bn) persp)))
-                                  (unless ret
-                                    (push bn  helm-persp-filtered-buffers-cache))
-                                  ret))
-                            candidates)))
+    (defvar helm-persp-filtered-buffers-cache nil)
 
-      (defclass helm-persp-buffers-source (helm-source-buffers)
-        ((buffer-list
-          :initarg :buffer-list
-          :initform #'(lambda () (mapcar #'buffer-name (persp-buffer-list-restricted nil -1 nil)))
-          :custom function
-          :documentation
-          "  A function with no arguments to create buffer list.")
-         (init :initform #'(lambda ()
-                             (setq helm-persp-filtered-buffers-cache nil)
-                             (helm-buffers-list--init)))
-         (candidate-transformer :initform '(helm-persp-buffers-filter-transformer))))
+    (defun helm-persp-buffers-filter-transformer (candidates)
+      (setq helm-persp-filtered-buffers-cache nil)
+      (let* ((persp (get-current-persp))
+             (ret
+              (cl-remove-if-not #'(lambda (bn)
+                                    (let* ((ret (persp-contain-buffer-p (get-buffer bn) persp)))
+                                      (unless ret
+                                        (push bn  helm-persp-filtered-buffers-cache))
+                                      ret))
+                                candidates)))
+        ret))
 
-      (defvar helm-source-persp-buffers
-        (helm-make-source "Current perspective buffers"
-            'helm-persp-buffers-source
-          :fuzzy-match t))
+    (defclass helm-persp-buffers-source (helm-source-buffers)
+      ((buffer-list
+        :initarg :buffer-list
+        :initform #'(lambda () (mapcar #'buffer-name (persp-buffer-list-restricted nil -1 nil)))
+        :custom function
+        :documentation
+        "  A function with no arguments to create buffer list.")
+       (cleanup :initform #'(lambda () (setq helm-persp-filtered-buffers-cache nil
+                                        helm-buffers-list-cache nil)))
+       (candidate-transformer :initform '(helm-persp-buffers-filter-transformer))))
 
-      (defclass helm-persp-filtered-buffers-source (helm-source-buffers)
-        ((init :initform nil)
-         (candidates :initform helm-persp-filtered-buffers-cache)))
+    (defvar helm-source-persp-buffers
+      (helm-make-source "Current perspective buffers"
+          'helm-persp-buffers-source
+        :fuzzy-match t))
 
-      (defvar helm-source-persp-filtered-buffers
-        (helm-make-source "Buffers not in the current perspective"
-            'helm-persp-filtered-buffers-source
-          :fuzzy-match t))
+    (defclass helm-persp-filtered-buffers-source (helm-source-buffers)
+      ((init :initform #'(lambda ()
+                           (when (and (not helm-buffers-list-cache)
+                                      (not helm-persp-filtered-buffers-cache))
+                             (setq helm-persp-filtered-buffers-cache
+                                   (persp-buffer-list-restricted nil -1 nil)))))
+       (candidates :initform helm-persp-filtered-buffers-cache)
+       (cleanup :initform #'(lambda () (setq helm-persp-filtered-buffers-cache nil)))))
 
-      (defun helm-persp-buffer-list-bridge
-          (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
+    (defvar helm-source-persp-filtered-buffers
+      (helm-make-source "Other buffers"
+          'helm-persp-filtered-buffers-source
+        :fuzzy-match t))
+
+    (defun helm-persp-buffer-list-bridge
+        (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
+      (let ((dflt (or default "")))
         (or
          (helm :sources '(helm-source-persp-buffers helm-source-persp-filtered-buffers)
                :fuzzy-match helm-mode-fuzzy-match
@@ -650,23 +690,39 @@ that if there is ht's overlay at at the top then return 'default"
                :resume 'noresume
                :keymap helm-buffer-map
                :truncate-lines helm-buffers-truncate-lines
-               :default (or default "")
-               :preselect default)
-         (helm-mode--keyboard-quit)))
+               :default dflt
+               :preselect (substring dflt 0 (min (string-width dflt) helm-buffer-max-length)))
+         (helm-mode--keyboard-quit))))
 
-      (setq helm-mini-default-sources
-            (cons helm-source-persp-buffers
-                  (cons helm-source-persp-filtered-buffers
-                        (cdr helm-mini-default-sources))))
+    (setq helm-mini-default-sources
+          (cons helm-source-persp-buffers
+                (cons helm-source-persp-filtered-buffers
+                      (cdr helm-mini-default-sources))))
 
-      (setq helm-completing-read-handlers-alist
-            (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
-                      (kill-buffer                      . helm-persp-buffer-list-bridge)
-                      (persp-kill-buffer                . helm-persp-buffer-list-bridge)
-                      (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
-                      (persp-add-buffer                 . helm-persp-buffer-list-bridge)
-                      (persp-remove-buffer              . helm-persp-buffer-list-bridge))
-                    helm-completing-read-handlers-alist)))))
+    (defun helm-persp-mini ()
+      (interactive)
+      (let* ((cbuf (current-buffer))
+             (cbn (buffer-name cbuf)))
+        (or
+         (helm :sources helm-mini-default-sources
+               :ff-transformer-show-only-basename nil
+               :fuzzy-match helm-mode-fuzzy-match
+               :buffer "*helm persp mini*"
+               :keymap helm-buffer-map
+               :truncate-lines helm-buffers-truncate-lines
+               :default cbn
+               :preselect (substring cbn 0 (min (string-width cbn) helm-buffer-max-length)))
+         (helm-mode--keyboard-quit))))
 
+    (global-set-key (kbd "C-x b") #'helm-persp-mini)
+
+    (setq helm-completing-read-handlers-alist
+          (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
+                    (kill-buffer                      . helm-persp-buffer-list-bridge)
+                    (persp-kill-buffer                . helm-persp-buffer-list-bridge)
+                    (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
+                    (persp-add-buffer                 . helm-persp-buffer-list-bridge)
+                    (persp-remove-buffer              . helm-persp-buffer-list-bridge))
+                  helm-completing-read-handlers-alist))))
 
 ;; 3-packages.el ends here
