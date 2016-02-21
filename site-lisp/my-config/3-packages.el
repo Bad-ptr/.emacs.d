@@ -551,7 +551,28 @@ that if there is ht's overlay at at the top then return 'default"
   (global-set-key (kbd "C-x C-f") #'helm-find-files)
 
   (helm-mode 1)
-  (helm-autoresize-mode t))
+  (helm-autoresize-mode t)
+  (setq helm-autoresize-max-height 30)
+
+  (defvar helm-source-header-default-background (face-attribute 'helm-source-header :background))
+  (defvar helm-source-header-default-foreground (face-attribute 'helm-source-header :foreground))
+  (defvar helm-source-header-default-box (face-attribute 'helm-source-header :box))
+
+  (defun helm-toggle-header-line ()
+    (if (> (length helm-sources) 1)
+        (set-face-attribute 'helm-source-header
+                            nil
+                            :foreground helm-source-header-default-foreground
+                            :background helm-source-header-default-background
+                            :box helm-source-header-default-box
+                            :height 1.0)
+      (set-face-attribute 'helm-source-header
+                          nil
+                          :foreground (face-attribute 'helm-selection :background)
+                          :background (face-attribute 'helm-selection :background)
+                          :box nil
+                          :height 0.1)))
+  (add-hook 'helm-before-initialize-hook #'helm-toggle-header-line))
 
 ;; (with-eval-after-load "scroll-restore-autoloads"
 ;;   (setq scroll-restore-jump-back t
