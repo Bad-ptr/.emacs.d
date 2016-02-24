@@ -100,7 +100,7 @@ buffer-local wherever it is set."
 (when (version< emacs-version "24.4")
   (unless (fboundp 'incf)
     (defmacro incf (n)
-      `(setq ,n (1+ n))))
+      `(setq ,n (1+ ,n))))
   (lexical-let ((original-backtrace-frame (symbol-function 'backtrace-frame)))
     (defun backtrace-frame (nframes &optional base)
       (let ((i (if base
