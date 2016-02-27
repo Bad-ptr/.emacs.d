@@ -4,10 +4,37 @@
 ;;; Code:
 
 
-
 (setq inhibit-default-init t
       load-prefer-newer t
       message-log-max 1000)
+
+
+;; https://www.reddit.com/r/emacs/comments/4586eq/quick_emacs_snippet_to_automatically_use/
+;; Automagical EmacsClient functionality
+;;
+;; Basically, if Emacs is already running, this shunts things over to
+;; the existing Emacs; otherwise, it readies itself to accept said
+;; shunting.
+;;
+;; This operates by detecting the existence of an Emacs server socket
+;; file.  If a socket is found ("/tmp/emacs$UID/server"), Emacs will
+;; spin up emacsclient and immediately exit itself.  Otherwise, Emacs
+;; will start a new server.
+(defun server-already-running-p () "Is Emacs already running?"
+       (file-exists-p (format "/tmp/emacs%s/server" (user-uid))))
+(defun server-shunt () "Shunts to emacsclient"
+       (require 'cl-lib)
+       (let ((args (append '("emacsclient" "-a" "\"\"" "-n")
+                           (cdr command-line-args))))
+         (setq args (append args
+                            (if window-system
+                                '("-c")
+                              '("-t") ;; it doesn't work
+                              )))
+         (shell-command (substring (format "%S" args) 1 -1))
+         (kill-emacs)))
+(unless (featurep 'server)
+  (if (server-already-running-p) (server-shunt) (server-start)))
 
 
 ;;load functions that will be used during initialization

@@ -616,7 +616,7 @@ that if there is ht's overlay at at the top then return 'default"
          command-switch-alist))
 
   (with-eval-after-load "dired"
-    (def-auto-persp "dired"
+    (persp/macro/define-auto-perspective "dired"
       :parameters '((dont-save-to-file . t))
       :mode dired-mode
       :dyn-env (after-switch-to-buffer-functions
@@ -791,6 +791,7 @@ that if there is ht's overlay at at the top then return 'default"
             (append helm-persp-completing-read-handlers
                     helm-completing-read-handlers-alist))
       (global-set-key (kbd "C-x b") #'helm-persp-mini))
+
     (defun persp-helm-destroy-bridge ()
       (setq helm-mini-default-sources
             (cons

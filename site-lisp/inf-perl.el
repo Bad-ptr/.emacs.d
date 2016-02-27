@@ -62,3 +62,28 @@
 (provide 'inf-perl)
 
 ;;; inf-perl.el ends here
+
+;; (let* ((redirect-buffer (current-buffer))
+;;        (redir-proc (get-buffer-process redirect-buffer)))
+;;   (let ((comint-redirect-echo-input nil)
+;;         (comint-redirect-completed nil)
+;;         (comint-redirect-perform-sanity-check nil)
+;;         (comint-redirect-insert-matching-regexp t)
+;;         (comint-redirect-finished-regexp "r ")
+;;         (comint-redirect-output-buffer redirect-buffer))
+;;     (set-process-filter redir-proc #'comint-redirect-filter)
+;;     (process-send-string redir-proc "$v\t")
+;;     (accept-process-output redir-proc 2)
+;;     (set-process-filter redir-proc #'comint-output-filter)))
+
+(let* ((redirect-buffer (current-buffer))
+       (redir-proc (get-buffer-process redirect-buffer)))
+  (let ((comint-redirect-echo-input nil)
+        (comint-redirect-completed nil)
+        (comint-redirect-perform-sanity-check nil)
+        (comint-redirect-insert-matching-regexp t)
+        (comint-redirect-finished-regexp "r ")
+        (comint-redirect-output-buffer redirect-buffer))
+    (process-send-string redir-proc "$v\t")
+    (accept-process-output redir-proc 2)
+    ))
