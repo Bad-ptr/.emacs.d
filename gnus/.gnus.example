@@ -1,0 +1,7 @@
+;;; -*- mode: emacs-lisp -*-
+
+(setq gnus-select-method '(nnimap "imap.gmail.com"))
+(setq smtpmail-default-smtp-server "smtp.gmail.com")
+
+(setq smtpmail-smtp-service 587
+      gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")

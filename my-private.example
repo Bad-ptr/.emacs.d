@@ -1,4 +1,4 @@
-;;; my-private.el -- This file is ignored by git. Set here your private settings. -*- lexical-binding: t; -*-
+;;; my-private.el -- This file is ignored by git. Set here your private settings. -*- lexical-binding: t; mode: emacs-lisp -*-
 
 ;; This file is ignored by git. Set here your private settings, save as ~/.emacs.d/my-private.el,
 ;; then kill this buffer with C-x k and you're done.
@@ -11,11 +11,13 @@
  user-full-name "Vasily Pupkin"
  user-mail-address "vasya-pupkin2020@gmail.com"
  user-emacs-directory "~/.emacs.d/"
+ ;;user-init-file "~/.emacs"
  package-user-dir
  (expand-file-name (concat "elpa-" (number-to-string emacs-major-version))
                    user-emacs-directory)
- ;;user-init-file "~/.emacs"
- )
+ gnus-home-directory (expand-file-name "gnus" user-emacs-directory)
+ gnus-init-file (expand-file-name ".gnus" gnus-home-directory)
+ auth-sources (list (expand-file-name ".authinfo.gpg" gnus-home-directory)))
 
 
 ;; For now it's used only by template.el

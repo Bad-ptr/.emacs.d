@@ -25,3 +25,6 @@ custom.el
 
 !site-lisp/my-config
 !site-lisp/my-config/*.el
+
+!gnus
+!gnus/*.example
