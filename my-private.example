@@ -45,73 +45,77 @@
   '(
     ;; anaconda-mode
     ;; adoc-mode
-    ;; backup-walker
+    backup-walker
     ;; bm
     ;; browse-kill-ring
-    ;; caml
-    ;; cmake-mode
-    ;; cperl-mode
-    ;; coffee-mode
-    ;; company
+    caml
+    cmake-mode
+    cperl-mode
+    coffee-mode
+    company
     ;; company-inf-python
     ;; company-inf-ruby
     ;; csharp-mode
-    ;; css-eldoc
-    ;; diff-hl
-    ;; drag-stuff
-    ;; dylan-mode
-    ;; edit-list
+    css-eldoc
+    diff-hl
+    drag-stuff
+    dylan-mode
+    edit-list
     ;; eimp
-    ;; expand-region
+    expand-region
     ;; eyedropper
     ;; find-file-in-repository
     ;; flx flx-ido
-    ;; flycheck
-    ;; fsharp-mode
+    flycheck
+    fsharp-mode
     ;; git-commit-mode git-rebase-mode
-    ;; glsl-mode
-    ;; gnu-apl-mode
-    ;; go-eldoc go-mode
-    ;; golden-ratio
-    ;; haml-mode
-    ;; haskell-mode
+    glsl-mode
+    gnu-apl-mode
+    go-eldoc go-mode
+    golden-ratio
+    haml-mode
+    haskell-mode
     ;; hexrgb
     ;; highlight-blocks highlight-parentheses highlight-tail
+    highlight-parentheses
     ;; httprepl
     ;; ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
+    helm
     ;; inf-ruby
     ;; io-mode io-mode-inf
-    ;; jabber
+    jabber
     ;; jedi
-    ;; json-mode
-    ;; key-chord
+    json-mode
+    key-chord
     ;; lice
-    ;; lua-mode
-    ;; magit
+    lua-mode
+    magit
     ;; manage-minor-mode
-    ;; markdown-mode
-    ;; miniedit
-    ;; multiple-cursors
-    ;; nemerle
+    markdown-mode
+    miniedit
+    multiple-cursors
+    nemerle
     ;; omnisharp
-    ;; pcre2el
-    ;; persp-mode
+    pcre2el
+    persp-mode
     ;; php-eldoc php-mode
     ;; qml-mode
     ;; rainbow-blocks rainbow-identifiers ;color-identifiers-mode
     ;; rectangle-utils
-    ;; redo+
-    ;; rust-mode
-    ;; sass-mode
-    ;; shell-pop
-    ;; simplezen
-    ;; skeletor
+    redo+
+    rust-mode
+    sass-mode
+    shell-pop
+    simplezen
+    skeletor
     ;; smex
-    ;; smooth-scrolling
-    ;; tabbar
+    smooth-scrolling
+    golden-ratio-scrolling
+    tabbar
     ;; vkill
     ;; vlf
-    ;; wgrep
+    undo-tree
+    wgrep
     )
   "List of packages I like.")
 
