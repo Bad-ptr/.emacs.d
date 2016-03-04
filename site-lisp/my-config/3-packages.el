@@ -258,6 +258,10 @@ That is, a string used to represent it on the tab bar."
   (setq undo-no-redo t)
   (require 'redo+))
 
+;; undo-tree
+(with-eval-after-load "undo-tree-autoloads"
+  (autoload 'undo-tree-visualize "undo-tree" "" t))
+
 ;; key-chord
 (with-eval-after-load "key-chord-autoloads"
   (key-chord-mode 1)
