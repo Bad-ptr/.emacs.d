@@ -470,7 +470,10 @@ that if there is ht's overlay at at the top then return 'default"
 
         (setq-local company-minibuffer-mode this-command)
 
-        (setq-local completion-at-point-functions '(elisp-completion-at-point t))
+        (setq-local completion-at-point-functions
+                    (list (if (fboundp 'elisp-completion-at-point)
+                              #'elisp-completion-at-point
+                            #'lisp-completion-at-point) t))
 
         (setq-local company-show-numbers nil)
         (setq-local company-backends '((company-elisp-minibuffer company-capf)))
