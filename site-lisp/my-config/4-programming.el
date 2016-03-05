@@ -256,6 +256,11 @@ of FILE in the current directory, suitable for creation"
               #'(lambda ()
                   (add-to-list 'company-backends 'company-c-headers)))))
 
+;; rust
+(with-eval-after-load "racer-autoloads"
+  ;; (setq racer-cmd "~/.cargo/bin/racer"
+  ;;       racer-rust-src-path "/usr/local/src/rust/src/")
+  (add-hook 'rust-mode-hook #'racer-mode))
 
 ;; lisp
 (let ((q-s-h-file (expand-file-name "~/quicklisp/slime-helper.el")))
