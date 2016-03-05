@@ -434,7 +434,8 @@ that if there is ht's overlay at at the top then return 'default"
                                  c-electric-lt-gt c-electric-colon
                                  completion-separator-self-insert-command)
         company-idle-delay 0.2
-        company-show-numbers t)
+        company-show-numbers t
+        company-tooltip-align-annotations t)
 
   (defvar-local company-col-offset 0 "Horisontal tooltip offset.")
   (defvar-local company-row-offset 0 "Vertical tooltip offset.")
