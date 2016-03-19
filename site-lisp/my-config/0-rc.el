@@ -70,6 +70,9 @@
 (setq x-select-enable-clipboard t
       interprogram-paste-function #'x-cut-buffer-or-selection-value)
 
+;; Create frames maximized
+(push '(fullscreen . maximized) initial-frame-alist)
+
 ;; always end a file with a newline
 (setq require-final-newline t)
 
