@@ -86,7 +86,13 @@
   ;; Install my packages at first run
   (unless (file-exists-p package-user-dir)
     (when (fboundp 'my/-install-favourite-packages)
-      (my/-install-favourite-packages)))
+      (let ((package-archives package-archives)
+            (my/-favourite-packages-list my/-favourite-packages-list))
+        (add-to-list 'package-archives '("GNU/ELPA" . "http://elpa.gnu.org/packages/"))
+        (push 'rainbow-mode my/-favourite-packages-list)
+        (unless (featurep 'cl-lib)
+          (push 'cl-lib my/-favourite-packages-list))
+        (my/-install-favourite-packages))))
 
   (my/-load-directory my/-conf-path)
 
