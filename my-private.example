@@ -65,7 +65,6 @@
     expand-region
     ;; eyedropper
     ;; find-file-in-repository
-    ;; flx flx-ido
     flycheck
     fsharp-mode
     ;; git-commit-mode git-rebase-mode
@@ -79,8 +78,10 @@
     ;; highlight-blocks highlight-parentheses highlight-tail
     highlight-parentheses
     ;; httprepl
-    ;; ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
-    helm
+    ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
+    flx flx-ido
+    smex
+    ;; helm
     ;; inf-ruby
     ;; io-mode io-mode-inf
     jabber
@@ -108,7 +109,7 @@
     shell-pop
     simplezen
     skeletor
-    ;; smex
+
     smooth-scrolling
     golden-ratio-scrolling
     tabbar
