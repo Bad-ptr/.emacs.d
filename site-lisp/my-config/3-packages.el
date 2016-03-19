@@ -207,6 +207,11 @@ That is, a string used to represent it on the tab bar."
   ;;       (not (minibuffer-selected-window)))))
   )
 
+;; golden-ratio-scroll-screen
+(with-eval-after-load "golden-ratio-scroll-screen-autoloads"
+  (global-set-key [remap scroll-down-command] #'golden-ratio-scroll-screen-down)
+  (global-set-key [remap scroll-up-command] #'golden-ratio-scroll-screen-up))
+
 ;;Jabber
 (with-eval-after-load "jabber"
   (defun jabber-muc-join-group ()
