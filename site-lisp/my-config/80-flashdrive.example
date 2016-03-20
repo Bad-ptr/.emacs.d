@@ -1,4 +1,4 @@
-;;; 80-flashdrive.el --- flashdrive configuration.
+;;; 80-flashdrive.el --- flashdrive configuration. -*- mode: emacs-lisp -*-
 
 ;; .==========================================[ !!! WARNING !!! ]==============================================.
 ;; |                                                                                                           |
@@ -10,17 +10,71 @@
 ;;; Code:
 
 
-(setq
- backup-inhibited t
- make-backup-files nil
- version-control   nil
- kept-new-versions 0
- kept-old-versions 0
- auto-save-default nil)
-(auto-save-mode -1)
+;; (setq
+;;  backup-inhibited t
+;;  make-backup-files nil
+;;  version-control   nil
+;;  kept-new-versions 0
+;;  kept-old-versions 0
+;;  auto-save-default nil)
+;; (auto-save-mode -1)
 ;; (recentf-mode -1)
 ;; (savehist-mode -1)
 ;; (setq-default save-place nil)
 ;; (remove-hook 'kill-emacs-hook #'write-abbrev-file)
+
+(defvar my/-emacs-tmp-dir "/tmp/emacs")
+
+(defun my/-emacs-tmp-setup ()
+  (let ((bu-dir (concat my/-emacs-tmp-dir "/cache/backups")))
+    (unless (file-directory-p bu-dir) (make-directory bu-dir t))
+    (setq backup-directory-alist `(("." . ,bu-dir))))
+
+  (setq auto-save-list-file-prefix (concat
+                                    my/-emacs-tmp-dir
+                                    "/cache/auto-save-list/.saves-"))
+
+  (with-eval-after-load "tramp"
+    (setq tramp-auto-save-directory (concat my/-emacs-tmp-dir
+                                            "/tramp-auto-save")))
+
+  (let ((abbrev-dir (concat my/-emacs-tmp-dir "/data")))
+    (unless (file-exists-p abbrev-dir) (make-directory abbrev-dir t))
+    (setq abbrev-file-name
+          (expand-file-name "abbrev_defs" abbrev-dir)))
+
+  (defun emacs-session-filename (SESSION-ID)
+    (concat my/-emacs-tmp-dir "/cache/session." SESSION-ID))
+
+  (setq bookmark-default-file (concat my/-emacs-tmp-dir "/data/bookmarks"))
+
+  (setq save-place-file (concat my/-emacs-tmp-dir "/cache/saveplace"))
+
+  (setq savehist-file (concat my/-emacs-tmp-dir "/cache/savehist"))
+
+  (setq recentf-save-file (concat my/-emacs-tmp-dir "/cache/recentf"))
+
+  (add-hook
+   'my/-packages-initialized-hook
+   #'(lambda ()
+       (setq smex-save-file (concat my/-emacs-tmp-dir "/.smex-items"))))
+
+  (setq ido-save-directory-list-file (concat my/-emacs-tmp-dir "/ido.last"))
+
+  (setq gnus-home-directory (expand-file-name "gnus" my/-emacs-tmp-dir)))
+
+(unless (file-directory-p my/-emacs-tmp-dir)
+  (with-demoted-errors (concat "Error creating the "
+                               my/-emacs-tmp-dir " directory: %S.")
+    (make-directory my/-emacs-tmp-dir)))
+
+(if (file-directory-p my/-emacs-tmp-dir)
+    (my/-emacs-tmp-setup)
+  (my/-exec-after-interactive-frame-available ()
+    (while (not (file-directory-p my/-emacs-tmp-dir))
+      (y-or-n-p (concat
+                 "Please create a " my/-emacs-tmp-dir
+                 " directory with read/write access for a current user."))
+      (my/-emacs-tmp-setup))))
 
 ;; 80-flashdrive.el ends here
