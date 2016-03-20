@@ -192,11 +192,11 @@ That is, a string used to represent it on the tab bar."
   (setq display-buffer-function 'popwin:display-buffer))
 
 ;; shackle
-(with-eval-after-load "shackle-autoloads"
-  (shackle-mode)
-  (setq shackle-lighter "s"
-        shackle-default-rule '(:other t))
-  (push '(grep-mode :align t) shackle-rules))
+;; (with-eval-after-load "shackle-autoloads"
+;;   (shackle-mode)
+;;   (setq shackle-lighter "s"
+;;         shackle-default-rule '(:other t))
+;;   (push '(grep-mode :align t) shackle-rules))
 
 ;; golden-ratio
 (with-eval-after-load "golden-ratio-autoloads"
@@ -211,7 +211,7 @@ That is, a string used to represent it on the tab bar."
 ;; golden-ratio-scroll-screen
 (with-eval-after-load "golden-ratio-scroll-screen-autoloads"
   (global-set-key [remap scroll-down-command] #'golden-ratio-scroll-screen-down)
-  (global-set-key [remap scroll-up-command] #'golden-ratio-scroll-screen-up))
+  (global-set-key [remap scroll-up-command]   #'golden-ratio-scroll-screen-up))
 
 ;;Jabber
 (with-eval-after-load "jabber"
@@ -504,7 +504,7 @@ that if there is ht's overlay at at the top then return 'default"
   ;;(remove-hook 'minibuffer-setup-hook #'minibuffer-company)
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
   ;; (with-eval-after-load "company-flx-autoloads"
-  ;;(company-flx-mode)
+  ;; (company-flx-mode)
   )
 
 
