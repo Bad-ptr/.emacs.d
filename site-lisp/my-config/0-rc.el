@@ -101,7 +101,7 @@
 (delete-selection-mode t)
 
 ;; syntax highlighting
-(global-font-lock-mode t)
+(global-font-lock-mode)
 (setq font-lock-maximum-decoration t)
 
 ;; enable cua keybindings and functions
@@ -346,6 +346,9 @@ the syntax class ')'."
 
 
 (winner-mode)
+
+;;(disable-command 'overwrite-mode)
+(put 'overwrite-mode 'disabled t)
 
 ;;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
