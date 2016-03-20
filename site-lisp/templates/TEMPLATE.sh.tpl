@@ -7,17 +7,18 @@
 ## License: (>>>LICENSE<<<)
 
 
-function main () {
+main () {
 
     (>>>POINT<<<)
 
 }
 
 
-signals="SIGHUP SIGTERM SIGQUIT SIGINT SIGKILL SIGSTOP EXIT"
+signals="HUP TERM QUIT KILL STOP EXIT"
 for signal in $signals;do
-    trap "{ echo \"Caught ${signal}.\"; }" "$signal"
+    trap 'echo "Caught ${signal} signal."' "$signal"
 done
+trap 'echo "Caught INT signal."; trap - INT; kill -INT $$' INT
 
 
-main "${@:1}"
+main "$@"

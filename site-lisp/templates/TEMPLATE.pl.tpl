@@ -25,7 +25,7 @@ use Encode;
 # binmode STDIN, ":utf8";
 # binmode STDERR, ":utf8";
 use open qw( :encoding(UTF-8) :std );
-binmode(DATA, ":encoding(UTF-8)");
+#binmode(DATA, ":encoding(UTF-8)");
 
 use charnames qw( :full :short );
 
