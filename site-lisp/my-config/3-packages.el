@@ -98,65 +98,64 @@ int main (int argc, char **argv) {
 
 
 ;; ido
-(unless (locate-library "helm-autoloads")
-  (defface ido-first-match  '((default :weight bold)
-                              (((class color) (min-colors 88) (background light))
-                               (:background "#DFD"))
-                              (((class color) (min-colors 88) (background dark))
-                               (:background "#474")))
-    "Face used by Ido for highlighting first match."
-    :group 'ido)
+(defface ido-first-match  '((default :weight bold)
+                            (((class color) (min-colors 88) (background light))
+                             (:background "#DFD"))
+                            (((class color) (min-colors 88) (background dark))
+                             (:background "#474")))
+  "Face used by Ido for highlighting first match."
+  :group 'ido)
+(with-eval-after-load "ido"
+  (setq ido-enable-prefix nil
+        ido-enable-flex-matching t
+        ido-create-new-buffer 'always
+        ido-use-filename-at-point 'guess
+        ido-default-file-method 'selected-window
+        ido-max-prospects 10)
+  (ido-mode t)
+  (ido-everywhere t))
+(require 'ido)
+
+(with-eval-after-load "ido-ubiquitous-autoloads"
+  (ido-ubiquitous-mode t))
+(with-eval-after-load "ido-at-point-autoloads"
+  (ido-at-point-mode 1))
+
+;; flx
+(with-eval-after-load "flx-ido-autoloads"
+  (setq ido-use-faces nil)
+  (flx-ido-mode 1))
+
+;; ido-vertical or ido-grid-mode
+(if (>= emacs-major-version 24)
+    (progn
+      ;; (with-eval-after-load "ido-vertical-mode-autoloads"
+      ;;   (ido-vertical-mode 1))
+      (with-eval-after-load "ido-grid-mode-autoloads"
+        (ido-grid-mode 1)))
   (with-eval-after-load "ido"
-    (setq ido-enable-prefix nil
-          ido-enable-flex-matching t
-          ido-create-new-buffer 'always
-          ido-use-filename-at-point 'guess
-          ido-default-file-method 'selected-window
-          ido-max-prospects 10)
-    (ido-mode t)
-    (ido-everywhere t))
-  (require 'ido)
+    ;; Display ido results vertically, rather than horizontally
+    (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
+    (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
+    (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
 
-  (with-eval-after-load "ido-ubiquitous-autoloads"
-    (ido-ubiquitous-mode t))
-  (with-eval-after-load "ido-at-point-autoloads"
-    (ido-at-point-mode 1))
-
-  ;; flx
-  (with-eval-after-load "flx-ido-autoloads"
-    (setq ido-use-faces nil)
-    (flx-ido-mode 1))
-
-  ;; ido-vertical or ido-grid-mode
-  (if (>= emacs-major-version 24)
-      (progn
-        ;; (with-eval-after-load "ido-vertical-mode-autoloads"
-        ;;   (ido-vertical-mode 1))
-        (with-eval-after-load "ido-grid-mode-autoloads"
-          (ido-grid-mode 1)))
-    (with-eval-after-load "ido"
-      ;; Display ido results vertically, rather than horizontally
-      (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
-      (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
-      (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
-
-  ;; smex
-  (if (>= emacs-major-version 24)
-      (with-eval-after-load "smex-autoloads"
-        (smex-initialize)
-        (global-set-key (kbd "M-x") #'smex)
-        (global-set-key (kbd "M-X") #'smex-major-mode-commands)
-        ;; This is your old M-x.
-        (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
-        (smex-auto-update 60)
-        (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
-    (with-eval-after-load "ido"
-      (global-set-key
-       "\M-x" (lambda ()
-                (interactive)
-                (call-interactively
-                 (intern
-                  (ido-completing-read "M-x " (all-completions "" obarray 'commandp)))))))))
+;; smex
+(if (>= emacs-major-version 24)
+    (with-eval-after-load "smex-autoloads"
+      (smex-initialize)
+      (global-set-key (kbd "M-x") #'smex)
+      (global-set-key (kbd "M-X") #'smex-major-mode-commands)
+      ;; This is your old M-x.
+      (global-set-key (kbd "C-c C-c M-x") #'execute-extended-command)
+      (smex-auto-update 60)
+      (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
+  (with-eval-after-load "ido"
+    (global-set-key
+     "\M-x" (lambda ()
+              (interactive)
+              (call-interactively
+               (intern
+                (ido-completing-read "M-x " (all-completions "" obarray 'commandp))))))))
 
 
 ;; Tabbar
