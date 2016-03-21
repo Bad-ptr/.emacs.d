@@ -579,7 +579,7 @@ that if there is ht's overlay at at the top then return 'default"
   (global-set-key (kbd "C-x C-f") #'helm-find-files)
 
   (helm-mode 1)
-  (helm-autoresize-mode t)
+  ;; (helm-autoresize-mode t)
   (setq helm-autoresize-max-height 30)
 
   (defvar helm-source-header-default-background (face-attribute 'helm-source-header :background))
