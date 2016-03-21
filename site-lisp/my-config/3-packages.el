@@ -648,7 +648,9 @@ that if there is ht's overlay at at the top then return 'default"
                        (persp-window-switch (safe-persp-name p)))))
 
   (push #'(lambda () (persp-mode 1)
-            (global-set-key (kbd "C-x k") #'persp-kill-buffer))
+            (global-set-key (kbd "C-x k") #'persp-kill-buffer)
+            (with-eval-after-load "helm"
+              (persp-update-completion-system 'completing-read)))
         after-init-hook))
 
 
