@@ -644,20 +644,20 @@ that if there is ht's overlay at at the top then return 'default"
          command-switch-alist))
 
   (with-eval-after-load "dired"
-    (def-auto-persp "dired"
-      :parameters '((dont-save-to-file . t))
-      :mode dired-mode
-      :dyn-env (after-switch-to-buffer-functions
-                (persp-add-buffer-on-find-file nil)
-                persp-add-buffer-on-after-change-major-mode)
-      :hooks (after-switch-to-buffer-functions)
-      :after-match #'(lambda (p b h ha)
-                       (persp-window-switch (safe-persp-name p)))))
+    (persp/macro/define-auto-perspective "dired"
+                                         :parameters '((dont-save-to-file . t))
+                                         :mode dired-mode
+                                         :dyn-env (after-switch-to-buffer-functions
+                                                   (persp-add-buffer-on-find-file nil)
+                                                   persp-add-buffer-on-after-change-major-mode)
+                                         :hooks (after-switch-to-buffer-functions)
+                                         :after-match #'(lambda (p b h ha)
+                                                          (persp/ui/window-switch (persp/ll/macro/persp-name p)))))
 
   (push #'(lambda () (persp-mode 1)
-            (global-set-key (kbd "C-x k") #'persp-kill-buffer)
+            (global-set-key (kbd "C-x k") #'persp/ui/kill-buffer)
             (with-eval-after-load "helm"
-              (persp-update-completion-system 'completing-read)))
+              (persp/ui/cr/update-completion-system 'completing-read)))
         after-init-hook))
 
 
