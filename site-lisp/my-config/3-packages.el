@@ -8,6 +8,13 @@
 (require 'newcomment)
 
 
+(setq package-pinned-packages
+      (list
+       '(persp-mode . "localhost")
+       '(multiple-cursors . "localhost")
+       '(golden-ratio . "localhost")))
+
+
 (defun fbread-mode()
   (interactive)
   (sgml-mode)
