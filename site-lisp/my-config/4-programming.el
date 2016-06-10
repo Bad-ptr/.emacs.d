@@ -397,6 +397,36 @@ of FILE in the current directory, suitable for creation"
     (set-face-background 'shm-current-face "#eee8d5")
     (set-face-background 'shm-quarantine-face "lemonchiffon")))
 
+;; erlang/elexir
+(with-eval-after-load "alchemist-autoloads"
+  (setq alchemist-goto-erlang-source-dir (expand-file-name
+                                          "~/projects/erlang-otp")
+        alchemist-goto-elixir-source-dir (expand-file-name
+                                          "~/projects/elixir_stuff/elixir"))
+  (add-hook 'elixir-mode-hook #'alchemist-mode)
+
+  (with-eval-after-load "smartparens-autoloads"
+    (with-eval-after-load "smartparens"
+      (defun my-elixir-do-end-close-action (id action context)
+        (when (and (eq action 'insert)
+                   (not (looking-back "fn\s+?")))
+          (cancel-timer my/-double-key-timer)
+          (newline-and-indent)
+          (newline-and-indent)
+          (forward-line -1)
+          (indent-according-to-mode)))
+
+      (sp-with-modes '(elixir-mode)
+        (sp-local-pair "fn" "end"
+                       :when '(("SPC" "RET"))
+                       :post-handlers '(:add my-elixir-do-end-close-action)
+                       :actions '(insert))
+        (sp-local-pair "do" "end"
+                       :when '(("SPC" "RET"))
+                       :post-handlers '(:add my-elixir-do-end-close-action)
+                       :actions '(insert))))
+    (add-hook 'elixir-mode-hook #'turn-on-smartparens-mode)))
+
 
 ;; C#
 (with-eval-after-load "csharp-mode-autoloads"
