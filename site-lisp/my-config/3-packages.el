@@ -313,7 +313,45 @@ That is, a string used to represent it on the tab bar."
 ;; idle-highlight-mode
 (with-eval-after-load "idle-highlight-mode-autoloads"
   (setq idle-highlight-delay 1.0)
-  (add-hook 'my/-prog-mode-hook 'idle-highlight-mode))
+  (add-hook 'my/-prog-mode-hook #'idle-highlight-mode))
+
+;; highlight-symbol
+(with-eval-after-load "highlight-symbol-autoloads"
+  (setq highlight-symbol-disable '())
+  (add-hook 'after-change-major-mode-hook
+            (lambda ()
+              (when (null (memql major-mode highlight-symbol-disable))
+                (highlight-symbol-mode)
+                (highlight-symbol-nav-mode)))))
+
+;; highlight-stages
+;; (with-eval-after-load "highlight-stages-autoloads"
+;;   (highlight-stages-global-mode))
+
+;; highlight-indentation
+;; (with-eval-after-load "highlight-indentation-autoloads"
+;;   (add-hook 'my/-prog-mode-hook #'highlight-indentation-mode))
+
+;; highlight-leading-spaces
+;; (with-eval-after-load "highlight-leading-spaces-autoloads"
+;;   (add-hook 'my/-prog-mode-hook #'highlight-leading-spaces-mode))
+
+;; highlight-escape
+(with-eval-after-load "highlight-escape-sequences-autoloads"
+  (hes-mode))
+
+;; highlight-quoted
+(with-eval-after-load "highlight-quoted-autoloads"
+  (add-hook 'emacs-lisp-mode-hook #'highlight-quoted-mode))
+
+;; highlight-numbers
+(with-eval-after-load "highlight-numbers-autoloads"
+  (setq highlight-numbers-disable '())
+  (add-hook 'after-change-major-mode-hook
+            (lambda ()
+              (when (null (memql major-mode highlight-numbers-disable))
+                (highlight-numbers-mode))))
+  (highlight-numbers-mode))
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
