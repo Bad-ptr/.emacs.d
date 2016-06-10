@@ -24,12 +24,13 @@
        (file-exists-p (format "/tmp/emacs%s/server" (user-uid))))
 (defun server-shunt () "Shunts to emacsclient"
        (require 'cl-lib)
-       (let ((args (append '("emacsclient" "-a" "\"\"" "-n")
+       (let ((args (append '("emacsclient" "-a" "''")
                            (cdr command-line-args))))
          (setq args (append args
                             (if window-system
-                                '("-c")
-                              '("-t") ;; it doesn't work
+                                '("-n" "-c")
+                              '("-n" "-c")
+                              ;;'("-t") ;; it doesn't work
                               )))
          (shell-command (substring (format "%S" args) 1 -1))
          (kill-emacs)))
