@@ -679,13 +679,13 @@ that if there is ht's overlay at at the top then return 'default"
   (with-eval-after-load "dired"
     (def-auto-persp "dired"
       :parameters '((dont-save-to-file . t))
-      :mode dired-mode
-      :dyn-env (after-switch-to-buffer-functions
-                (persp-add-buffer-on-find-file nil)
-                persp-add-buffer-on-after-change-major-mode)
-      :hooks (after-switch-to-buffer-functions)
-      :after-match #'(lambda (p b h ha)
-                       (persp-window-switch (safe-persp-name p)))))
+      :mode 'dired-mode
+      :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
+                 (persp-add-buffer-on-find-file nil)
+                 persp-add-buffer-on-after-change-major-mode)
+      :hooks '(after-switch-to-buffer-functions)
+      :after-match #'(lambda (pn p b h ha ps noa)
+                       (persp-window-switch pn))))
 
   (push #'(lambda () (persp-mode 1)
             (global-set-key (kbd "C-x k") #'persp-kill-buffer)
