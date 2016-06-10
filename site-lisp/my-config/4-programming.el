@@ -370,21 +370,8 @@ of FILE in the current directory, suitable for creation"
         (with-current-buffer (get-buffer-create bufname)
           (erase-buffer)
           (insert text))
-        (pop-to-buffer bufname)))))
-
-(defalias 'perl-mode 'cperl-mode)
-
-
-;; php
-(with-eval-after-load "php-mode-autoloads"
-  (push '("/*.\.php[345]?$" . php-mode) auto-mode-alist)
-  (add-hook 'before-save-hook #'(lambda ()
-                                  (when (eq 'php-mode major-mode)
-                                    (save-excursion
-                                      (goto-char (point-min))
-                                      (delete-blank-lines)
-                                      (goto-char (point-max))
-                                      (delete-blank-lines))))))
+        (pop-to-buffer bufname))))
+  (defalias 'perl-mode 'cperl-mode))
 
 
 ;; haskell
@@ -447,6 +434,20 @@ of FILE in the current directory, suitable for creation"
 (with-eval-after-load "sqlup-mode-autoloads"
   (add-hook 'sql-mode-hook #'(lambda () (sqlup-mode t))))
 
+;; php
+(with-eval-after-load "php-mode-autoloads"
+  (push '("/*.\.php[0-9]?$" . php-mode) auto-mode-alist)
+  (add-hook 'before-save-hook #'(lambda ()
+                                  (when (eq 'php-mode major-mode)
+                                    (cleanup-buffer)))))
+
+;; JS
+(with-eval-after-load "tern-autoloads"
+  (add-hook 'js-mode-hook #'(lambda () (tern-mode t)))
+  (with-eval-after-load "company-tern-autoloads"
+    (add-to-list 'company-backends 'company-tern)))
+(with-eval-after-load "js2-mode-autoloads"
+  (defalias 'js-mode 'js2-mode))
 
 ;; HTML
 (with-eval-after-load "simplezen-autoloads"
