@@ -269,6 +269,16 @@ the syntax class ')'."
             (run-at-time my/-double-key-timeout nil #'newline-and-indent)))))
 (global-set-key (kbd "RET") #'my/-ret)
 
+;; open-line and indent
+(defun my/-open-line (&optional N)
+  (interactive "*p")
+  (open-line N)
+  (save-excursion
+    (forward-line)
+    (indent-according-to-mode)))
+(global-set-key (kbd "C-o") #'my/-open-line)
+
+
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)
 (define-key minibuffer-local-map (kbd "<down>") 'next-complete-history-element)
 
