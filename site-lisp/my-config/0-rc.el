@@ -101,8 +101,10 @@
 (delete-selection-mode t)
 
 ;; syntax highlighting
-(global-font-lock-mode)
-(setq font-lock-maximum-decoration t)
+(setq font-lock-maximum-decoration t
+      ;;font-lock-maximum-size nil
+      )
+(global-font-lock-mode 1)
 
 ;; enable cua keybindings and functions
 ;; (when (> emacs-major-version 23)
@@ -178,7 +180,8 @@ the syntax class ')'."
  scroll-step 1
  scroll-up-aggressively nil
  scroll-down-aggressively nil
- scroll-preserve-screen-position 1)
+ scroll-preserve-screen-position 1
+ fast-but-imprecise-scrolling t)
 
 ;; Mouse
 (setq mouse-wheel-follow-mouse 't
