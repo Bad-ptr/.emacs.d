@@ -411,10 +411,23 @@ of FILE in the current directory, suitable for creation"
 
 ;; erlang/elexir
 (with-eval-after-load "alchemist-autoloads"
-  (setq alchemist-goto-erlang-source-dir (expand-file-name
-                                          "~/projects/erlang-otp")
-        alchemist-goto-elixir-source-dir (expand-file-name
-                                          "~/projects/elixir_stuff/elixir"))
+  (defvar erlang-include-path
+    (when (executable-find "erl")
+      (with-temp-buffer
+        (shell-command
+         "erl -eval 'io:format(\"~s\", [lists:concat([code:root_dir(), \"/erts-\", erlang:system_info(version), \"/include\"])])' -s init stop -noshell"
+         (current-buffer))
+        (buffer-string))))
+  (push erlang-include-path my/-c-include-paths)
+  (with-eval-after-load "company-clang"
+    (push (concat "-I" erlang-include-path) company-clang-arguments))
+  (with-eval-after-load "c-eldoc"
+    (setq c-eldoc-includes (concat "-I" erlang-include-path " " c-eldoc-includes)))
+  (with-eval-after-load "ffap"
+    (push erlang-include-path ffap-c-path)
+    (push erlang-include-path ffap-c++-path))
+  (setq alchemist-goto-erlang-source-dir (expand-file-name "~/projects/erlang-otp")
+        alchemist-goto-elixir-source-dir (expand-file-name "~/projects/elixir_stuff/elixir"))
   (add-hook 'elixir-mode-hook #'alchemist-mode)
 
   (with-eval-after-load "smartparens-autoloads"
