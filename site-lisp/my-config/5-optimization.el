@@ -3,21 +3,17 @@
 
 ;;; Code:
 
-
-(setq gc-cons-threshold 20000000)
-
-(setq max-lisp-eval-depth 1600
-      max-specpdl-size 4680)
+;; (setq gc-cons-threshold   (* gc-cons-threshold   25)
+;;       max-lisp-eval-depth (* max-lisp-eval-depth 2)
+;;       max-specpdl-size    (* max-specpdl-size    4))
 
 
-(jit-lock-mode t)
-(setq jit-lock-stealth-time 0.5
-      jit-lock-defer-time 0.5
-      ;;jit-lock-contextually nil
-      jit-lock-context-time 0.5)
-;; defaults
-;; (setq jit-lock-stealth-time nil
-;;       jit-lock-defer-time nil)
+(setq
+ font-lock-support-mode 'jit-lock-mode
+ jit-lock-stealth-time 0.5
+ jit-lock-defer-time   0.5
+ jit-lock-context-time 0.5)
+
 
 (setq-default bidi-display-reordering nil)
 (setq redisplay-dont-pause nil)
