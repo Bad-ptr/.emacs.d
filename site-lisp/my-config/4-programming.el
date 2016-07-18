@@ -221,6 +221,9 @@ of FILE in the current directory, suitable for creation"
 ;; cedet
 ;;(load "~/projects/cedet/cedet-devel-load.el")
 ;;(global-ede-mode t)
+;; (require 'semantic/bovine/c)
+;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file
+;;     "/usr/lib/gcc/x86_64-linux-gnu/4.8/include/stddef.h")
 ;; Example ede project:
 ;; (ede-cpp-root-project "Test"
 ;;                       :name "Test"
@@ -232,10 +235,16 @@ of FILE in the current directory, suitable for creation"
       gdb-show-main t)
 
 
-;; C/Cpp
+;; C/Cpp/C++
 (setq c-default-style "gnu")
 
-(defvar my/-c-include-paths nil
+(defvar my/-c-include-paths (cons "."
+                                  (when (executable-find "cpp")
+                                    (with-temp-buffer
+                                      (shell-command
+                                       "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
+                                       (current-buffer))
+                                      (split-string (buffer-string) "\n" t))))
   "List of dirs with includes for c.")
 (defun my/-c-get-includes ()
   (concatenate 'list
@@ -253,13 +262,7 @@ of FILE in the current directory, suitable for creation"
                             (oref ede-object-project include-path)))))
                (when semantic-mode
                  semantic-dependency-system-include-path)
-               (or my/-c-include-paths
-                   (setq my/-c-include-paths
-                         (with-temp-buffer
-                           (shell-command
-                            "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
-                            (current-buffer))
-                           (split-string (buffer-string) "\n" t))))))
+               my/-c-include-paths))
 
 (with-eval-after-load "company-c-headers-autoloads"
   (setq company-c-headers-path-system #'my/-c-get-includes)
