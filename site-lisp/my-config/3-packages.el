@@ -16,85 +16,24 @@
   (view-mode))
 (add-to-list 'auto-mode-alist '("\\.fb2$" . fbread-mode))
 
-
 (add-hook 'tabulated-list-mode-hook #'(lambda () (hl-line-mode 1)))
 
-;; templates
-(with-eval-after-load "template"
-  (push (locate-user-emacs-file "site-lisp/templates/") template-default-directories)
-  (setq template-auto-insert t
-        template-auto-update nil)
-  (setq template-expansion-alist
-        (append '(("USER_MAIL"     (insert user-mail-address))
-                  ("USER_NICKNAME" (insert user-nickname)))
-                template-expansion-alist))
-  (template-initialize)
-  (defun template-expand-to-string-for-virtual-file (file &optional template)
-    (flet ((template-make-directory (dir) dir))
-      (unless template
-        (setq template (cdr (template-derivation file t)))))
-    (with-temp-buffer
-      (let (find-file-hooks)
-        (flet ((buffer-file-name (&optional buffer) file))
-          (template-new-file nil template)))
-      (buffer-substring (point-min) (point-max)))))
-(require 'template)
 
-;; skeletor
-(with-eval-after-load "skeletor-autoloads"
-  (skeletor-define-template "Cpp"
-    :substitutions
-    (list
-     (cons "__MAINCPP__"
-           #'(lambda ()
-               (if (fboundp 'template-expand-to-string-for-virtual-file)
-                   (let ((project-license (skeletor-project-license-type)))
-                     (template-expand-to-string-for-virtual-file
-                      (concat skeletor--current-project-root  "/main.cpp")))
-                 "#include <iostream>
-int main (int argc, char **argv) {
-  std::cout << \"Hello World\" << std::endl;
-  exit(0);
-}"))))))
-(with-eval-after-load "skeletor"
-  (defun skeletor-project-license-type ()
-    (substring skeletor-project-license
-               (1+ (search "/" skeletor-project-license :from-end t))))
-
-  (defun skeletor--ctor-runtime-spec (spec)
-    "Concatenate the given macro SPEC with values evaluated at runtime."
-    (let* ((project-name (skeletor--read-project-name))
-           (dest (f-join skeletor-project-directory project-name)))
-      (let-alist spec
-        (setq skeletor--current-project-root dest
-              skeletor-project-root dest
-              skeletor-project-name project-name
-              skeletor-project-license (when .create-license?
-                                         (skeletor--read-license "License: " .license-file-name))
-              skeletor-project-spec (-concat
-                                     (list
-                                      (cons 'project-name project-name)
-                                      (cons 'project-dir skeletor-project-directory)
-                                      (cons 'dest dest)
-                                      (cons 'skeleton (skeletor--get-named-skeleton .name))
-                                      (cons 'license-file skeletor-project-license))
-                                     spec))
-        (setq skeletor-project-spec
-              (-concat
-               (list
-                (cons 'repls (-map 'skeletor--eval-substitution
-                                   (-concat
-                                    skeletor-global-substitutions
-                                    (list (cons "__PROJECT-NAME__" project-name)
-                                          (cons "__LICENSE-FILE-NAME__" .license-file-name))
-                                    .substitutions))))
-               skeletor-project-spec)))))
-  (setq skeletor-global-substitutions
-        (nconc
-         (list (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M")))
-               (cons "__USER-NICKNAME__" #'(lambda () user-nickname))
-               (cons "__LICENSE__" #'skeletor-project-license-type))
-         skeletor-global-substitutions)))
+;;Jabber
+(with-eval-after-load "jabber"
+  (defun jabber-muc-join-group ()
+    (interactive)
+    (let ((account (jabber-read-account)))
+      (jabber-get-bookmarks account
+                            #'(lambda (jc bms)
+                                (let (groups group nickname)
+                                  (mapc #'(lambda (b)
+                                            (when (eq 'conference (jabber-xml-node-name b))
+                                              (push (make-symbol (jabber-xml-get-attribute b 'jid)) groups)))
+                                        bms)
+                                  (setq group (jabber-read-jid-completing "group: " groups)
+                                        nickname (jabber-muc-read-my-nickname jc group))
+                                  (jabber-muc-join jc group nickname)))))))
 
 
 ;; ido
@@ -212,21 +151,86 @@ That is, a string used to represent it on the tab bar."
   (global-set-key [remap scroll-down-command] #'golden-ratio-scroll-screen-down)
   (global-set-key [remap scroll-up-command]   #'golden-ratio-scroll-screen-up))
 
-;;Jabber
-(with-eval-after-load "jabber"
-  (defun jabber-muc-join-group ()
-    (interactive)
-    (let ((account (jabber-read-account)))
-      (jabber-get-bookmarks account
-                            #'(lambda (jc bms)
-                                (let (groups group nickname)
-                                  (mapc #'(lambda (b)
-                                            (when (eq 'conference (jabber-xml-node-name b))
-                                              (push (make-symbol (jabber-xml-get-attribute b 'jid)) groups)))
-                                        bms)
-                                  (setq group (jabber-read-jid-completing "group: " groups)
-                                        nickname (jabber-muc-read-my-nickname jc group))
-                                  (jabber-muc-join jc group nickname)))))))
+;; magit
+(with-eval-after-load "magit-autoloads"
+  (add-hook 'magit-mode-hook '(lambda () (font-lock-mode 0))))
+
+;; templates
+(with-eval-after-load "template"
+  (push (locate-user-emacs-file "site-lisp/templates/") template-default-directories)
+  (setq template-auto-insert t
+        template-auto-update nil)
+  (setq template-expansion-alist
+        (append '(("USER_MAIL"     (insert user-mail-address))
+                  ("USER_NICKNAME" (insert user-nickname)))
+                template-expansion-alist))
+  (template-initialize)
+  (defun template-expand-to-string-for-virtual-file (file &optional template)
+    (flet ((template-make-directory (dir) dir))
+      (unless template
+        (setq template (cdr (template-derivation file t)))))
+    (with-temp-buffer
+      (let (find-file-hooks)
+        (flet ((buffer-file-name (&optional buffer) file))
+          (template-new-file nil template)))
+      (buffer-substring (point-min) (point-max)))))
+(require 'template)
+
+;; skeletor
+(with-eval-after-load "skeletor-autoloads"
+  (skeletor-define-template "Cpp"
+    :substitutions
+    (list
+     (cons "__MAINCPP__"
+           #'(lambda ()
+               (if (fboundp 'template-expand-to-string-for-virtual-file)
+                   (let ((project-license (skeletor-project-license-type)))
+                     (template-expand-to-string-for-virtual-file
+                      (concat skeletor--current-project-root  "/main.cpp")))
+                 "#include <iostream>
+int main (int argc, char **argv) {
+  std::cout << \"Hello World\" << std::endl;
+  exit(0);
+}"))))))
+(with-eval-after-load "skeletor"
+  (defun skeletor-project-license-type ()
+    (substring skeletor-project-license
+               (1+ (search "/" skeletor-project-license :from-end t))))
+
+  (defun skeletor--ctor-runtime-spec (spec)
+    "Concatenate the given macro SPEC with values evaluated at runtime."
+    (let* ((project-name (skeletor--read-project-name))
+           (dest (f-join skeletor-project-directory project-name)))
+      (let-alist spec
+        (setq skeletor--current-project-root dest
+              skeletor-project-root dest
+              skeletor-project-name project-name
+              skeletor-project-license (when .create-license?
+                                         (skeletor--read-license "License: " .license-file-name))
+              skeletor-project-spec (-concat
+                                     (list
+                                      (cons 'project-name project-name)
+                                      (cons 'project-dir skeletor-project-directory)
+                                      (cons 'dest dest)
+                                      (cons 'skeleton (skeletor--get-named-skeleton .name))
+                                      (cons 'license-file skeletor-project-license))
+                                     spec))
+        (setq skeletor-project-spec
+              (-concat
+               (list
+                (cons 'repls (-map 'skeletor--eval-substitution
+                                   (-concat
+                                    skeletor-global-substitutions
+                                    (list (cons "__PROJECT-NAME__" project-name)
+                                          (cons "__LICENSE-FILE-NAME__" .license-file-name))
+                                    .substitutions))))
+               skeletor-project-spec)))))
+  (setq skeletor-global-substitutions
+        (nconc
+         (list (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M")))
+               (cons "__USER-NICKNAME__" #'(lambda () user-nickname))
+               (cons "__LICENSE__" #'skeletor-project-license-type))
+         skeletor-global-substitutions)))
 
 ;; yasnippet
 (with-eval-after-load "yasnippet-autoloads"
