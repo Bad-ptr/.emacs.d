@@ -276,6 +276,11 @@ of FILE in the current directory, suitable for creation"
               #'(lambda ()
                   (add-to-list 'company-backends 'company-c-headers)))))
 
+(with-eval-after-load "c-eldoc-autoloads"
+  (setq c-eldoc-buffer-regenerate-time 120)
+  (add-hook 'c-mode-hook #'c-turn-on-eldoc-mode)
+  (add-hook 'c++-mode-hook #'c-turn-on-eldoc-mode))
+
 ;; rust
 (with-eval-after-load "racer-autoloads"
   ;; (setq racer-cmd "~/.cargo/bin/racer"
