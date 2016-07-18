@@ -77,6 +77,18 @@
                                  file
                                  (file-name-sans-extension file)))))))))
 
+(with-eval-after-load "clean-aindent-mode-autoloads"
+  (add-hook 'my/-prog-mode-hook #'clean-aindent-mode))
+
+(with-eval-after-load "dtrt-indent-autoloads"
+  (dtrt-indent-mode 1)
+  (setq dtrt-indent-verbosity 0))
+
+(with-eval-after-load "ws-butler-autoloads"
+  ;;(add-hook 'my/-prog-mode-hook #'ws-butler-mode)
+  (ws-butler-global-mode))
+
+
 ;; Fonts for parens and ops
 
 (defface open-paren-face
