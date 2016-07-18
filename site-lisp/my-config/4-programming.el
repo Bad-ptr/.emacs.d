@@ -264,6 +264,11 @@ of FILE in the current directory, suitable for creation"
                  semantic-dependency-system-include-path)
                my/-c-include-paths))
 
+(with-eval-after-load "ffap"
+  (defun ffap-c-mode (name)
+    (ffap-locate-file name t (my/-c-get-includes)))
+  (defalias 'ffap-c++-mode 'ffap-c-mode))
+
 (with-eval-after-load "company-c-headers-autoloads"
   (setq company-c-headers-path-system #'my/-c-get-includes)
   (dolist (hook '(c-mode-hook c++-mode-hook))
