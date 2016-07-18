@@ -362,4 +362,7 @@ the syntax class ')'."
 
 ;;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
+(when (fboundp 'eww)
+  (setq browse-url-browser-function 'eww-browse-url))
+
 ;; 0-rc.el ends here
