@@ -315,9 +315,9 @@ int main (int argc, char **argv) {
                                                    (search-forward chord-r-s))))))))
 
 ;; idle-highlight-mode
-(with-eval-after-load "idle-highlight-mode-autoloads"
-  (setq idle-highlight-delay 1.0)
-  (add-hook 'my/-prog-mode-hook #'idle-highlight-mode))
+;; (with-eval-after-load "idle-highlight-mode-autoloads"
+;;   (setq idle-highlight-delay 1.0)
+;;   (add-hook 'my/-prog-mode-hook #'idle-highlight-mode))
 
 ;; highlight-symbol
 (with-eval-after-load "highlight-symbol-autoloads"
@@ -351,11 +351,7 @@ int main (int argc, char **argv) {
 ;; highlight-numbers
 (with-eval-after-load "highlight-numbers-autoloads"
   (setq highlight-numbers-disable '())
-  (add-hook 'after-change-major-mode-hook
-            (lambda ()
-              (when (null (memql major-mode highlight-numbers-disable))
-                (highlight-numbers-mode))))
-  (highlight-numbers-mode))
+  (add-hook 'my/-prog-mode-hook #'highlight-numbers-mode))
 
 ;; highlight-tail-mode
 (with-eval-after-load "highlight-tail-autoloads"
@@ -605,7 +601,9 @@ that if there is ht's overlay at at the top then return 'default"
 
   (setq helm-split-window-in-side-p t
         helm-move-to-line-cycle-in-source t
-        helm-echo-input-in-header-line t)
+        helm-echo-input-in-header-line t
+        helm-ff-guess-ffap-filenames t
+        helm-buffer-max-length nil)
 
   (with-eval-after-load "golden-ratio-autoloads"
     (push #'helm-alive-p golden-ratio-inhibit-functions))
@@ -654,6 +652,14 @@ that if there is ht's overlay at at the top then return 'default"
 ;;   ;; (scroll-restore-mode)
 ;;   )
 
+
+;; projectile
+(with-eval-after-load "projectile-autoloads"
+  (setq projectile-keymap-prefix (kbd "C-x p"))
+  (projectile-global-mode)
+  (with-eval-after-load "helm-projectile-autoloads"
+    (helm-projectile-on)))
+
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
   (defvar after-switch-to-buffer-functions nil)
@@ -688,10 +694,35 @@ that if there is ht's overlay at at the top then return 'default"
                  (persp-add-buffer-on-find-file nil)
                  persp-add-buffer-on-after-change-major-mode)
       :hooks '(after-switch-to-buffer-functions)
-      :after-match #'(lambda (pn p b h ha ps noa)
-                       (persp-window-switch pn))))
+      :weak t
+      :switch 'window))
+
+
+  (defvar after-find-file-hook nil)
+
+  ;; (defun my/-after-find-file-adv (&rest args)
+  ;;   (run-hooks 'after-find-file-hook))
+
+  ;; (advice-add 'find-file :after 'my/-after-find-file-adv)
+
+  ;; (def-auto-persp "projectile"
+  ;;   :parameters '((dont-save-to-file . t))
+  ;;   :hooks '(after-find-file-hook)
+  ;;   :switch 'frame
+  ;;   :predicate
+  ;;   #'(lambda (buffer)
+  ;;       (and
+  ;;        (buffer-file-name)
+  ;;        (projectile-project-p)))
+  ;;   :get-name-expr
+  ;;   #'(lambda ()
+  ;;       (abbreviate-file-name (projectile-project-root))))
+
+  ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
+
 
   (push #'(lambda () (persp-mode 1)
+            ;; (add-hook 'persp-after-load-state-functions #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
             (global-set-key (kbd "C-x k") #'persp-kill-buffer)
             (with-eval-after-load "helm"
               (persp-update-completion-system 'completing-read)))
