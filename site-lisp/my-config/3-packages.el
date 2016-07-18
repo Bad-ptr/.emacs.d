@@ -7,6 +7,11 @@
 (require 'generic-x)
 (require 'newcomment)
 
+(setq package-pinned-packages
+      '((persp-mode . "localhost")
+        (multiple-cursors . "localhost")
+        (helm-dash . "localhost")
+        (golden-ratio . "localhost")))
 
 (defun fbread-mode()
   (interactive)
@@ -592,6 +597,11 @@ that if there is ht's overlay at at the top then return 'default"
 ;; speedbar
 (with-eval-after-load "speedbar"
   (push (cons 'persp-ignore-wconf t) speedbar-frame-parameters))
+
+;; helm-dash
+(with-eval-after-load "helm-dash-autoloads"
+  (add-hook 'my/-prog-mode-hook #'helm-dash-set-apropriate-major-mode-docsets)
+  (add-hook 'conf-mode-hook #'helm-dash-set-apropriate-major-mode-docsets))
 
 ;; helm
 ;; (with-eval-after-load "helm-autoloads"
