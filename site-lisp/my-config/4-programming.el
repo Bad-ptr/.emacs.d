@@ -86,6 +86,7 @@
 
 (with-eval-after-load "ws-butler-autoloads"
   ;;(add-hook 'my/-prog-mode-hook #'ws-butler-mode)
+  (add-hook 'markdown-mode-hook #'(lambda () (ws-butler-mode -1)))
   (ws-butler-global-mode))
 
 
