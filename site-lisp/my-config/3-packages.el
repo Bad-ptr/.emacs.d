@@ -327,7 +327,7 @@ int main (int argc, char **argv) {
 ;; highlight-symbol
 (with-eval-after-load "highlight-symbol-autoloads"
   (setq highlight-symbol-disable '())
-  (add-hook 'after-change-major-mode-hook
+  (add-hook 'prog-mode-hook
             (lambda ()
               (when (null (memql major-mode highlight-symbol-disable))
                 (highlight-symbol-mode)
