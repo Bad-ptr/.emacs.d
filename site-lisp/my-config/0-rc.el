@@ -104,7 +104,7 @@
 (setq font-lock-maximum-decoration t
       ;;font-lock-maximum-size nil
       )
-(global-font-lock-mode 1)
+;;(global-font-lock-mode 1)
 
 ;; enable cua keybindings and functions
 ;; (when (> emacs-major-version 23)

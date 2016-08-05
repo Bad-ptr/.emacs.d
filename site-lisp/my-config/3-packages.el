@@ -8,10 +8,10 @@
 (require 'newcomment)
 
 (setq package-pinned-packages
-      '((persp-mode . "localhost")
+      '((persp-mode       . "localhost")
         (multiple-cursors . "localhost")
-        (helm-dash . "localhost")
-        (golden-ratio . "localhost")))
+        (helm-dash        . "localhost")
+        (golden-ratio     . "localhost")))
 
 (defun fbread-mode()
   (interactive)
@@ -248,7 +248,7 @@ int main (int argc, char **argv) {
         uniquify-after-kill-buffer-p t
         uniquify-ignore-buffers-re "^\\*"))
 
-;;mark-multiple
+;; mark-multiple
 (with-eval-after-load "multiple-cursors-autoloads"
   (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
   (global-set-key (kbd "C-<") #'mc/mark-previous-symbol-like-this)
@@ -333,15 +333,15 @@ int main (int argc, char **argv) {
                 (highlight-symbol-mode)
                 (highlight-symbol-nav-mode)))))
 
-;; highlight-stages
+;; ;; highlight-stages
 ;; (with-eval-after-load "highlight-stages-autoloads"
 ;;   (highlight-stages-global-mode))
 
-;; highlight-indentation
+;; ;; highlight-indentation
 ;; (with-eval-after-load "highlight-indentation-autoloads"
 ;;   (add-hook 'my/-prog-mode-hook #'highlight-indentation-mode))
 
-;; highlight-leading-spaces
+;; ;; highlight-leading-spaces
 ;; (with-eval-after-load "highlight-leading-spaces-autoloads"
 ;;   (add-hook 'my/-prog-mode-hook #'highlight-leading-spaces-mode))
 
@@ -458,7 +458,7 @@ that if there is ht's overlay at at the top then return 'default"
           (overlay-put (car hl-paren-overlays) 'face attributes)))
       (setq hl-paren-overlays (nreverse hl-paren-overlays)))))
 
-;; highlight-blocks-mode
+;; ;; highlight-blocks-mode
 ;; do not enable it as it's too slow
 ;; (with-eval-after-load "highlight-blocks-autoloads"
 ;;   (add-hook 'my/-prog-mode-hook #'(lambda () (highlight-blocks-mode 1)))

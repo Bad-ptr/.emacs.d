@@ -34,7 +34,6 @@
 (dolist (hook my/-prog-mode-hooks)
   (add-hook hook #'(lambda () (run-hooks 'my/-prog-mode-hook))))
 
-
 (unless (version< emacs-version "24.4")
   (global-prettify-symbols-mode 1))
 
