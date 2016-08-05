@@ -3,8 +3,10 @@
 
 ;;; Code:
 
+;; (profiler-start 'mem)
 
 (setq inhibit-default-init t
+      package-enable-at-startup nil
       load-prefer-newer t
       message-log-max 1000)
 
@@ -63,7 +65,6 @@
   (setq custom-file (locate-user-emacs-file "my-custom.el"))
   (load custom-file t t)
 
-  (setq package-enable-at-startup t)
   ;; Load other parts of configuration
   (my/-load-directory my/-common-conf-path))
 
