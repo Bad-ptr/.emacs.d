@@ -748,6 +748,7 @@ int main (int argc, char **argv) {
   ;;(setq windmove-window-distance-delta 2)
   (unless (>= emacs-major-version 24)
     (setq persp-when-kill-switch-to-buffer-in-perspective nil))
+  (setq persp-autokill-buffer-on-remove 'kill-weak)
 
   (setq command-switch-alist
         (cons
@@ -757,17 +758,27 @@ int main (int argc, char **argv) {
                          persp-auto-save-opt 0)))
          command-switch-alist))
 
-  (with-eval-after-load "dired"
-    (def-auto-persp "dired"
-      :parameters '((dont-save-to-file . t))
-      :mode 'dired-mode
-      :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
-                 (persp-add-buffer-on-find-file nil)
-                 persp-add-buffer-on-after-change-major-mode)
-      :hooks '(after-switch-to-buffer-functions)
-      :weak t
-      :switch 'window))
+  ;; (with-eval-after-load "dired"
+  ;;   (def-auto-persp "dired"
+  ;;     :parameters '((dont-save-to-file . t))
+  ;;     :mode 'dired-mode
+  ;;     :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
+  ;;                (persp-add-buffer-on-find-file nil)
+  ;;                persp-add-buffer-on-after-change-major-mode)
+  ;;     :hooks '(after-switch-to-buffer-functions)
+  ;;     :weak t
+  ;;     :switch 'window))
 
+  ;; (def-persp-buffer-save/load :mode 'eshell-mode :tag-symbol 'def-eshell-buffer
+  ;;   :save-vars '(major-mode default-directory))
+  ;; (def-persp-buffer-save/load :mode 'compilation-mode :tag-symbol 'def-compilation-buffer
+  ;;   :save-vars '(major-mode default-directory compilation-directory compilation-environment compilation-arguments))
+  ;; (with-eval-after-load "magit-autoloads"
+  ;;   (autoload 'magit-status-mode "magit")
+  ;;   (autoload 'magit-refresh "magit")
+  ;;   (def-persp-buffer-save/load :mode 'magit-status-mode :tag-symbol 'def-magit-status-buffer
+  ;;     :save-vars '(major-mode default-directory)
+  ;;     :after-load-function #'(lambda (b &rest _) (with-current-buffer b (magit-refresh)))))
 
   (defvar after-find-file-hook nil)
 
