@@ -593,9 +593,18 @@ int main (int argc, char **argv) {
 ;;                                       ))
 ;;     (ac-flyspell-workaround)))
 
+;; anzu
+(with-eval-after-load "anzu-autoloads"
+  (global-set-key [remap query-replace] 'anzu-query-replace)
+  (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
+
 ;; speedbar
 (with-eval-after-load "speedbar"
   (push (cons 'persp-ignore-wconf t) speedbar-frame-parameters))
+
+;; which-key
+(with-eval-after-load "which-key-autoloads"
+  (which-key-mode))
 
 ;; ivy
 (with-eval-after-load "ivy-autoloads"
