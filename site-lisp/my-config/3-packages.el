@@ -130,9 +130,9 @@ That is, a string used to represent it on the tab bar."
 (with-eval-after-load "drag-stuff-autoloads"
   (drag-stuff-global-mode 1))
 
-;; popwin
-(with-eval-after-load "popwin-autoloads"
-  (setq display-buffer-function 'popwin:display-buffer))
+;; ;; popwin
+;; (with-eval-after-load "popwin-autoloads"
+;;   (setq display-buffer-function 'popwin:display-buffer))
 
 ;; shackle
 ;; (with-eval-after-load "shackle-autoloads"
@@ -157,8 +157,8 @@ That is, a string used to represent it on the tab bar."
   (global-set-key [remap scroll-up-command]   #'golden-ratio-scroll-screen-up))
 
 ;; magit
-(with-eval-after-load "magit-autoloads"
-  (add-hook 'magit-mode-hook '(lambda () (font-lock-mode 0))))
+;; (with-eval-after-load "magit-autoloads"
+;;   (add-hook 'magit-mode-hook '(lambda () (font-lock-mode 0))))
 
 ;; templates
 (with-eval-after-load "template"
@@ -237,10 +237,10 @@ int main (int argc, char **argv) {
                (cons "__LICENSE__" #'skeletor-project-license-type))
          skeletor-global-substitutions)))
 
-;; yasnippet
-(with-eval-after-load "yasnippet-autoloads"
-  (yas-global-mode)
-  (add-hook 'term-mode-hook #'(lambda () (yas-minor-mode -1))))
+;; ;; yasnippet
+;; (with-eval-after-load "yasnippet-autoloads"
+;;   (yas-global-mode)
+;;   (add-hook 'term-mode-hook #'(lambda () (yas-minor-mode -1))))
 
 ;; uniquify
 (with-eval-after-load "uniquify"
@@ -358,57 +358,57 @@ int main (int argc, char **argv) {
   (setq highlight-numbers-disable '())
   (add-hook 'my/-prog-mode-hook #'highlight-numbers-mode))
 
-;; highlight-tail-mode
-(with-eval-after-load "highlight-tail-autoloads"
-  (highlight-tail-mode 1)
-  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
-(with-eval-after-load "highlight-tail"
-  (defun highlight-tail-get-bgcolor-hex (point)
-    "Get the background color of point.
-Do not take highlight-tail's overlays into consideration.  This means
-that if there is ht's overlay at at the top then return 'default"
-    (let ((point-face (get-char-property point 'face))
-          point-face-from-cache
-          point-face-bgcolor
-          point-face-bgcolor-hex)
-      (when point-face
-        (when (listp point-face) (setq point-face (car point-face)))
-        ;; This is weird because for howm-reminder-today-face, the
-        ;; (get-char-property) function returns a list:
-        ;; (howm-reminder-today-face), so it's needed to get car of
-        ;; it...
-        (when (stringp point-face) (setq point-face (intern point-face)))
-        ;; This is weird because for faces used by ediff, the
-        ;; (get-char-property) function returns a string:
-        ;; "xxx-face", so it's needed to intern it...
-        (unless (facep point-face) (setq point-face 'default)))
-      (if point-face
-          (progn
-            (setq point-face-from-cache
-                  (assoc point-face highlight-tail-nonhtfaces-bgcolors))
-            (if point-face-from-cache
-                (setq point-face-bgcolor-hex (cdr point-face-from-cache))
-              (setq point-face-bgcolor
-                    (highlight-tail-get-face-background point-face))
-              (when (or (eq point-face-bgcolor nil)
-                        (eq point-face-bgcolor 'unspecified))
-                (setq point-face-bgcolor 'default))))
-        (setq point-face-bgcolor 'default))
-      (when (not point-face-bgcolor-hex)  ; not read from cache
-        (if (eq point-face-bgcolor 'default)
-            (setq point-face-bgcolor-hex 'default)
-          ;; else
-          (setq point-face-bgcolor-hex
-                (highlight-tail-hex-from-colorname point-face-bgcolor))
-          (setq highlight-tail-nonhtfaces-bgcolors
-                (cons (cons point-face point-face-bgcolor-hex)
-                      highlight-tail-nonhtfaces-bgcolors))
-          (highlight-tail-add-colors-fade-table point-face-bgcolor-hex)
-          (highlight-tail-make-faces
-           (highlight-tail-get-colors-fade-table-with-key
-            point-face-bgcolor-hex))))
-      ;; return value
-      point-face-bgcolor-hex)))
+;; ;; highlight-tail-mode
+;; (with-eval-after-load "highlight-tail-autoloads"
+;;   (highlight-tail-mode 1)
+;;   (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-tail-mode -1))))
+;; (with-eval-after-load "highlight-tail"
+;;   (defun highlight-tail-get-bgcolor-hex (point)
+;;     "Get the background color of point.
+;; Do not take highlight-tail's overlays into consideration.  This means
+;; that if there is ht's overlay at at the top then return 'default"
+;;     (let ((point-face (get-char-property point 'face))
+;;           point-face-from-cache
+;;           point-face-bgcolor
+;;           point-face-bgcolor-hex)
+;;       (when point-face
+;;         (when (listp point-face) (setq point-face (car point-face)))
+;;         ;; This is weird because for howm-reminder-today-face, the
+;;         ;; (get-char-property) function returns a list:
+;;         ;; (howm-reminder-today-face), so it's needed to get car of
+;;         ;; it...
+;;         (when (stringp point-face) (setq point-face (intern point-face)))
+;;         ;; This is weird because for faces used by ediff, the
+;;         ;; (get-char-property) function returns a string:
+;;         ;; "xxx-face", so it's needed to intern it...
+;;         (unless (facep point-face) (setq point-face 'default)))
+;;       (if point-face
+;;           (progn
+;;             (setq point-face-from-cache
+;;                   (assoc point-face highlight-tail-nonhtfaces-bgcolors))
+;;             (if point-face-from-cache
+;;                 (setq point-face-bgcolor-hex (cdr point-face-from-cache))
+;;               (setq point-face-bgcolor
+;;                     (highlight-tail-get-face-background point-face))
+;;               (when (or (eq point-face-bgcolor nil)
+;;                         (eq point-face-bgcolor 'unspecified))
+;;                 (setq point-face-bgcolor 'default))))
+;;         (setq point-face-bgcolor 'default))
+;;       (when (not point-face-bgcolor-hex)  ; not read from cache
+;;         (if (eq point-face-bgcolor 'default)
+;;             (setq point-face-bgcolor-hex 'default)
+;;           ;; else
+;;           (setq point-face-bgcolor-hex
+;;                 (highlight-tail-hex-from-colorname point-face-bgcolor))
+;;           (setq highlight-tail-nonhtfaces-bgcolors
+;;                 (cons (cons point-face point-face-bgcolor-hex)
+;;                       highlight-tail-nonhtfaces-bgcolors))
+;;           (highlight-tail-add-colors-fade-table point-face-bgcolor-hex)
+;;           (highlight-tail-make-faces
+;;            (highlight-tail-get-colors-fade-table-with-key
+;;             point-face-bgcolor-hex))))
+;;       ;; return value
+;;       point-face-bgcolor-hex)))
 
 ;; beacon-mode
 (with-eval-after-load "beacon-autoloads"
@@ -465,9 +465,9 @@ that if there is ht's overlay at at the top then return 'default"
 ;;   (add-hook 'activate-mark-hook #'(lambda () (highlight-blocks-mode -1)))
 ;;   (add-hook 'deactivate-mark-hook #'(lambda () (highlight-blocks-mode 1))))
 
-;; smart-modeline
-(with-eval-after-load "smart-mode-line-autoloads"
-  (sml/setup))
+;; ;; smart-modeline
+;; (with-eval-after-load "smart-mode-line-autoloads"
+;;   (sml/setup))
 
 ;; prompt-text-el
 (with-eval-after-load "prompt-text-autoloads"
@@ -552,47 +552,46 @@ that if there is ht's overlay at at the top then return 'default"
   )
 
 
-;; auto-complete-mode
-(when (< emacs-major-version 24)
-  (with-eval-after-load "auto-complete-autoloads"
-    (require 'auto-complete)
-    (require 'auto-complete-config)
-    ;;(add-to-list 'ac-dictionary-directories (concat my/-conf-path "auto-complete/dict"))
-    ;;(require 'auto-complete-clang)
-    ;;(require 'go-autocomplete)
-    (ac-config-default)
-    (setq clang-completion-suppress-error t
-          ac-clang-flags (mapcar #'(lambda (item)(concat "-I" item))
-                                 (my/-c-get-includes)))
+;; ;; auto-complete-mode
+;; (when (< emacs-major-version 24)
+;;   (with-eval-after-load "auto-complete-autoloads"
+;;     (require 'auto-complete)
+;;     (require 'auto-complete-config)
+;;     ;;(add-to-list 'ac-dictionary-directories (concat my/-conf-path "auto-complete/dict"))
+;;     ;;(require 'auto-complete-clang)
+;;     ;;(require 'go-autocomplete)
+;;     (ac-config-default)
+;;     (setq clang-completion-suppress-error t
+;;           ac-clang-flags (mapcar #'(lambda (item)(concat "-I" item))
+;;                                  (my/-c-get-includes)))
 
-    (global-auto-complete-mode t)           ;enable global-mode
-    (setq ac-auto-start 2                ;automatically start (disabled)
-          ac-dwim t                        ;Do what i mean
-          ac-override-local-map nil        ;don't override local map
-          ac-use-quick-help nil ac-quick-help-delay 1.5
-          ac-use-menu-map t ac-auto-show-menu 0.5
-          ac-ignore-case t ac-delay 0.5 ac-use-fuzzy t ac-use-comphist t)
-    (custom-set-variables
-     '(ac-sources
-       '(;;ac-source-filename
-         ac-source-files-in-current-dir ;;ac-source-words-in-buffer
-         ac-source-words-in-same-mode-buffers
-         ;;ac-source-yasnippet ac-source-words-in-all-buffer ac-source-gtags
-         ;;ac-source-imenu ac-source-abbrev ac-source-semantic
-         ;;ac-source-semantic-raw ac-source-ropemacs ac-source-symbols
-         )))
+;;     (global-auto-complete-mode t)          ;enable global-mode
+;;     (setq ac-auto-start 2                  ;automatically start (disabled)
+;;           ac-dwim t                        ;Do what i mean
+;;           ac-override-local-map nil        ;don't override local map
+;;           ac-use-quick-help nil ac-quick-help-delay 1.5
+;;           ac-use-menu-map t ac-auto-show-menu 0.5
+;;           ac-ignore-case t ac-delay 0.5 ac-use-fuzzy t ac-use-comphist t)
+;;     (custom-set-variables
+;;      '(ac-sources
+;;        '(;;ac-source-filename
+;;          ac-source-files-in-current-dir ;;ac-source-words-in-buffer
+;;          ac-source-words-in-same-mode-buffers
+;;          ;;ac-source-yasnippet ac-source-words-in-all-buffer ac-source-gtags
+;;          ;;ac-source-imenu ac-source-abbrev ac-source-semantic
+;;          ;;ac-source-semantic-raw ac-source-ropemacs ac-source-symbols
+;;          )))
 
-    (dolist (hook '(emacs-lisp-mode-hook inferior-emacs-lisp-mode
-                                         lisp-mode-hook lisp-interaction-mode-hook))
-      (add-hook hook #'(lambda () (add-to-list 'ac-sources 'ac-source-symbols))))
-    (add-hook 'haskell-mode-hook #'(lambda () (add-to-list 'ac-sources 'ac-source-haskell)))
-    (add-hook 'c-mode-common-hook #'(lambda ()
-                                      ;;(setq ac-sources '(ac-source-clang ac-source-yasnippet))
-                                      (add-to-list 'ac-sources 'ac-source-clang)
-                                      ;;(setq ac-sources '(ac-source-semantic))
-                                      ))
-    (ac-flyspell-workaround)))
-
+;;     (dolist (hook '(emacs-lisp-mode-hook inferior-emacs-lisp-mode
+;;                                          lisp-mode-hook lisp-interaction-mode-hook))
+;;       (add-hook hook #'(lambda () (add-to-list 'ac-sources 'ac-source-symbols))))
+;;     (add-hook 'haskell-mode-hook #'(lambda () (add-to-list 'ac-sources 'ac-source-haskell)))
+;;     (add-hook 'c-mode-common-hook #'(lambda ()
+;;                                       ;;(setq ac-sources '(ac-source-clang ac-source-yasnippet))
+;;                                       (add-to-list 'ac-sources 'ac-source-clang)
+;;                                       ;;(setq ac-sources '(ac-source-semantic))
+;;                                       ))
+;;     (ac-flyspell-workaround)))
 
 ;; speedbar
 (with-eval-after-load "speedbar"
@@ -717,11 +716,11 @@ that if there is ht's overlay at at the top then return 'default"
 
 
 ;; projectile
-(with-eval-after-load "projectile-autoloads"
-  (setq projectile-keymap-prefix (kbd "C-x p"))
-  (projectile-global-mode)
-  (with-eval-after-load "helm-projectile-autoloads"
-    (helm-projectile-on)))
+;; (with-eval-after-load "projectile-autoloads"
+;;   (setq projectile-keymap-prefix (kbd "C-x p"))
+;;   (projectile-global-mode)
+;;   (with-eval-after-load "helm-projectile-autoloads"
+;;     (helm-projectile-on)))
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
