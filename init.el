@@ -36,8 +36,9 @@
                               )))
          (shell-command (substring (format "%S" args) 1 -1))
          (kill-emacs)))
-(unless (featurep 'server)
-  (if (server-already-running-p) (server-shunt) (server-start)))
+;; this don't work with magit (with-editor)
+;; (unless (featurep 'server)
+;;   (if (server-already-running-p) (server-shunt) (server-start)))
 
 
 ;;load functions that will be used during initialization
