@@ -327,7 +327,7 @@ int main (int argc, char **argv) {
 ;; highlight-symbol
 (with-eval-after-load "highlight-symbol-autoloads"
   (setq highlight-symbol-disable '())
-  (add-hook 'prog-mode-hook
+  (add-hook 'my/-prog-mode-hook
             (lambda ()
               (when (null (memql major-mode highlight-symbol-disable))
                 (highlight-symbol-mode)
@@ -597,6 +597,12 @@ int main (int argc, char **argv) {
 (with-eval-after-load "anzu-autoloads"
   (global-set-key [remap query-replace] 'anzu-query-replace)
   (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
+
+;; visual-regexp
+(with-eval-after-load "visual-regexp-autoloads"
+  (global-set-key (kbd "C-c r") 'vr/replace)
+  (global-set-key (kbd "C-c q") 'vr/query-replace)
+  (global-set-key (kbd "C-c m") 'vr/mc-mark))
 
 ;; speedbar
 (with-eval-after-load "speedbar"
