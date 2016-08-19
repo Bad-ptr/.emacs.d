@@ -26,6 +26,19 @@
 
 ;;; Code:
 
+(defvar my/-load-in-progress nil)
+(defvar my/-load-file-name nil)
+(lexical-let ((original-load (symbol-function 'load)))
+  (let ((original-doc (documentation 'load t)))
+    (defun load (file &optional noerror nomessage nosuffix must-suffix)
+      (setq my/-load-in-progress t
+            my/-load-file-name file)
+      (prog1
+          (funcall original-load file noerror nomessage nosuffix must-suffix)
+        (setq my/-load-in-progress nil
+              my/-load-file-name nil)))
+    (put 'load 'function-documentation original-doc)))
+
 ;; old and potentially buggy
 ;; (defmacro alambda (arglist &rest body)
 ;;   "Anaphoric lambda."
@@ -130,7 +143,9 @@ buffer-local wherever it is set."
          (errbrief (concat
                     (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
                     (and load-in-progress
-                         (format "\n\tIn %s." (or load-file-name (buffer-file-name))))))
+                         (format "\n\tIn %s." (or load-file-name (buffer-file-name))))
+                    (and my/-load-in-progress
+                         (format "\n\tIn %s." my/-load-file-name))))
          (errstr (concat
                   errbrief
                   ;;(format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
