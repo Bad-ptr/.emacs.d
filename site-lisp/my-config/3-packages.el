@@ -823,7 +823,10 @@ int main (int argc, char **argv) {
           (append ivy-sort-functions-alist
                   '((persp-kill-buffer   . nil)
                     (persp-remove-buffer . nil)
-                    (persp-add-buffer    . nil))))))
+                    (persp-add-buffer    . nil)
+                    (persp-switch        . nil)
+                    (persp-window-switch . nil)
+                    (persp-frame-switch  . nil))))))
 
 ;; (with-eval-after-load "persp-mode"
 ;;   (with-eval-after-load "helm-mode"
@@ -960,3 +963,35 @@ int main (int argc, char **argv) {
 ;;                     (persp-add-buffer                 . helm-persp-buffer-list-bridge)
 ;;                     (persp-remove-buffer              . helm-persp-buffer-list-bridge))
 ;;                   helm-completing-read-handlers-alist))))
+
+(with-eval-after-load "persp-mode"
+  (defvar persp-names-sorted (and (bound-and-true-p *persp-hash*) (persp-names))
+    "Ordered list of perspective names.")
+
+  (add-hook 'persp-before-switch-functions
+            #'(lambda (new-persp-name w-or-f)
+                (let ((cur-persp-name (safe-persp-name (get-current-persp))))
+                  (when (member cur-persp-name persp-names-sorted)
+                    (setq persp-names-sorted
+                          (cons cur-persp-name
+                                (delete cur-persp-name persp-names-sorted)))))))
+
+  (add-hook 'persp-renamed-functions
+            #'(lambda (persp old-name new-name)
+                (setq persp-names-sorted
+                      (cons new-name (delete old-name persp-names-sorted)))))
+
+  (add-hook 'persp-before-kill-functions
+            #'(lambda (persp)
+                (setq persp-names-sorted
+                      (delete (safe-persp-name persp) persp-names-sorted))))
+
+  (add-hook 'persp-created-functions
+            #'(lambda (persp phash)
+                (when (and (eq phash *persp-hash*)
+                           (not (member (safe-persp-name persp) persp-names-sorted)))
+                  (setq persp-names-sorted
+                        (cons (safe-persp-name persp) persp-names-sorted)))))
+
+  (defsubst* persp-names-sorted (&optional (phash *persp-hash*)) (append persp-names-sorted nil))
+  (defun persp-names-current-frame-fast-ordered () (append persp-names-sorted nil)))
