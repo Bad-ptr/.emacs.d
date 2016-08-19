@@ -124,13 +124,13 @@
  'my/-username-hook
  (alambda (&optional arg)
    (unless arg
-     (condition-case err (my/-init-before-private)
+     (condition-case-unless-debug err (my/-init-before-private)
        (error (my/-init-error-fatal err))))
    (lexical-let ((priv-file (locate-user-emacs-file
                              (concat
                               (if my/-multiuser-private
                                   my/-username "my") "-private.el"))))
-     (when (condition-case err (load priv-file)
+     (when (condition-case-unless-debug err (load priv-file)
              (file-error
               (message "%s" err)
               (let ((ff (lambda ()
@@ -152,7 +152,7 @@
                 (my/-exec-after-interactive-frame-available ()
                   (run-at-time 2 nil ff))))
              (error (my/-init-error-fatal err) nil))
-       (condition-case err (progn (my/-init-after-private)
+       (condition-case-unless-debug err (progn (my/-init-after-private)
                                   (when arg (run-hooks 'after-init-hook)))
          (error (my/-init-error-fatal err)))))))
 

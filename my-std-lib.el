@@ -178,7 +178,7 @@ re-downloaded in order to locate PACKAGE."
     (if (package-installed-p package min-version)
         t
       (if (or (assoc package package-archive-contents) no-refresh)
-          (condition-case err (package-install package)
+          (condition-case-unless-debug err (package-install package)
             (error (my/-warning (format "Package: %s, Error: %s." package err))))
         (progn
           (package-refresh-contents)
