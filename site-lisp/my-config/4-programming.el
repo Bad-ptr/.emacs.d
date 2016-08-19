@@ -52,7 +52,8 @@
             ("->" . 'access-op-face) ("::" . 'access-op-face) ("\\." . 'access-op-face)
             ("," . 'comma-semicolon-face) (";" . 'comma-semicolon-face)
 
-            ("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend)
+            ;; use the hl-todo package
+            ;; ("\\<\\(FIXME\\|HACK\\|XXX\\|TODO\\):?" 1 font-lock-warning-face prepend)
 
             ("--_--.*?--_--" 0 'underline prepend)
             ("--/--.*?--/--" 0 'overstriked-face prepend))

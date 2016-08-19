@@ -248,6 +248,29 @@ int main (int argc, char **argv) {
         uniquify-after-kill-buffer-p t
         uniquify-ignore-buffers-re "^\\*"))
 
+(with-eval-after-load "hl-todo-autoloads"
+  ;;(setq hl-todo-activate-in-modes '(prog-mode)
+  ;;(add-hook 'after-change-major-mode-hook #'(lambda () (turn-on-hl-todo-mode-if-desired)))
+  (with-eval-after-load "hl-todo"
+    (setq hl-todo-keyword-faces
+          '(("HOLD" . "#d0bf8f")
+            ("TODO" . "#ff4323")
+            ("NEXT" . "#dca3a3")
+            ("THEM" . "#dc8cc3")
+            ("PROG" . "#7cb8bb")
+            ("OKAY" . "#7cb8bb")
+            ("DONT" . "#5f7f5f")
+            ("FAIL" . "#8c5353")
+            ("DONE" . "#afd8af")
+            ("NOTE"   . "#d0bf8f")
+            ("KLUDGE" . "#d0bf8f")
+            ("HACK"   . "#ff4323")
+            ("FIXME"  . "#ff4323")
+            ("XXX"    . "#ff4323")
+            ("XXXX"   . "#ff4323")
+            ("???"    . "#ff4323"))))
+  (add-hook 'my/-prog-mode-hook #'(lambda () (hl-todo-mode +1))))
+
 ;; mark-multiple
 (with-eval-after-load "multiple-cursors-autoloads"
   (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
