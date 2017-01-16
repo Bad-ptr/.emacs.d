@@ -696,26 +696,61 @@ int main (int argc, char **argv) {
                                 (t . ivy--regex-fuzzy)))
   (ivy-mode 1)
   (global-set-key (kbd "C-c C-r") 'ivy-resume)
-  (global-set-key (kbd "<f6>") 'ivy-resume))
+  (global-set-key (kbd "<f6>") 'ivy-resume)
+
+  ;;(require 'lv)
+  ;; (defun ivy-display-function-lv (text)
+  ;;   (let ((lv-force-update t))
+  ;;     (lv-message
+  ;;      (if (string-match "\\`\n" text)
+  ;;          (substring text 1)
+  ;;        text))))
+  ;; (setq ivy-display-function 'ivy-display-function-lv)
+
+  (with-eval-after-load "grep"
+    (setq grep-read-files-original (symbol-function #'grep-read-files))
+    (fset 'grep-read-files
+          #'(lambda (regexp)
+              (let ((ret
+                     (funcall grep-read-files-original regexp)))
+                (file-name-nondirectory ret)))))
+  (with-eval-after-load "ivy-rich-autoloads"
+    ;; (require 'ivy-rich)
+    (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)))
 
 (with-eval-after-load "counsel-autoloads"
   (setq counsel-find-file-at-point t)
   (autoload 'rgrep-default-command "grep")
-  (defun counsel-rgrep ()
-    (interactive)
-    (ivy-read "rgrep"
+  (defun counsel-rgrep (&optional zgrep-p)
+    (interactive "P")
+    (require 'counsel)
+    (ivy-set-prompt 'counsel-ag counsel-prompt-function)
+    (ivy-read (if zgrep-p "zrgrep" "rgrep")
               #'(lambda (string)
                   (if (< (length string) 3)
                       (counsel-more-chars 3)
+                    (grep-compute-defaults)
                     (let ((regex (counsel-unquote-regex-parens
                                   (setq ivy--old-re
                                         (ivy--regex string)))))
-                      (let ((rgrep-cmd
-                             ;; (format
-                             ;;  "grep --color=never -i -nH -e %s -R ./"
-                             ;;  (shell-quote-argument regex))
-                             (rgrep-default-command (shell-quote-argument regex) "*" nil)))
-                        (counsel--async-command rgrep-cmd))
+                      (if zgrep-p
+                          (let ((grep-program "zgrep")
+                                (grep-find-template nil)
+                                (grep-find-command nil)
+                                (grep-host-defaults-alist nil)
+                                (grep-files-aliases '(("all" . "* .*")
+                                                      ("gz"  . "*.gz"))))
+                            (grep-compute-defaults)
+                            (let ((rgrep-cmd
+                                   (concat (rgrep-default-command regex "*" "./")
+                                           " || true")))
+                              (counsel--async-command rgrep-cmd)))
+                        (let ((rgrep-cmd
+                               ;; (format
+                               ;;  "grep --color=never -i -nH -e %s -R ./"
+                               ;;  (shell-quote-argument regex))
+                               (rgrep-default-command regex "*" "./")))
+                          (counsel--async-command rgrep-cmd)))
                       nil)))
               :dynamic-collection t
               :keymap counsel-ag-map
