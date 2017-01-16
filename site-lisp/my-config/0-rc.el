@@ -127,11 +127,11 @@
   "Face for show-paren mode, when parens match.")
 (defvar show-paren-deactivated-until-active-mark nil)
 (add-hook 'activate-mark-hook   #'(lambda () (when show-paren-mode
-                                               (setq show-paren-deactivated-until-active-mark t)
-                                               (show-paren-mode -1))))
+                                          (setq show-paren-deactivated-until-active-mark t)
+                                          (show-paren-mode -1))))
 (add-hook 'deactivate-mark-hook #'(lambda () (when show-paren-deactivated-until-active-mark
-                                               (setq show-paren-deactivated-until-active-mark nil)
-                                               (show-paren-mode 1))))
+                                          (setq show-paren-deactivated-until-active-mark nil)
+                                          (show-paren-mode 1))))
 
 (defvar-local show-paren-advice-enabled t)
 (add-hook 'my/-find-large-file-hook
@@ -213,13 +213,13 @@ the syntax class ')'."
 ;; Tab settings
 (setq-default tab-width 4
               backward-delete-char-untabify-method 'hungry)
-; use spaces (not tabs) for indenting
+;; use spaces (not tabs) for indenting
 (setq-default indent-tabs-mode nil)
 
 ;; make "yes or no" "y or n"
 (fset 'yes-or-no-p 'y-or-n-p)
 
-; no bells please
+;; no bells please
 (setq ring-bell-function (lambda nil nil))
 
 ;; disable startup echo area message

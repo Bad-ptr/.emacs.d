@@ -753,12 +753,13 @@ int main (int argc, char **argv) {
 ;;   )
 
 
-;; projectile
+;; ;; projectile
 ;; (with-eval-after-load "projectile-autoloads"
 ;;   (setq projectile-keymap-prefix (kbd "C-x p"))
 ;;   (projectile-global-mode)
-;;   (with-eval-after-load "helm-projectile-autoloads"
-;;     (helm-projectile-on)))
+;;   ;; (with-eval-after-load "helm-projectile-autoloads"
+;;   ;;   (helm-projectile-on))
+;;   )
 
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"

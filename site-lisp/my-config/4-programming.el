@@ -23,11 +23,11 @@
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
 (defvar my/-prog-mode-hooks (if (< emacs-major-version 24)
-                                 '(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
-                                                        lisp-mode-hook lisp-interaction-mode-hook
-                                                        ielm-mode-hook)
-                               '(prog-mode-hook cperl-mode-hook ielm-mode-hook
-                                                eval-expression-minibuffer-setup-hook))
+								'(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
+													   lisp-mode-hook lisp-interaction-mode-hook
+													   ielm-mode-hook)
+							  '(prog-mode-hook cperl-mode-hook ielm-mode-hook
+											   eval-expression-minibuffer-setup-hook))
   "List of programming mode hooks.")
 
 ;; Common hook place for programming modes
@@ -443,14 +443,14 @@ of FILE in the current directory, suitable for creation"
           (indent-according-to-mode)))
 
       (sp-with-modes '(elixir-mode)
-        (sp-local-pair "fn" "end"
-                       :when '(("SPC" "RET"))
-                       :post-handlers '(:add my-elixir-do-end-close-action)
-                       :actions '(insert))
-        (sp-local-pair "do" "end"
-                       :when '(("SPC" "RET"))
-                       :post-handlers '(:add my-elixir-do-end-close-action)
-                       :actions '(insert))))
+					 (sp-local-pair "fn" "end"
+									:when '(("SPC" "RET"))
+									:post-handlers '(:add my-elixir-do-end-close-action)
+									:actions '(insert))
+					 (sp-local-pair "do" "end"
+									:when '(("SPC" "RET"))
+									:post-handlers '(:add my-elixir-do-end-close-action)
+									:actions '(insert))))
     (add-hook 'elixir-mode-hook #'turn-on-smartparens-mode)))
 
 
