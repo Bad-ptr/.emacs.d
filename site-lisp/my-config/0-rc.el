@@ -260,7 +260,17 @@ the syntax class ')'."
     (indent-according-to-mode)))
 (global-set-key (kbd "C-o") #'my/-open-line)
 
-
+;; delete region ignoring read-only text properties
+(defun my/-delete-region-even-if-readonly (&optional start end)
+  (interactive "r")
+  (when (and transient-mark-mode mark-active)
+    (unless start (setq start (point)))
+    (unless end (setq end (mark)))
+    (when (> start end) (rotatef start end)))
+  (when (and start end)
+    (let ((inhibit-read-only t))
+      (delete-region start end))))
+(global-set-key (kbd "s-<delete>") #'my/-delete-region-even-if-readonly)
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)
 (define-key minibuffer-local-map (kbd "<down>") 'next-complete-history-element)
 
