@@ -23,6 +23,9 @@
 
 (add-hook 'tabulated-list-mode-hook #'(lambda () (hl-line-mode 1)))
 
+(with-eval-after-load "comint"
+  (push #'comint-truncate-buffer comint-output-filter-functions))
+
 
 ;;Jabber
 (with-eval-after-load "jabber"
