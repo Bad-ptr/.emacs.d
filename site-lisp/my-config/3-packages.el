@@ -133,7 +133,46 @@ That is, a string used to represent it on the tab bar."
 
 ;; drag-stuff
 (with-eval-after-load "drag-stuff-autoloads"
-  (drag-stuff-global-mode 1))
+  (drag-stuff-global-mode 1)
+
+  (defun drag-stuff-sexp-left (arg)
+    "Drags word left ARG times."
+    (drag-stuff-sexp-horizontally (- arg)))
+
+  (defun drag-stuff-sexp-right (arg)
+    "Drags word right ARG times."
+    (drag-stuff-sexp-horizontally arg))
+
+  (defun drag-stuff-sexp-horizontally (arg)
+    "Drags word horizontally ARG times."
+    (let ((old-point (point))
+          (offset (- (save-mark-and-excursion (forward-sexp) (point)) (point))))
+      (condition-case err
+          (progn
+            (transpose-sexps arg)
+            (backward-char offset))
+        (error
+         (message
+          (if (> arg 0)
+              "Can not move word further to the right"
+            "Can not move word further to the left"))
+         (goto-char old-point)))))
+
+  (defun drag-stuff-right (arg)
+    "Drag stuff ARG lines to the right."
+    (interactive "p")
+    (if mark-active
+        (drag-stuff-region-right arg)
+      (drag-stuff-sexp-right arg)))
+
+  (defun drag-stuff-left (arg)
+    "Drag stuff ARG lines to the left."
+    (interactive "p")
+    (if mark-active
+        (drag-stuff-region-left arg)
+      (drag-stuff-sexp-left arg)))
+
+  (drag-stuff-define-keys))
 
 ;; ;; popwin
 ;; (with-eval-after-load "popwin-autoloads"
