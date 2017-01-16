@@ -343,9 +343,11 @@ If no pair found then use p-str as opening and closing."
   (let ((fun-name (intern (concat "w-w/insert-for-" key)))
         (key-seq (read-kbd-macro key)))
     (eval
-     `(defun ,fun-name ()
-        (interactive)
-        (w-w/with-term-funcs ,body)))
+     `(defun ,fun-name (&optional insert-as-is)
+        (interactive "P")
+        (if insert-as-is
+            (self-insert-command 1)
+          (w-w/with-term-funcs ,body))))
     (define-key wrap-with-mode-map key-seq fun-name)))
 
 (defvar wrap-with-mode-map (make-sparse-keymap)
