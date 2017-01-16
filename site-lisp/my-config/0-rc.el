@@ -271,9 +271,11 @@ the syntax class ')'."
     (let ((inhibit-read-only t))
       (delete-region start end))))
 (global-set-key (kbd "s-<delete>") #'my/-delete-region-even-if-readonly)
+
+(define-key minibuffer-local-map (kbd "C-<up>") 'previous-line)
+(define-key minibuffer-local-map (kbd "C-<down>") 'next-line)
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)
 (define-key minibuffer-local-map (kbd "<down>") 'next-complete-history-element)
-
 
 
 ;; backups
