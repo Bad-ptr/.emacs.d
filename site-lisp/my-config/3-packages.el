@@ -899,11 +899,9 @@ int main (int argc, char **argv) {
   ;;     :save-vars '(major-mode default-directory)
   ;;     :after-load-function #'(lambda (b &rest _) (with-current-buffer b (magit-refresh)))))
 
-  (defvar after-find-file-hook nil)
-
+  ;; (defvar after-find-file-hook nil)
   ;; (defun my/-after-find-file-adv (&rest args)
   ;;   (run-hooks 'after-find-file-hook))
-
   ;; (advice-add 'find-file :after 'my/-after-find-file-adv)
 
   ;; (def-auto-persp "projectile"
@@ -920,6 +918,7 @@ int main (int argc, char **argv) {
   ;;       (abbreviate-file-name (projectile-project-root))))
 
   ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
+  ;; (add-hook 'persp-after-load-state-functions #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
 
 
   (push #'(lambda () (persp-mode 1)
@@ -929,17 +928,6 @@ int main (int argc, char **argv) {
             ;;   (persp-update-completion-system 'completing-read))
             )
         after-init-hook))
-
-(with-eval-after-load "persp-mode"
-  (with-eval-after-load "ivy"
-    (setq ivy-sort-functions-alist
-          (append ivy-sort-functions-alist
-                  '((persp-kill-buffer   . nil)
-                    (persp-remove-buffer . nil)
-                    (persp-add-buffer    . nil)
-                    (persp-switch        . nil)
-                    (persp-window-switch . nil)
-                    (persp-frame-switch  . nil))))))
 
 ;; (with-eval-after-load "persp-mode"
 ;;   (with-eval-after-load "helm-mode"
@@ -1078,6 +1066,11 @@ int main (int argc, char **argv) {
 ;;                   helm-completing-read-handlers-alist))))
 
 (with-eval-after-load "persp-mode"
+  (with-eval-after-load "persp-fr-autoloads"
+    (setq persp-fr-title-prefix "")
+    (persp-fr-start)))
+
+(with-eval-after-load "persp-mode"
   (defvar persp-names-sorted (and (bound-and-true-p *persp-hash*) (persp-names))
     "Ordered list of perspective names.")
 
@@ -1108,3 +1101,147 @@ int main (int argc, char **argv) {
 
   (defsubst* persp-names-sorted (&optional (phash *persp-hash*)) (append persp-names-sorted nil))
   (defun persp-names-current-frame-fast-ordered () (append persp-names-sorted nil)))
+
+
+(with-eval-after-load "persp-mode"
+  (with-eval-after-load "ivy"
+    (setq ivy-sort-functions-alist
+          (append ivy-sort-functions-alist
+                  '((persp-kill-buffer   . nil)
+                    (persp-remove-buffer . nil)
+                    (persp-add-buffer    . nil)
+                    (persp-switch        . nil)
+                    (persp-window-switch . nil)
+                    (persp-frame-switch  . nil))))))
+
+;; (with-eval-after-load "persp-mode"
+;;   (require 'erc)
+;;   (with-eval-after-load "erc"
+;;     (def-persp-buffer-save/load :mode 'erc-mode :tag-symbol 'def-erc-server
+;;       :save-vars '("^erc-session-.+" "^erc-server-.+")
+;;       :save-function #'(lambda (buffer tag lvars)
+;;                          (if (get-buffer-process buffer)
+;;                              (progn
+;;                                (push (cons 'persp-erc-chans
+;;                                            (mapcar #'buffer-name
+;;                                                    (erc-channel-list (get-buffer-process buffer))))
+;;                                      lvars)
+;;                                (push (cons 'persp-erc-persp-name (car (buffer-local-value
+;;                                                                        'persp-buffer-in-persps
+;;                                                                        buffer)))
+;;                                      lvars)
+;;                                (list tag (buffer-name buffer) lvars))
+;;                            'skip))
+;;       :after-load-function
+;;       #'(lambda (erc-buf &rest _other)
+;;           (lexical-let (chans erc-persp-name erc-persp
+;;                               (erc-buf erc-buf) initial-persp erc-window
+;;                               persp-erc-after-connect-lambda persp-erc-join-lambda)
+;;             (setq persp-erc-after-connect-lambda
+;;                   #'(lambda (ntwrk nck)
+;;                       (if (and (window-live-p erc-window) (eq erc-buf (window-buffer erc-window)))
+;;                           (select-window erc-window)
+;;                         (setq erc-window (selected-window))
+;;                         (set-window-buffer erc-window erc-buf))
+;;                       (add-hook 'erc-server-JOIN-functions persp-erc-join-lambda t)
+;;                       (mapc #'(lambda (chan)
+;;                                 (with-current-buffer erc-buf
+;;                                   (persp-add-buffer (erc-join-channel chan nil) erc-persp)))
+;;                             chans)
+;;                       (remove-hook 'erc-after-connect persp-erc-after-connect-lambda)
+;;                       nil)
+;;                   persp-erc-join-lambda
+;;                   #'(lambda (proc parsed)
+;;                       (if chans
+;;                           (when (eq proc (get-buffer-process erc-buf))
+;;                             (let ((chan (erc-response.contents parsed)))
+;;                               (when (member chan chans)
+;;                                 (setq chans (delete chan chans))
+;;                                 (when erc-persp (persp-add-buffer chan erc-persp))
+;;                                 (unless chans
+;;                                   (remove-hook 'erc-server-JOIN-functions persp-erc-join-lambda)
+;;                                   ;; (persp-frame-switch (safe-persp-name initial-persp))
+;;                                   ))))
+;;                         (remove-hook 'erc-server-JOIN-functions persp-erc-join-lambda))
+;;                       nil))
+;;             (with-current-buffer erc-buf
+;;               (setq chans persp-erc-chans
+;;                     erc-persp-name persp-erc-persp-name))
+;;             (when erc-persp-name
+;;               (setq erc-persp (persp-get-by-name erc-persp-name))
+;;               (setq initial-persp (get-current-persp))
+;;               (persp-frame-switch erc-persp-name))
+;;             (setq erc-window (get-buffer-window erc-buf (selected-frame)))
+;;             (if (window-live-p erc-window)
+;;                 (select-window erc-window)
+;;               (setq erc-window (selected-window))
+;;               (set-window-buffer erc-window erc-buf))
+;;             (add-hook 'erc-after-connect persp-erc-after-connect-lambda t)
+;;             (with-current-buffer erc-buf
+;;               (erc-server-reconnect)
+;;               (persp-special-last-buffer-make-current)))))))
+
+;; (with-eval-after-load "persp-mode"
+
+;;   (defun persp-remove-killed-buffers ()
+;;     (interactive)
+;;     (mapc #'(lambda (p)
+;;               (when p
+;;                 (setf (persp-buffers p)
+;;                       (delete-if-not #'buffer-live-p
+;;                                      (persp-buffers p)))))
+;;           (persp-persps)))
+
+
+;;   (defvar persp-trace-buffers-hash (make-hash-table :test #'equal))
+
+;;   (add-hook 'persp-renamed-functions
+;;             #'(lambda (persp old-name new-name)
+;;                 (let ((bufs (gethash old-name persp-trace-buffers-hash)))
+;;                   (remhash old-name persp-trace-buffers-hash)
+;;                   (puthash new-name bufs persp-trace-buffers-hash))))
+
+;;   (add-hook 'persp-before-kill-functions
+;;             #'(lambda (persp)
+;;                 (remhash (safe-persp-name persp) persp-trace-buffers-hash)))
+
+;;   (add-hook 'persp-created-functions
+;;             #'(lambda (persp phash)
+;;                 (when (eq phash *persp-hash*)
+;;                   (puthash (safe-persp-name persp) nil persp-trace-buffers-hash))))
+
+;;   (defun persp--check-for-killed-buffers (&optional persp)
+;;     (when persp-mode
+;;       (if persp
+;;           (let ((known-buffers (append (gethash (persp-name persp) persp-trace-buffers-hash) nil)))
+;;             (dolist (buf (persp-buffers persp))
+;;               (if (not (buffer-live-p buf))
+;;                   (message "[persp-mode] Warning: Found killed buffer in the %s perspective."
+;;                            (persp-name persp))
+;;                 (setq known-buffers (delete (buffer-name buf) known-buffers))))
+;;             (when known-buffers
+;;               (message "[persp-mode] Warning: These %s buffers was killed, but not removed from the %s perspective"
+;;                        known-buffers (persp-name persp))))
+;;         (mapc #'persp--check-for-killed-buffers (delq nil (persp-persps))))))
+
+;;   (defun* persp-add-buffer-after-adv (buff-or-name &optional persp &rest _rargs)
+;;     (when persp
+;;       (let* ((buf (get-buffer buff-or-name))
+;;              (buf-name (buffer-name buf))
+;;              (known-buffers (gethash (persp-name persp) persp-trace-buffers-hash)))
+;;         (when (and (memq buf (persp-buffers persp))
+;;                    (not (member buf-name known-buffers)))
+;;           (puthash (persp-name persp) (cons buf-name known-buffers) persp-trace-buffers-hash)))
+;;       (persp--check-for-killed-buffers)))
+;;   (defun* persp-remove-buffer-after-adv (buff-or-name &optional persp &rest _rargs)
+;;     (when persp
+;;       (puthash (persp-name persp)
+;;                (delete (buffer-name (get-buffer buff-or-name))
+;;                        (gethash (persp-name persp) persp-trace-buffers-hash))
+;;                persp-trace-buffers-hash)
+;;       (persp--check-for-killed-buffers)))
+
+;;   (advice-add #'persp-add-buffer    :after #'persp-add-buffer-after-adv)
+;;   (advice-add #'persp-remove-buffer :after #'persp-remove-buffer-after-adv)
+
+;;   (run-at-time t 30 #'persp--check-for-killed-buffers))
