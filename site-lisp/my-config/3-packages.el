@@ -547,6 +547,16 @@ int main (int argc, char **argv) {
   (wrap-with-mode t))
 (require 'wrap-with nil t)
 
+;; smartparens
+(with-eval-after-load "smartparens"
+  (setq sp-show-pair-delay 0.2
+        ;; fix paren highlighting in normal mode
+        sp-show-pair-from-inside t
+        sp-cancel-autoskip-on-backward-movement nil
+        sp-highlight-pair-overlay nil
+        sp-highlight-wrap-overlay nil
+        sp-highlight-wrap-tag-overlay nil))
+
 ;; company-mode https://gist.github.com/Bad-ptr/7787596
 (with-eval-after-load "company-autoloads"
   (global-company-mode 1)
