@@ -43,6 +43,8 @@
                                         nickname (jabber-muc-read-my-nickname jc group))
                                   (jabber-muc-join jc group nickname)))))))
 
+(with-eval-after-load "edit-list-autoloads"
+  (autoload 'edit-list "edit-list" "edit list" t))
 
 ;; ;; ido
 ;; (defface ido-first-match  '((default :weight bold)
