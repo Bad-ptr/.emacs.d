@@ -141,14 +141,14 @@ buffer-local wherever it is set."
                   (setq i (1+ i)))
                 bf))
          (errbrief (concat
-                    (format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
+                    (format "%s: %s" (propertize ecs 'face (or face 'error)) msg)
                     (and load-in-progress
                          (format "\n\tIn %s." (or load-file-name (buffer-file-name))))
                     (and my/-load-in-progress
                          (format "\n\tIn %s." my/-load-file-name))))
          (errstr (concat
                   errbrief
-                  ;;(format "%s: %s" (propertize ecs 'face (or face 'compilation-error)) msg)
+                  ;;(format "%s: %s" (propertize ecs 'face (or face 'error)) msg)
                   (and call-stack
                        (format "\n Call stack:\n\t\t%s"
                                (mapconcat #'(lambda (elt) (format "%s" elt))
@@ -163,7 +163,7 @@ buffer-local wherever it is set."
         (special-mode))
       (read-only-mode -1)
       (goto-char (point-min))
-      (insert-string errstr)
+      (insert errstr)
       (newline)
       (read-only-mode 1)
       (font-lock-add-keywords nil `((,(concat "^\\[" error-class "\\]") 0 'error t))))
