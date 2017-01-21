@@ -394,6 +394,9 @@ int main (int argc, char **argv) {
 ;; highlight-symbol
 (with-eval-after-load "highlight-symbol-autoloads"
   (setq highlight-symbol-disable '())
+  (with-eval-after-load "highlight-symbol"
+    (set-face-background 'highlight-symbol-face nil)
+    (set-face-underline 'highlight-symbol-face "#0F0"))
   (add-hook 'my/-prog-mode-hook
             (lambda ()
               (when (null (memql major-mode highlight-symbol-disable))
