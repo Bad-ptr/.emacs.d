@@ -251,7 +251,8 @@ of FILE in the current directory, suitable for creation"
   (concatenate 'list
                (when (and global-ede-mode ede-object)
                  (append
-                  (ede-system-include-path ede-object)
+                  (ignore-errors
+                    (ede-system-include-path ede-object))
                   (when ede-object-project
                     (mapcar #'(lambda (s)
                                 (when (string-prefix-p "/" s)
@@ -260,7 +261,8 @@ of FILE in the current directory, suitable for creation"
                                                        (concat "." s)
                                                        ;;(substring s 1)
                                                        )))
-                            (oref ede-object-project include-path)))))
+                            (ignore-errors
+                              (oref ede-object-project include-path))))))
                (when semantic-mode
                  semantic-dependency-system-include-path)
                my/-c-include-paths))
