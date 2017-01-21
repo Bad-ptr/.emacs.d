@@ -13,7 +13,7 @@
         (helm-dash        . "localhost")
         (golden-ratio     . "localhost")))
 
-(defun fbread-mode()
+(defun fbread-mode ()
   (interactive)
   (sgml-mode)
   (sgml-tags-invisible 0)

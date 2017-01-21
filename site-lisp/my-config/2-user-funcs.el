@@ -75,12 +75,12 @@ Does not indent buffer, because it is used for a before-save-hook, and that
 might be bad."
   (interactive)
   ;;(let ((m-m major-mode))
-    ;;(fundamental-mode)
-    (untabify-buffer)
-    (delete-trailing-whitespace)
-    (set-buffer-file-coding-system 'utf-8)
-    ;;(funcall m-m)
-    ;;)
+  ;;(fundamental-mode)
+  (untabify-buffer)
+  (delete-trailing-whitespace)
+  (set-buffer-file-coding-system 'utf-8)
+  ;;(funcall m-m)
+  ;;)
   )
 
 (defun cleanup-buffer ()
@@ -102,16 +102,17 @@ Including indent-buffer, which should not be called automatically on save."
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
-(defun toggle-mode-line-to header () "toggles the modeline to header"
+(defun toggle-mode-line-to-header ()
+  "toggles the modeline to header"
   (interactive)
   (setq mode-line-format
-    (if (equal mode-line-format nil)
-        (progn
-          (setq header-line-format (default-value 'header-line-format))
-          (default-value 'mode-line-format))
-      (let ((hlf header-line-format))
-        (setq header-line-format mode-line-format)
-      hlf)))
+        (if (equal mode-line-format nil)
+            (progn
+              (setq header-line-format (default-value 'header-line-format))
+              (default-value 'mode-line-format))
+          (let ((hlf header-line-format))
+            (setq header-line-format mode-line-format)
+            hlf)))
   (redraw-display))
 
 
