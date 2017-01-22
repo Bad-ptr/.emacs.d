@@ -723,46 +723,48 @@ int main (int argc, char **argv) {
 
 (with-eval-after-load "counsel-autoloads"
   (setq counsel-find-file-at-point t)
+
   (autoload 'rgrep-default-command "grep")
   (defun counsel-rgrep (&optional zgrep-p)
     (interactive "P")
     (require 'counsel)
-    (ivy-set-prompt 'counsel-ag counsel-prompt-function)
-    (ivy-read (if zgrep-p "zrgrep" "rgrep")
-              #'(lambda (string)
-                  (if (< (length string) 3)
-                      (counsel-more-chars 3)
-                    (grep-compute-defaults)
-                    (let ((regex (counsel-unquote-regex-parens
-                                  (setq ivy--old-re
-                                        (ivy--regex string)))))
-                      (if zgrep-p
-                          (let ((grep-program "zgrep")
-                                (grep-find-template nil)
-                                (grep-find-command nil)
-                                (grep-host-defaults-alist nil)
-                                (grep-files-aliases '(("all" . "* .*")
-                                                      ("gz"  . "*.gz"))))
-                            (grep-compute-defaults)
-                            (let ((rgrep-cmd
-                                   (concat (rgrep-default-command regex "*" "./")
-                                           " || true")))
-                              (counsel--async-command rgrep-cmd)))
-                        (let ((rgrep-cmd
-                               ;; (format
-                               ;;  "grep --color=never -i -nH -e %s -R ./"
-                               ;;  (shell-quote-argument regex))
-                               (rgrep-default-command regex "*" "./")))
-                          (counsel--async-command rgrep-cmd)))
-                      nil)))
-              :dynamic-collection t
-              :keymap counsel-ag-map
-              :history 'counsel-git-grep-history
-              :action #'counsel-git-grep-action
-              :unwind (lambda ()
-                        (counsel-delete-process)
-                        (swiper--cleanup))
-              :caller 'counsel-rgrep))
+    (ivy-set-prompt 'counsel-rgrep counsel-prompt-function)
+    (let ((file-name-pattern
+           (read-string "File name pattern: " "*" nil "*"))
+          (grep-program (if zgrep-p "zgrep" "grep")))
+      (ivy-read (if zgrep-p "zrgrep" "rgrep")
+                (apply-partially
+                 #'(lambda (dir file-name-pattern grep-progam string)
+                     (if (< (length string) 3)
+                         (counsel-more-chars 3)
+                       (let ((regex ;; (counsel-unquote-regex-parens
+                              ;;  (setq ivy--old-re
+                              ;;        (ivy--regex string)))
+                              string)
+                             (counsel--git-grep-dir dir)
+                             grep-find-template
+                             grep-find-command
+                             grep-host-defaults-alist)
+                         (grep-compute-defaults)
+                         (let ((rgrep-cmd
+                                (concat (rgrep-default-command regex file-name-pattern dir)
+                                        (when (string= "zgrep" grep-program)
+                                          " || true"))))
+                           (counsel--async-command rgrep-cmd))
+                         nil)))
+                 "./" file-name-pattern grep-program)
+                :dynamic-collection t
+                :keymap counsel-ag-map
+                :history 'counsel-git-grep-history
+                :re-builder #'ivy--regex
+                :action #'counsel-git-grep-action
+                :unwind (lambda ()
+                          (counsel-delete-process)
+                          (swiper--cleanup))
+                :caller 'counsel-rgrep)))
+  (ivy-set-display-transformer 'counsel-rgrep 'counsel-git-grep-transformer)
+  ;; (push '(counsel-git-grep . ivy--regex-plus) ivy-re-builders-alist)
+
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
@@ -775,6 +777,7 @@ int main (int argc, char **argv) {
   (global-set-key (kbd "C-c k") 'counsel-rgrep)
   (global-set-key (kbd "C-x l") 'counsel-locate)
   (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+
 (with-eval-after-load "swiper-autoloads"
   (setq swiper-action-recenter t)
   (global-set-key "\C-s" 'swiper))
