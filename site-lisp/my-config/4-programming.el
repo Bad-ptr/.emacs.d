@@ -14,7 +14,7 @@
 ;; make file executable if it's a script
 (add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
 
-(defvar project-license "GPL either version 2 or any later version"
+(defvar project-license "GPL either version 3 or any later version"
   "Default license for new files.")
 
 (with-eval-after-load "template"
