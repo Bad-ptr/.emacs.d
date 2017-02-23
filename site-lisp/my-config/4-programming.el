@@ -35,6 +35,7 @@
   (add-hook hook #'(lambda () (run-hooks 'my/-prog-mode-hook))))
 
 (unless (version< emacs-version "24.4")
+  (setq prettify-symbols-unprettify-at-point 'right-edge)
   (global-prettify-symbols-mode 1))
 
 (add-hook
