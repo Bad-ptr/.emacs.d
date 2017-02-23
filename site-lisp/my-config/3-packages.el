@@ -131,6 +131,11 @@ That is, a string used to represent it on the tab bar."
                          (length (tabbar-view
                                   (tabbar-current-tabset))))))))))
 
+;; move where I mean
+(with-eval-after-load "mwim-autoloads"
+  (global-set-key (kbd "C-a") 'mwim-beginning-of-code-or-line)
+  (global-set-key (kbd "C-e") 'mwim-end-of-code-or-line))
+
 ;; drag-stuff
 (with-eval-after-load "drag-stuff-autoloads"
   (drag-stuff-global-mode 1)
