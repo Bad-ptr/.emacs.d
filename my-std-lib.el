@@ -182,7 +182,7 @@ buffer-local wherever it is set."
 
 (defun my/-load-directory (dir)
   (when (file-directory-p dir)
-    (dolist (file (directory-files dir t ".+\.el"))
+    (dolist (file (directory-files dir t "[0-9a-zA-Z].*\.el"))
       (load file))))
 
 (with-eval-after-load "package"
