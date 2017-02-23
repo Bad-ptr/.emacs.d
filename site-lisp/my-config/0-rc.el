@@ -91,9 +91,9 @@
       search-highlight t)
 
 ;; Cursor
-(setq-default cursor-type 'hbar
+(setq-default cursor-type 'box
               cursor-in-non-selected-windows 'hollow)
-(set-face-background 'cursor "#000")
+(set-face-background 'cursor "#080")
 (blink-cursor-mode 1)
 
 ;; Show marked text
