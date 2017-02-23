@@ -202,7 +202,16 @@ re-downloaded in order to locate PACKAGE."
     (interactive)
     (when (boundp 'my/-favourite-packages-list)
       (dolist (pkg my/-favourite-packages-list)
-        (require-package pkg)))))
+        (require-package pkg))))
+  (defun my/-install-elpa-package (&optional package)
+    (interactive)
+    (let (package-archives)
+      (add-to-list 'package-archives
+                   '("GNU/ELPA" . "http://elpa.gnu.org/packages/"))
+      (package-refresh-contents)
+      (if package
+          (package-install package)
+        (call-interactively #'package-install)))))
 
 
 (unless (version< emacs-version "24.1")
