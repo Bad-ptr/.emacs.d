@@ -721,6 +721,7 @@ int main (int argc, char **argv) {
     ;; (require 'ivy-rich)
     (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)))
 
+;; counsel
 (with-eval-after-load "counsel-autoloads"
   (setq counsel-find-file-at-point t)
 
@@ -766,6 +767,7 @@ int main (int argc, char **argv) {
   ;; (push '(counsel-git-grep . ivy--regex-plus) ivy-re-builders-alist)
 
   (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "M-y") 'counsel-yank-pop)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
   (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
