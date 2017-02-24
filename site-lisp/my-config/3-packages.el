@@ -731,13 +731,16 @@ int main (int argc, char **argv) {
   (setq counsel-find-file-at-point t)
 
   (autoload 'rgrep-default-command "grep")
+  (defvar counsel-rgrep-last-cmd ""
+    "Last command generated in counsel-rgrep")
   (defun counsel-rgrep (&optional zgrep-p)
     (interactive "P")
     (require 'counsel)
     (ivy-set-prompt 'counsel-rgrep counsel-prompt-function)
     (let ((file-name-pattern
            (read-string "File name pattern: " "*" nil "*"))
-          (grep-program (if zgrep-p "zgrep" "grep")))
+          (grep-program (if zgrep-p "zgrep" "grep"))
+          (counsel--git-grep-dir (expand-file-name "./")))
       (ivy-read (if zgrep-p "zrgrep" "rgrep")
                 (apply-partially
                  #'(lambda (dir file-name-pattern grep-progam string)
@@ -747,16 +750,15 @@ int main (int argc, char **argv) {
                               ;;  (setq ivy--old-re
                               ;;        (ivy--regex string)))
                               string)
-                             (counsel--git-grep-dir dir)
                              grep-find-template
                              grep-find-command
                              grep-host-defaults-alist)
                          (grep-compute-defaults)
-                         (let ((rgrep-cmd
-                                (concat (rgrep-default-command regex file-name-pattern dir)
-                                        (when (string= "zgrep" grep-program)
-                                          " || true"))))
-                           (counsel--async-command rgrep-cmd))
+                         (setq counsel-rgrep-last-cmd
+                               (concat (rgrep-default-command regex file-name-pattern dir)
+                                       (when (string= "zgrep" grep-program)
+                                         " || true")))
+                         (counsel--async-command counsel-rgrep-last-cmd)
                          nil)))
                  "./" file-name-pattern grep-program)
                 :dynamic-collection t
@@ -769,6 +771,22 @@ int main (int argc, char **argv) {
                           (swiper--cleanup))
                 :caller 'counsel-rgrep)))
   (ivy-set-display-transformer 'counsel-rgrep 'counsel-git-grep-transformer)
+
+  (defun counsel-rgrep-occur ()
+    "Generate a custom occur buffer for `counsel-rgrep'.
+When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
+    (unless (eq major-mode 'ivy-occur-grep-mode)
+      (ivy-occur-grep-mode))
+    (setq default-directory counsel--git-grep-dir)
+    (let* ((cmd-out (shell-command-to-string counsel-rgrep-last-cmd))
+           (cands (split-string cmd-out "\n" t)))
+      ;; Need precise number of header lines for `wgrep' to work.
+      (insert (format "-*- mode:grep; default-directory: %S -*-\n\n\n"
+                      default-directory))
+      (insert (format "%d candidates:\n" (length cands)))
+      (ivy--occur-insert-lines cands)))
+
+  (ivy-set-occur 'counsel-rgrep 'counsel-rgrep-occur)
   ;; (push '(counsel-git-grep . ivy--regex-plus) ivy-re-builders-alist)
 
   (global-set-key (kbd "M-x") 'counsel-M-x)
