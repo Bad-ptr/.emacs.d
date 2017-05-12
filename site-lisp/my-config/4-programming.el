@@ -86,7 +86,8 @@
                                  (file-name-sans-extension file)))))))))
 
 (with-eval-after-load "clean-aindent-mode-autoloads"
-  (add-hook 'my/-prog-mode-hook #'clean-aindent-mode))
+  (add-hook 'my/-prog-mode-hook #'clean-aindent-mode)
+  (add-hook 'text-mode-hook #'clean-aindent-mode))
 
 (with-eval-after-load "dtrt-indent-autoloads"
   (dtrt-indent-mode 1)
