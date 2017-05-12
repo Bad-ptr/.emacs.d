@@ -39,12 +39,21 @@
   (setq prettify-symbols-unprettify-at-point 'right-edge)
   (global-prettify-symbols-mode 1))
 
+(let ((hook-lambda
+       #'(lambda ()
+           (auto-fill-mode 1)
+           (whitespace-mode 1)))
+      (text-hooks '(text-mode-hook)))
+  (dolist (text-hook text-hooks)
+    (add-hook text-hook hook-lambda)))
+
 (add-hook
  'my/-prog-mode-hook
  #'(lambda ()
      (eldoc-mode 1)
 
-     (setq show-trailing-whitespace t)
+     ;; (setq show-trailing-whitespace t)
+     (whitespace-mode 1)
 
      (font-lock-add-keywords
       nil '(("("   . 'open-paren-face)   (")" . 'close-paren-face)

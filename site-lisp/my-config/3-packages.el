@@ -26,6 +26,9 @@
 (with-eval-after-load "comint"
   (push #'comint-truncate-buffer comint-output-filter-functions))
 
+(with-eval-after-load "whitespace"
+  (setq whitespace-style '(face lines-tail trailing tab-mark)
+        whitespace-line-column fill-column))
 
 ;;Jabber
 (with-eval-after-load "jabber"
