@@ -1,14 +1,14 @@
 ;;; (>>>FILE<<<) --- (>>>Short_description<<<). -*- lexical-binding: t; -*-
 
 ;; Copyright (C) (>>>YEAR<<<) (>>>USER_NAME<<<)
-;;
+
 ;; Author: (>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>
 ;; Version: (>>>Version<<<)
 ;; Package-Requires: ((>>>Dependencies<<<))
 ;; Date: (>>>VC_DATE<<<)
-;; License: GPL either version 2 or any later version
+;; License: GPL either version 3 or any later version
 ;; Keywords: (>>>Keywords<<<)
-;; X-URL: (>>>Url<<<)
+;; URL: (>>>Url<<<)
 
 ;;; License:
 
@@ -32,10 +32,15 @@
 
 ;; (>>>Long_description<<<)
 
-;; Put this file into your load-path and the following into your ~/.emacs:
-;;   (require '(>>>FILE_SANS<<<))
+;;; Usage:
+
+;; Installation:
+
+;; M-x package-install-file RET (>>>FILE<<<) RET
+
 
 ;;; Code:
+
 
 (require 'cl-lib)
 
