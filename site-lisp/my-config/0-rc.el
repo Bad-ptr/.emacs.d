@@ -211,6 +211,9 @@ the syntax class ')'."
 ;; show buffer size
 (size-indication-mode 1)
 
+;; Fill column
+(setq-default fill-column 80)
+
 ;; Tab settings
 (setq-default tab-width 4
               backward-delete-char-untabify-method 'hungry)
