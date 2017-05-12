@@ -41,7 +41,7 @@
 (add-hook
  'my/-prog-mode-hook
  #'(lambda ()
-     (eldoc-mode)
+     (eldoc-mode 1)
 
      (setq show-trailing-whitespace t)
 
