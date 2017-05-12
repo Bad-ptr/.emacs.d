@@ -32,26 +32,29 @@
   (defun jabber-muc-join-group ()
     (interactive)
     (let ((account (jabber-read-account)))
-      (jabber-get-bookmarks account
-                            #'(lambda (jc bms)
-                                (let (groups group nickname)
-                                  (mapc #'(lambda (b)
-                                            (when (eq 'conference (jabber-xml-node-name b))
-                                              (push (make-symbol (jabber-xml-get-attribute b 'jid)) groups)))
-                                        bms)
-                                  (setq group (jabber-read-jid-completing "group: " groups)
-                                        nickname (jabber-muc-read-my-nickname jc group))
-                                  (jabber-muc-join jc group nickname)))))))
+      (jabber-get-bookmarks
+       account
+       #'(lambda (jc bms)
+           (let (groups group nickname)
+             (mapc #'(lambda (b)
+                       (when (eq 'conference (jabber-xml-node-name b))
+                         (push (make-symbol (jabber-xml-get-attribute b 'jid))
+                               groups)))
+                   bms)
+             (setq group (jabber-read-jid-completing "group: " groups)
+                   nickname (jabber-muc-read-my-nickname jc group))
+             (jabber-muc-join jc group nickname)))))))
 
 (with-eval-after-load "edit-list-autoloads"
   (autoload 'edit-list "edit-list" "edit list" t))
 
-;; ;; ido
-;; (defface ido-first-match  '((default :weight bold)
-;;                             (((class color) (min-colors 88) (background light))
-;;                              (:background "#DFD"))
-;;                             (((class color) (min-colors 88) (background dark))
-;;                              (:background "#474")))
+;; ido
+;; (defface ido-first-match
+;;   '((default :weight bold)
+;;     (((class color) (min-colors 88) (background light))
+;;      (:background "#DFD"))
+;;     (((class color) (min-colors 88) (background dark))
+;;      (:background "#474")))
 ;;   "Face used by Ido for highlighting first match."
 ;;   :group 'ido)
 ;; (with-eval-after-load "ido"
@@ -84,8 +87,12 @@
 ;;         (ido-grid-mode 1)))
 ;;   (with-eval-after-load "ido"
 ;;     ;; Display ido results vertically, rather than horizontally
-;;     (setq ido-decorations (quote ("\n-> " "" "\n   " "\n   ..." "[" "]" " [No match]" " [Matched]" " [Not readable]" " [Too big]" " [Confirm]")))
-;;     (defun ido-disable-line-truncation () (set (make-local-variable 'truncate-lines) nil))
+;;     (setq ido-decorations
+;;           (quote ("\n-> " "" "\n   " "\n   ..."
+;;                   "[" "]" " [No match]" " [Matched]" " [Not readable]"
+;;                   " [Too big]" " [Confirm]")))
+;;     (defun ido-disable-line-truncation ()
+;;       (set (make-local-variable 'truncate-lines) nil))
 ;;     (add-hook 'ido-minibuffer-setup-hook 'ido-disable-line-truncation)))
 
 ;; ;; smex
@@ -100,11 +107,13 @@
 ;;       (setq smex-save-file (expand-file-name "~/.emacs.d/.smex-items")))
 ;;   (with-eval-after-load "ido"
 ;;     (global-set-key
-;;      "\M-x" (lambda ()
-;;               (interactive)
-;;               (call-interactively
-;;                (intern
-;;                 (ido-completing-read "M-x " (all-completions "" obarray 'commandp))))))))
+;;      "\M-x"
+;;      (lambda ()
+;;        (interactive)
+;;        (call-interactively
+;;         (intern
+;;          (ido-completing-read
+;;           "M-x " (all-completions "" obarray 'commandp))))))))
 
 
 ;; Tabbar
@@ -151,7 +160,9 @@ That is, a string used to represent it on the tab bar."
   (defun drag-stuff-sexp-horizontally (arg)
     "Drags word horizontally ARG times."
     (let ((old-point (point))
-          (offset (- (save-mark-and-excursion (forward-sexp) (point)) (point))))
+          (offset (- (save-mark-and-excursion
+                       (forward-sexp) (point))
+                     (point))))
       (condition-case err
           (progn
             (transpose-sexps arg)
@@ -211,7 +222,8 @@ That is, a string used to represent it on the tab bar."
 
 ;; templates
 (with-eval-after-load "template"
-  (push (locate-user-emacs-file "site-lisp/templates/") template-default-directories)
+  (push (locate-user-emacs-file "site-lisp/templates/")
+        template-default-directories)
   (setq template-auto-insert t
         template-auto-update nil)
   (setq template-expansion-alist
@@ -259,29 +271,34 @@ int main (int argc, char **argv) {
         (setq skeletor--current-project-root dest
               skeletor-project-root dest
               skeletor-project-name project-name
-              skeletor-project-license (when .create-license?
-                                         (skeletor--read-license "License: " .license-file-name))
-              skeletor-project-spec (-concat
-                                     (list
-                                      (cons 'project-name project-name)
-                                      (cons 'project-dir skeletor-project-directory)
-                                      (cons 'dest dest)
-                                      (cons 'skeleton (skeletor--get-named-skeleton .name))
-                                      (cons 'license-file skeletor-project-license))
-                                     spec))
+              skeletor-project-license
+              (when .create-license?
+                (skeletor--read-license "License: " .license-file-name))
+              skeletor-project-spec
+              (-concat
+               (list
+                (cons 'project-name project-name)
+                (cons 'project-dir skeletor-project-directory)
+                (cons 'dest dest)
+                (cons 'skeleton (skeletor--get-named-skeleton .name))
+                (cons 'license-file skeletor-project-license))
+               spec))
         (setq skeletor-project-spec
               (-concat
                (list
-                (cons 'repls (-map 'skeletor--eval-substitution
-                                   (-concat
-                                    skeletor-global-substitutions
-                                    (list (cons "__PROJECT-NAME__" project-name)
-                                          (cons "__LICENSE-FILE-NAME__" .license-file-name))
-                                    .substitutions))))
+                (cons
+                 'repls
+                 (-map 'skeletor--eval-substitution
+                       (-concat
+                        skeletor-global-substitutions
+                        (list (cons "__PROJECT-NAME__" project-name)
+                              (cons "__LICENSE-FILE-NAME__" .license-file-name))
+                        .substitutions))))
                skeletor-project-spec)))))
   (setq skeletor-global-substitutions
         (nconc
-         (list (cons "__DATE-TIME__" #'(lambda () (format-time-string "%d/%m/%Y %H:%M")))
+         (list (cons "__DATE-TIME__"
+                     #'(lambda () (format-time-string "%d/%m/%Y %H:%M")))
                (cons "__USER-NICKNAME__" #'(lambda () user-nickname))
                (cons "__LICENSE__" #'skeletor-project-license-type))
          skeletor-global-substitutions)))
@@ -299,7 +316,8 @@ int main (int argc, char **argv) {
 
 (with-eval-after-load "hl-todo-autoloads"
   ;;(setq hl-todo-activate-in-modes '(prog-mode)
-  ;;(add-hook 'after-change-major-mode-hook #'(lambda () (turn-on-hl-todo-mode-if-desired)))
+  ;; (add-hook 'after-change-major-mode-hook
+  ;;           #'(lambda () (turn-on-hl-todo-mode-if-desired)))
   (with-eval-after-load "hl-todo"
     (setq hl-todo-keyword-faces
           '(("HOLD" . "#d0bf8f")
@@ -590,7 +608,8 @@ int main (int argc, char **argv) {
       (when (and header-line-format (version< emacs-version "24.3.93.3"))
         ;; http://debbugs.gnu.org/18384
         (cl-decf row))
-      (cons (+ col (window-hscroll) company-col-offset) (+ row company-row-offset))))
+      (cons (+ col (window-hscroll) company-col-offset)
+            (+ row company-row-offset))))
 
   (defun company-elisp-minibuffer (command &optional arg &rest ignored)
     "`company-mode' completion back-end for Emacs Lisp in the minibuffer."
@@ -607,23 +626,26 @@ int main (int argc, char **argv) {
 
   (defun minibuffer-company ()
     (unless company-mode
-      (when (and global-company-mode (or (eq this-command #'execute-extended-command)
-                                         (eq this-command #'eval-expression)))
+      (when (and global-company-mode
+                 (or (eq this-command #'execute-extended-command)
+                     (eq this-command #'eval-expression)))
 
         (setq-local company-minibuffer-mode this-command)
 
         (setq-local completion-at-point-functions
                     (list (if (fboundp 'elisp-completion-at-point)
                               #'elisp-completion-at-point
-                            #'lisp-completion-at-point) t))
+                            #'lisp-completion-at-point)
+                          t))
 
         (setq-local company-show-numbers nil)
         (setq-local company-backends '((company-elisp-minibuffer company-capf)))
         (setq-local company-tooltip-limit 8)
         (setq-local company-col-offset 1)
         (setq-local company-row-offset 1)
-        (setq-local company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
-                                        company-preview-if-just-one-frontend))
+        (setq-local company-frontends
+                    '(company-pseudo-tooltip-unless-just-one-frontend
+                      company-preview-if-just-one-frontend))
 
         (company-mode 1)
         (when (eq this-command #'execute-extended-command)
@@ -642,7 +664,8 @@ int main (int argc, char **argv) {
 ;;   (with-eval-after-load "auto-complete-autoloads"
 ;;     (require 'auto-complete)
 ;;     (require 'auto-complete-config)
-;;     ;;(add-to-list 'ac-dictionary-directories (concat my/-conf-path "auto-complete/dict"))
+;;     (add-to-list 'ac-dictionary-directories
+;;                  (concat my/-conf-path "auto-complete/dict"))
 ;;     ;;(require 'auto-complete-clang)
 ;;     ;;(require 'go-autocomplete)
 ;;     (ac-config-default)
@@ -667,15 +690,19 @@ int main (int argc, char **argv) {
 ;;          ;;ac-source-semantic-raw ac-source-ropemacs ac-source-symbols
 ;;          )))
 
-;;     (dolist (hook '(emacs-lisp-mode-hook inferior-emacs-lisp-mode
-;;                                          lisp-mode-hook lisp-interaction-mode-hook))
+;;     (dolist (hook '(emacs-lisp-mode-hook
+;;                     inferior-emacs-lisp-mode
+;;                     lisp-mode-hook lisp-interaction-mode-hook))
 ;;       (add-hook hook #'(lambda () (add-to-list 'ac-sources 'ac-source-symbols))))
-;;     (add-hook 'haskell-mode-hook #'(lambda () (add-to-list 'ac-sources 'ac-source-haskell)))
-;;     (add-hook 'c-mode-common-hook #'(lambda ()
-;;                                       ;;(setq ac-sources '(ac-source-clang ac-source-yasnippet))
-;;                                       (add-to-list 'ac-sources 'ac-source-clang)
-;;                                       ;;(setq ac-sources '(ac-source-semantic))
-;;                                       ))
+;;     (add-hook 'haskell-mode-hook
+;;               #'(lambda ()
+;;                   (add-to-list 'ac-sources 'ac-source-haskell)))
+;;     (add-hook 'c-mode-common-hook
+;;               #'(lambda ()
+;;                   ;;(setq ac-sources '(ac-source-clang ac-source-yasnippet))
+;;                   (add-to-list 'ac-sources 'ac-source-clang)
+;;                   ;;(setq ac-sources '(ac-source-semantic))
+;;                   ))
 ;;     (ac-flyspell-workaround)))
 
 ;; anzu
@@ -724,7 +751,8 @@ int main (int argc, char **argv) {
                 (file-name-nondirectory ret)))))
   (with-eval-after-load "ivy-rich-autoloads"
     ;; (require 'ivy-rich)
-    (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)))
+    (ivy-set-display-transformer 'ivy-switch-buffer
+                                 'ivy-rich-switch-buffer-transformer)))
 
 ;; counsel
 (with-eval-after-load "counsel-autoloads"
@@ -755,9 +783,10 @@ int main (int argc, char **argv) {
                              grep-host-defaults-alist)
                          (grep-compute-defaults)
                          (setq counsel-rgrep-last-cmd
-                               (concat (rgrep-default-command regex file-name-pattern dir)
-                                       (when (string= "zgrep" grep-program)
-                                         " || true")))
+                               (concat
+                                (rgrep-default-command regex file-name-pattern dir)
+                                (when (string= "zgrep" grep-program)
+                                  " || true")))
                          (counsel--async-command counsel-rgrep-last-cmd)
                          nil)))
                  "./" file-name-pattern grep-program)
@@ -843,9 +872,12 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;   ;; (helm-autoresize-mode t)
 ;;   (setq helm-autoresize-max-height 30)
 
-;;   (defvar helm-source-header-default-background (face-attribute 'helm-source-header :background))
-;;   (defvar helm-source-header-default-foreground (face-attribute 'helm-source-header :foreground))
-;;   (defvar helm-source-header-default-box (face-attribute 'helm-source-header :box))
+;;   (defvar helm-source-header-default-background
+;;     (face-attribute 'helm-source-header :background))
+;;   (defvar helm-source-header-default-foreground
+;;     (face-attribute 'helm-source-header :foreground))
+;;   (defvar helm-source-header-default-box
+;;     (face-attribute 'helm-source-header :box))
 
 ;;   (defun helm-toggle-header-line ()
 ;;     (if (> (length helm-sources) 1)
@@ -855,12 +887,13 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;                             :background helm-source-header-default-background
 ;;                             :box helm-source-header-default-box
 ;;                             :height 1.0)
-;;       (set-face-attribute 'helm-source-header
-;;                           nil
-;;                           :foreground (face-attribute 'helm-selection :background)
-;;                           :background (face-attribute 'helm-selection :background)
-;;                           :box nil
-;;                           :height 0.1)))
+;;       (set-face-attribute
+;;        'helm-source-header
+;;        nil
+;;        :foreground (face-attribute 'helm-selection :background)
+;;        :background (face-attribute 'helm-selection :background)
+;;        :box nil
+;;        :height 0.1)))
 ;;   (add-hook 'helm-before-initialize-hook #'helm-toggle-header-line)
 ;;   ;;(helm-flx-mode)
 ;;   )
@@ -884,15 +917,17 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;; persp-mode
 (with-eval-after-load "persp-mode-autoloads"
   (defvar after-switch-to-buffer-functions nil)
-  (defvar after-display-buffer-functions nil)
+  (defvar after-find-file-functions nil)
 
   (when (fboundp 'advice-add)
-    (defun after-switch-to-buffer-adv (&rest r)
-      (apply #'run-hook-with-args 'after-switch-to-buffer-functions r))
-    (defun after-display-buffer-adv (&rest r)
-      (apply #'run-hook-with-args 'after-display-buffer-functions r))
+    (defvar after-switch-to-buffer-adv-suspend nil)
+    (defun after-switch-to-buffer-adv (&rest args)
+      (unless after-switch-to-buffer-adv-suspend
+        (apply #'run-hook-with-args 'after-switch-to-buffer-functions args)))
     (advice-add #'switch-to-buffer :after #'after-switch-to-buffer-adv)
-    (advice-add #'display-buffer   :after #'after-display-buffer-adv))
+    (defun after-find-file-adv (&rest args)
+      (apply #'run-hook-with-args 'after-find-file-functions args))
+    (advice-add #'find-file :after #'after-find-file-adv))
 
   (setq wg-morph-on nil)
   ;;(setq windmove-window-distance-delta 2)
@@ -909,26 +944,26 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
          command-switch-alist))
 
   ;; (with-eval-after-load "dired"
-  ;;   (def-auto-persp "dired"
+  ;;   (persp-def-auto-persp "dired"
   ;;     :parameters '((dont-save-to-file . t))
   ;;     :mode 'dired-mode
   ;;     :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
-  ;;                (persp-add-buffer-on-find-file nil)
+  ;;                persp-add-buffer-on-find-file
   ;;                persp-add-buffer-on-after-change-major-mode)
   ;;     :hooks '(after-switch-to-buffer-functions)
   ;;     :weak t
   ;;     :switch 'window))
 
-  ;; (def-persp-buffer-save/load :mode 'eshell-mode :tag-symbol 'def-eshell-buffer
-  ;;   :save-vars '(major-mode default-directory))
-  ;; (def-persp-buffer-save/load :mode 'compilation-mode :tag-symbol 'def-compilation-buffer
-  ;;   :save-vars '(major-mode default-directory compilation-directory compilation-environment compilation-arguments))
+  ;; (persp-def-buffer-save/load
+  ;;  :mode 'eshell-mode :tag-symbol 'def-eshell-buffer
+  ;;  :save-vars '(major-mode default-directory))
+  ;; (persp-def-buffer-save/load
+  ;;  :mode 'compilation-mode :tag-symbol 'def-compilation-buffer
+  ;;  :save-vars '(major-mode default-directory compilation-directory
+  ;;                          compilation-environment compilation-arguments))
   ;; (with-eval-after-load "magit-autoloads"
   ;;   (autoload 'magit-status-mode "magit")
   ;;   (autoload 'magit-refresh "magit")
-  ;;   (def-persp-buffer-save/load :mode 'magit-status-mode :tag-symbol 'def-magit-status-buffer
-  ;;     :save-vars '(major-mode default-directory)
-  ;;     :after-load-function #'(lambda (b &rest _) (with-current-buffer b (magit-refresh)))))
 
   ;; (defvar after-find-file-hook nil)
   ;; (defun my/-after-find-file-adv (&rest args)
@@ -951,9 +986,16 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
   ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
   ;; (add-hook 'persp-after-load-state-functions #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
 
+  ;;   (persp-def-buffer-save/load
+  ;;    :mode 'magit-status-mode :tag-symbol 'def-magit-status-buffer
+  ;;    :save-vars '(major-mode default-directory)
+  ;;    :after-load-function #'(lambda (b &rest _)
+  ;;                             (with-current-buffer b (magit-refresh)))))
 
   (push #'(lambda () (persp-mode 1)
-            ;; (add-hook 'persp-after-load-state-functions #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
+            ;; (add-hook 'persp-after-load-state-functions
+            ;;           #'(lambda (&rest args) (persp-auto-persps-pickup-buffers))
+            ;;           t)
             (global-set-key (kbd "C-x k") #'persp-kill-buffer)
             ;; (with-eval-after-load "helm"
             ;;   (persp-update-completion-system 'completing-read))
@@ -993,12 +1035,13 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;       (setq helm-persp-filtered-buffers-cache nil)
 ;;       (let* ((persp (get-current-persp))
 ;;              (ret
-;;               (cl-remove-if-not #'(lambda (bn)
-;;                                     (let* ((ret (persp-contain-buffer-p (get-buffer bn) persp)))
-;;                                       (unless ret
-;;                                         (push bn helm-persp-filtered-buffers-cache))
-;;                                       ret))
-;;                                 candidates)))
+;;               (cl-remove-if-not
+;;                #'(lambda (bn)
+;;                    (let* ((ret (persp-contain-buffer-p (get-buffer bn) persp)))
+;;                      (unless ret
+;;                        (push bn helm-persp-filtered-buffers-cache))
+;;                      ret))
+;;                candidates)))
 ;;         ret))
 ;;     (defclass helm-persp-buffers-source (helm-source-buffers)
 ;;       ((buffer-list
@@ -1007,34 +1050,45 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;         :custom function
 ;;         :documentation
 ;;         " A function with no arguments to create buffer list.")
-;;        (cleanup :initform #'(lambda () (setq helm-persp-filtered-buffers-cache nil
-;;                                         helm-buffers-list-cache nil)))
+;;        (cleanup :initform #'(lambda ()
+;;                               (setq helm-persp-filtered-buffers-cache nil
+;;                                     helm-buffers-list-cache nil)))
 ;;        (candidate-transformer :initform '(helm-persp-buffers-filter-transformer))))
 ;;     (defvar helm-source-persp-buffers
 ;;       (helm-make-source "Current perspective buffers"
 ;;           'helm-persp-buffers-source
 ;;         :fuzzy-match t))
 ;;     (defclass helm-persp-filtered-buffers-source (helm-source-buffers)
-;;       ((candidates :initform #'(lambda ()
-;;                                  (if helm-persp-filtered-buffers-cache
-;;                                      helm-persp-filtered-buffers-cache
-;;                                    (setq helm-persp-filtered-buffers-cache
-;;                                          (mapcar #'buffer-name (persp-buffer-list-restricted nil 1))))))
-;;        (cleanup :initform #'(lambda () (setq helm-persp-filtered-buffers-cache nil)))))
+;;       ((candidates
+;;         :initform
+;;         #'(lambda ()
+;;             (if helm-persp-filtered-buffers-cache
+;;                 helm-persp-filtered-buffers-cache
+;;               (setq helm-persp-filtered-buffers-cache
+;;                     (mapcar
+;;                      #'buffer-name
+;;                      (persp-buffer-list-restricted nil 1))))))
+;;        (cleanup :initform #'(lambda ()
+;;                               (setq helm-persp-filtered-buffers-cache nil)))))
 ;;     (defvar helm-source-persp-filtered-buffers
 ;;       (helm-make-source "Other buffers"
 ;;           'helm-persp-filtered-buffers-source
 ;;         :fuzzy-match t))
 ;;     (defun helm-persp-buffer-list-bridge
-;;         (prompt _collection &optional test _require-match init hist default _inherit-im name buffer)
+;;         (prompt _collection &optional
+;;                 test _require-match init hist default _inherit-im name buffer)
 ;;       (let ((dflt (or default ""))
 ;;             (cbuf (current-buffer))
 ;;             helm-candidate-number-limit)
 ;;         (or
-;;          (helm :sources (cond
-;;                          ((eq this-command 'persp-add-buffer) '(helm-source-persp-filtered-buffers))
-;;                          ((eq this-command 'persp-remove-buffer) '(helm-source-persp-buffers))
-;;                          (t '(helm-source-persp-buffers helm-source-persp-filtered-buffers)))
+;;          (helm :sources
+;;                (cond
+;;                 ((eq this-command 'persp-add-buffer)
+;;                  '(helm-source-persp-filtered-buffers))
+;;                 ((eq this-command 'persp-remove-buffer)
+;;                  '(helm-source-persp-buffers))
+;;                 (t
+;;                  '(helm-source-persp-buffers helm-source-persp-filtered-buffers)))
 ;;                :fuzzy-match helm-mode-fuzzy-match
 ;;                :prompt prompt
 ;;                :buffer buffer
@@ -1044,19 +1098,23 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;                :keymap helm-buffer-map
 ;;                :truncate-lines helm-buffers-truncate-lines
 ;;                :default dflt
-;;                :preselect #'(lambda ()
-;;                               (if (and (eq this-command 'persp-temporarily-display-buffer)
-;;                                        (persp-contain-buffer-p cbuf))
-;;                                   (helm-next-source)
-;;                                 (helm-mark-current-line)
-;;                                 (let ((buffer-name-truncated-regexp (helm-buffers--quote-truncated-buffer cbuf))
-;;                                       (start (point)) mp)
-;;                                   (helm-awhile (re-search-forward buffer-name-truncated-regexp nil t)
-;;                                     (when (helm-pos-header-line-p) (forward-line 1))
-;;                                     (helm-mark-current-line)
-;;                                     (when (eq cbuf (helm-get-selection)) (cl-return (setq mp it))))
-;;                                   (goto-char (or mp start))
-;;                                   (helm-mark-current-line)))))
+;;                :preselect
+;;                #'(lambda ()
+;;                    (if (and (eq this-command 'persp-temporarily-display-buffer)
+;;                             (persp-contain-buffer-p cbuf))
+;;                        (helm-next-source)
+;;                      (helm-mark-current-line)
+;;                      (let ((buffer-name-truncated-regexp
+;;                             (helm-buffers--quote-truncated-buffer cbuf))
+;;                            (start (point)) mp)
+;;                        (helm-awhile (re-search-forward
+;;                                      buffer-name-truncated-regexp nil t)
+;;                          (when (helm-pos-header-line-p) (forward-line 1))
+;;                          (helm-mark-current-line)
+;;                          (when (eq cbuf (helm-get-selection))
+;;                            (cl-return (setq mp it))))
+;;                        (goto-char (or mp start))
+;;                        (helm-mark-current-line)))))
 ;;          (helm-mode--keyboard-quit))))
 ;;     (defvar helm-persp-mini-default-sources
 ;;       (cons 'helm-source-persp-buffers
@@ -1076,25 +1134,29 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;                :truncate-lines helm-buffers-truncate-lines
 ;;                :default cbuf-name
 ;;                :preselect #'(lambda ()
-;;                               (let ((buffer-name-truncated-regexp (helm-buffers--quote-truncated-buffer cbuf))
+;;                               (let ((buffer-name-truncated-regexp
+;;                                      (helm-buffers--quote-truncated-buffer cbuf))
 ;;                                     (start (point)) mp)
-;;                                 (helm-awhile (re-search-forward buffer-name-truncated-regexp nil t)
+;;                                 (helm-awhile (re-search-forward
+;;                                               buffer-name-truncated-regexp nil t)
 ;;                                   (when (helm-pos-header-line-p) (forward-line 1))
 ;;                                   (helm-mark-current-line)
-;;                                   (when (eq cbuf (helm-get-selection)) (cl-return (setq mp it))))
+;;                                   (when (eq cbuf (helm-get-selection))
+;;                                     (cl-return (setq mp it))))
 ;;                                 (goto-char (or mp start))
 ;;                                 (helm-mark-current-line))))
 ;;          (helm-mode--keyboard-quit))))
 ;;     (global-set-key (kbd "C-x b") #'helm-persp-mini)
 ;;     (setq helm-completing-read-handlers-alist
-;;           (append '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
-;;                     (persp-switch-to-buffer           . helm-persp-buffer-list-bridge)
-;;                     (kill-buffer                      . helm-persp-buffer-list-bridge)
-;;                     (persp-kill-buffer                . helm-persp-buffer-list-bridge)
-;;                     (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
-;;                     (persp-add-buffer                 . helm-persp-buffer-list-bridge)
-;;                     (persp-remove-buffer              . helm-persp-buffer-list-bridge))
-;;                   helm-completing-read-handlers-alist))))
+;;           (append
+;;            '((switch-to-buffer                 . helm-persp-buffer-list-bridge)
+;;              (persp-switch-to-buffer           . helm-persp-buffer-list-bridge)
+;;              (kill-buffer                      . helm-persp-buffer-list-bridge)
+;;              (persp-kill-buffer                . helm-persp-buffer-list-bridge)
+;;              (persp-temporarily-display-buffer . helm-persp-buffer-list-bridge)
+;;              (persp-add-buffer                 . helm-persp-buffer-list-bridge)
+;;              (persp-remove-buffer              . helm-persp-buffer-list-bridge))
+;;            helm-completing-read-handlers-alist))))
 
 (with-eval-after-load "persp-mode"
   (with-eval-after-load "persp-fr-autoloads"
@@ -1126,7 +1188,8 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
   (add-hook 'persp-created-functions
             #'(lambda (persp phash)
                 (when (and (eq phash *persp-hash*)
-                           (not (member (safe-persp-name persp) persp-names-sorted)))
+                           (not (member (safe-persp-name persp)
+                                        persp-names-sorted)))
                   (setq persp-names-sorted
                         (cons (safe-persp-name persp) persp-names-sorted)))))
 
@@ -1147,72 +1210,83 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
                     (persp-window-switch . nil)
                     (persp-frame-switch  . nil))))))
 
-;; (with-eval-after-load "persp-mode"
-;;   (require 'erc)
-;;   (with-eval-after-load "erc"
-;;     (def-persp-buffer-save/load :mode 'erc-mode :tag-symbol 'def-erc-server
-;;       :save-vars '("^erc-session-.+" "^erc-server-.+")
-;;       :save-function #'(lambda (buffer tag lvars)
-;;                          (if (get-buffer-process buffer)
-;;                              (progn
-;;                                (push (cons 'persp-erc-chans
-;;                                            (mapcar #'buffer-name
-;;                                                    (erc-channel-list (get-buffer-process buffer))))
-;;                                      lvars)
-;;                                (push (cons 'persp-erc-persp-name (car (buffer-local-value
-;;                                                                        'persp-buffer-in-persps
-;;                                                                        buffer)))
-;;                                      lvars)
-;;                                (list tag (buffer-name buffer) lvars))
-;;                            'skip))
-;;       :after-load-function
-;;       #'(lambda (erc-buf &rest _other)
-;;           (lexical-let (chans erc-persp-name erc-persp
-;;                               (erc-buf erc-buf) initial-persp erc-window
-;;                               persp-erc-after-connect-lambda persp-erc-join-lambda)
-;;             (setq persp-erc-after-connect-lambda
-;;                   #'(lambda (ntwrk nck)
-;;                       (if (and (window-live-p erc-window) (eq erc-buf (window-buffer erc-window)))
-;;                           (select-window erc-window)
-;;                         (setq erc-window (selected-window))
-;;                         (set-window-buffer erc-window erc-buf))
-;;                       (add-hook 'erc-server-JOIN-functions persp-erc-join-lambda t)
-;;                       (mapc #'(lambda (chan)
-;;                                 (with-current-buffer erc-buf
-;;                                   (persp-add-buffer (erc-join-channel chan nil) erc-persp)))
-;;                             chans)
-;;                       (remove-hook 'erc-after-connect persp-erc-after-connect-lambda)
-;;                       nil)
-;;                   persp-erc-join-lambda
-;;                   #'(lambda (proc parsed)
-;;                       (if chans
-;;                           (when (eq proc (get-buffer-process erc-buf))
-;;                             (let ((chan (erc-response.contents parsed)))
-;;                               (when (member chan chans)
-;;                                 (setq chans (delete chan chans))
-;;                                 (when erc-persp (persp-add-buffer chan erc-persp))
-;;                                 (unless chans
-;;                                   (remove-hook 'erc-server-JOIN-functions persp-erc-join-lambda)
-;;                                   ;; (persp-frame-switch (safe-persp-name initial-persp))
-;;                                   ))))
-;;                         (remove-hook 'erc-server-JOIN-functions persp-erc-join-lambda))
-;;                       nil))
-;;             (with-current-buffer erc-buf
-;;               (setq chans persp-erc-chans
-;;                     erc-persp-name persp-erc-persp-name))
-;;             (when erc-persp-name
-;;               (setq erc-persp (persp-get-by-name erc-persp-name))
-;;               (setq initial-persp (get-current-persp))
-;;               (persp-frame-switch erc-persp-name))
-;;             (setq erc-window (get-buffer-window erc-buf (selected-frame)))
-;;             (if (window-live-p erc-window)
-;;                 (select-window erc-window)
-;;               (setq erc-window (selected-window))
-;;               (set-window-buffer erc-window erc-buf))
-;;             (add-hook 'erc-after-connect persp-erc-after-connect-lambda t)
-;;             (with-current-buffer erc-buf
-;;               (erc-server-reconnect)
-;;               (persp-special-last-buffer-make-current)))))))
+(with-eval-after-load "persp-mode"
+  (require 'erc)
+  (with-eval-after-load "erc"
+    (persp-def-buffer-save/load
+     :mode 'erc-mode :tag-symbol 'def-erc-server
+     :save-vars '("^erc-session-.+" "^erc-server-.+")
+     :save-function #'(lambda (buffer tag lvars)
+                        (if (get-buffer-process buffer)
+                            (progn
+                              (push (cons 'persp-erc-chans
+                                          (mapcar #'buffer-name
+                                                  (erc-channel-list
+                                                   (get-buffer-process buffer))))
+                                    lvars)
+                              (push (cons 'persp-erc-persp-name
+                                          (car (buffer-local-value
+                                                'persp-buffer-in-persps
+                                                buffer)))
+                                    lvars)
+                              (list tag (buffer-name buffer) lvars))
+                          'skip))
+     :after-load-function
+     #'(lambda (erc-buf &rest _other)
+         (lexical-let (chans
+                       erc-persp-name erc-persp (erc-buf erc-buf) initial-persp
+                       erc-window
+                       persp-erc-after-connect-lambda persp-erc-join-lambda)
+           (setq persp-erc-after-connect-lambda
+                 #'(lambda (ntwrk nck)
+                     (if (and (window-live-p erc-window)
+                              (eq erc-buf (window-buffer erc-window)))
+                         (select-window erc-window)
+                       (setq erc-window (selected-window))
+                       (set-window-buffer erc-window erc-buf))
+                     (add-hook 'erc-server-JOIN-functions persp-erc-join-lambda
+                               t)
+                     (mapc #'(lambda (chan)
+                               (with-current-buffer erc-buf
+                                 (persp-add-buffer (erc-join-channel chan nil)
+                                                   erc-persp)))
+                           chans)
+                     (remove-hook 'erc-after-connect
+                                  persp-erc-after-connect-lambda)
+                     nil)
+                 persp-erc-join-lambda
+                 #'(lambda (proc parsed)
+                     (if chans
+                         (when (eq proc (get-buffer-process erc-buf))
+                           (let ((chan (erc-response.contents parsed)))
+                             (when (member chan chans)
+                               (setq chans (delete chan chans))
+                               (when erc-persp (persp-add-buffer chan erc-persp))
+                               (unless chans
+                                 (remove-hook 'erc-server-JOIN-functions
+                                              persp-erc-join-lambda)
+                                 ;; (persp-frame-switch
+                                 ;;  (safe-persp-name initial-persp))
+                                 ))))
+                       (remove-hook 'erc-server-JOIN-functions
+                                    persp-erc-join-lambda))
+                     nil))
+           (with-current-buffer erc-buf
+             (setq chans persp-erc-chans
+                   erc-persp-name persp-erc-persp-name))
+           (when erc-persp-name
+             (setq erc-persp (persp-get-by-name erc-persp-name))
+             (setq initial-persp (get-current-persp))
+             (persp-frame-switch erc-persp-name))
+           (setq erc-window (get-buffer-window erc-buf (selected-frame)))
+           (if (window-live-p erc-window)
+               (select-window erc-window)
+             (setq erc-window (selected-window))
+             (set-window-buffer erc-window erc-buf))
+           (add-hook 'erc-after-connect persp-erc-after-connect-lambda t)
+           (with-current-buffer erc-buf
+             (erc-server-reconnect)
+             (persp-special-last-buffer-make-current)))))))
 
 ;; (with-eval-after-load "persp-mode"
 
@@ -1246,27 +1320,35 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;   (defun persp--check-for-killed-buffers (&optional persp)
 ;;     (when persp-mode
 ;;       (if persp
-;;           (let ((known-buffers (append (gethash (persp-name persp) persp-trace-buffers-hash) nil)))
+;;           (let ((known-buffers (append (gethash (persp-name persp)
+;;                                                 persp-trace-buffers-hash)
+;;                                        nil)))
 ;;             (dolist (buf (persp-buffers persp))
 ;;               (if (not (buffer-live-p buf))
-;;                   (message "[persp-mode] Warning: Found killed buffer in the %s perspective."
-;;                            (persp-name persp))
+;;                   (message
+;;                    "[persp-mode] Warning: Found killed buffer in the %s perspective."
+;;                    (persp-name persp))
 ;;                 (setq known-buffers (delete (buffer-name buf) known-buffers))))
 ;;             (when known-buffers
-;;               (message "[persp-mode] Warning: These %s buffers was killed, but not removed from the %s perspective"
-;;                        known-buffers (persp-name persp))))
+;;               (message
+;;                "[persp-mode] Warning: These %s buffers was killed, but not \
+;; removed from the %s perspective"
+;;                known-buffers (persp-name persp))))
 ;;         (mapc #'persp--check-for-killed-buffers (delq nil (persp-persps))))))
 
 ;;   (defun* persp-add-buffer-after-adv (buff-or-name &optional persp &rest _rargs)
 ;;     (when persp
 ;;       (let* ((buf (get-buffer buff-or-name))
 ;;              (buf-name (buffer-name buf))
-;;              (known-buffers (gethash (persp-name persp) persp-trace-buffers-hash)))
+;;              (known-buffers (gethash (persp-name persp)
+;;                                      persp-trace-buffers-hash)))
 ;;         (when (and (memq buf (persp-buffers persp))
 ;;                    (not (member buf-name known-buffers)))
-;;           (puthash (persp-name persp) (cons buf-name known-buffers) persp-trace-buffers-hash)))
+;;           (puthash (persp-name persp) (cons buf-name known-buffers)
+;;                    persp-trace-buffers-hash)))
 ;;       (persp--check-for-killed-buffers)))
-;;   (defun* persp-remove-buffer-after-adv (buff-or-name &optional persp &rest _rargs)
+;;   (defun* persp-remove-buffer-after-adv
+;;       (buff-or-name &optional persp &rest _rargs)
 ;;     (when persp
 ;;       (puthash (persp-name persp)
 ;;                (delete (buffer-name (get-buffer buff-or-name))

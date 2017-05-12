@@ -22,12 +22,13 @@
 
 (defvar my/-prog-mode-hook nil
   "Hook to be run on programming mode activation.")
-(defvar my/-prog-mode-hooks (if (< emacs-major-version 24)
-								'(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
-													   lisp-mode-hook lisp-interaction-mode-hook
-													   ielm-mode-hook)
-							  '(prog-mode-hook cperl-mode-hook ielm-mode-hook
-											   eval-expression-minibuffer-setup-hook))
+(defvar my/-prog-mode-hooks
+  (if (< emacs-major-version 24)
+      '(emacs-lisp-mode-hook cperl-mode-hook c-mode-common-hook
+                             lisp-mode-hook lisp-interaction-mode-hook
+                             ielm-mode-hook)
+    '(prog-mode-hook cperl-mode-hook ielm-mode-hook
+                     eval-expression-minibuffer-setup-hook))
   "List of programming mode hooks.")
 
 ;; Common hook place for programming modes
