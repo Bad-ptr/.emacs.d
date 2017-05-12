@@ -289,8 +289,12 @@ of FILE in the current directory, suitable for creation"
 
 (with-eval-after-load "c-eldoc-autoloads"
   (setq c-eldoc-buffer-regenerate-time 120)
-  (add-hook 'c-mode-hook #'c-turn-on-eldoc-mode)
-  (add-hook 'c++-mode-hook #'c-turn-on-eldoc-mode))
+  ;; (add-hook 'c-mode-hook #'c-turn-on-eldoc-mode)
+  ;; (add-hook 'c++-mode-hook #'c-turn-on-eldoc-mode)
+  (setq c-eldoc-includes
+        #'(lambda ()
+            (mapconcat #'(lambda (p) (concat "-I" p))
+                       (my/-c-get-includes) " "))))
 
 ;; rust
 (with-eval-after-load "racer-autoloads"
@@ -432,8 +436,6 @@ of FILE in the current directory, suitable for creation"
   (push erlang-include-path my/-c-include-paths)
   (with-eval-after-load "company-clang"
     (push (concat "-I" erlang-include-path) company-clang-arguments))
-  (with-eval-after-load "c-eldoc"
-    (setq c-eldoc-includes (concat "-I" erlang-include-path " " c-eldoc-includes)))
   (with-eval-after-load "ffap"
     (push erlang-include-path ffap-c-path)
     (push erlang-include-path ffap-c++-path))
