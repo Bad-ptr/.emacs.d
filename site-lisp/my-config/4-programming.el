@@ -303,10 +303,37 @@ of FILE in the current directory, suitable for creation"
   (add-hook 'rust-mode-hook #'racer-mode))
 
 ;; lisp
-(let ((q-s-h-file (expand-file-name "~/quicklisp/slime-helper.el")))
-  (when (file-exists-p q-s-h-file)
-    (load q-s-h-file)))
-(setq inferior-lisp-program "sbcl")
+
+(defun lisp-add-new-macro-indent (&optional macrosym)
+  (interactive
+   (list
+    (intern
+     (read-string
+      "Specify a macro name: " (let ((sap (symbol-at-point)))
+                                 (and sap (symbol-name sap)))))))
+  (when macrosym
+    (put macrosym 'lisp-indent-function 'defun)))
+
+;; (let ((q-s-h-file (expand-file-name "~/quicklisp/slime-helper.el")))
+;;   (when (file-exists-p q-s-h-file)
+;;     (load q-s-h-file)))
+
+
+(with-eval-after-load "slime"
+  ;; (setq inferior-lisp-program "sbcl")
+  (setq inferior-lisp-program "/opt/sbcl/bin/sbcl")
+  (slime-setup '(slime-fancy)))
+
+(with-eval-after-load "slime-repl"
+  (slime-define-keys slime-repl-mode-map
+    ("\M-p" 'slime-repl-backward-input)
+    ((kbd "C-<up>") 'slime-repl-previous-input)
+    ("\M-n" 'slime-repl-forward-input)
+    ((kbd "C-<down>") 'slime-repl-next-input)))
+
+(with-eval-after-load "slime-company-autoloads"
+  (when (fboundp 'slime-setup)
+    (slime-setup '(slime-fancy slime-company))))
 
 
 ;; go-mode
