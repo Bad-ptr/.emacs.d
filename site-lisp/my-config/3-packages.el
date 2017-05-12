@@ -712,9 +712,9 @@ int main (int argc, char **argv) {
 ;;     (ac-flyspell-workaround)))
 
 ;; anzu
-(with-eval-after-load "anzu-autoloads"
-  (global-set-key [remap query-replace] 'anzu-query-replace)
-  (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
+;; (with-eval-after-load "anzu-autoloads"
+;;   (global-set-key [remap query-replace] 'anzu-query-replace)
+;;   (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
 
 ;; visual-regexp
 (with-eval-after-load "visual-regexp-autoloads"
