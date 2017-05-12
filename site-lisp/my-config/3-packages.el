@@ -7,11 +7,6 @@
 (require 'generic-x)
 (require 'newcomment)
 
-(setq package-pinned-packages
-      '((persp-mode       . "localhost")
-        (multiple-cursors . "localhost")
-        (helm-dash        . "localhost")
-        (golden-ratio     . "localhost")))
 
 (defun fbread-mode ()
   (interactive)
