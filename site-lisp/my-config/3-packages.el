@@ -143,6 +143,137 @@ That is, a string used to represent it on the tab bar."
                          (length (tabbar-view
                                   (tabbar-current-tabset))))))))))
 
+;; Common header/mode-line
+
+(with-eval-after-load "common-header-mode-line-autoloads"
+  (add-hook
+   'after-init-hook
+   #'(lambda ()
+       (common-header-mode-line-mode 1)
+
+       (dolist (frame (frame-list))
+         (set-frame-parameter frame 'bottom-divider-width 1)
+         (set-frame-parameter frame 'right-divider-width 1))
+
+       (push (cons 'bottom-divider-width 1) default-frame-alist)
+       (push (cons 'right-divider-width 1) default-frame-alist)
+
+       (let ((def-height (face-attribute 'default :height)))
+         (set-face-attribute
+          'per-window-header-line-active-face nil
+          :height (ceiling (* 0.9 def-height)))
+
+         (set-face-attribute
+          'per-window-header-line-inactive-face nil
+          :height (floor (* 0.7 def-height))))
+
+       ;; (set-face-background
+       ;;  'per-window-header-line-active-face
+       ;;  (face-background 'mode-line))
+
+       ;; (set-face-background
+       ;;  'per-frame-header-line-inactive-face
+       ;;  (face-background 'mode-line-inactive))
+
+       (setq common-header-mode-line-update-delay 0.1)
+
+       (defvar per-window-header-line-active-format nil)
+       (defvar per-window-header-line-inactive-format nil)
+
+       (add-hook 'semantic-stickyfunc-mode-hook
+                 #'(lambda ()
+                     (if (and semantic-mode semantic-stickyfunc-mode)
+                         (push semantic-stickyfunc-header-line-format
+                               per-window-header-line-active-format)
+                       (setq per-window-header-line-active-format
+                             (delq semantic-stickyfunc-header-line-format
+                                   per-window-header-line-active-format)))))
+
+       (add-hook 'multiple-cursors-mode-hook
+                 #'(lambda ()
+                     (if multiple-cursors-mode
+                         (add-to-list 'per-window-header-line-active-format
+                                      mc/mode-line)
+                       (setq per-window-header-line-active-format
+                             (delq mc/mode-line
+                                   per-window-header-line-active-format)))))
+
+       (setq per-window-header-line-format-function
+             #'(lambda (win)
+                 (unless per-window-header-line-active-format
+                   (setq per-window-header-line-active-format
+                         `("" mode-line-front-space mode-line-mule-info
+                           mode-line-modified
+                           mode-line-remote " " mode-line-buffer-identification
+                           " " mode-line-position (vc-mode vc-mode) " "
+                           ;;" " ,(caddr mode-line-modes)
+                           mode-line-misc-info mode-line-end-spaces)))
+                 (unless per-window-header-line-inactive-format
+                   (setq per-window-header-line-inactive-format
+                         `("" mode-line-front-space mode-line-mule-info
+                           mode-line-modified
+                           mode-line-remote " " mode-line-buffer-identification
+                           " " ,(caddr mode-line-position) (vc-mode vc-mode) " "
+                           mode-line-misc-info mode-line-end-spaces)))
+                 ;; (let* ((buf (window-buffer win))
+                 ;;        (bfrmt (buffer-local-value 'header-line-format buf))
+                 ;;        (cf-sym (if (eq win (selected-window))
+                 ;;                    'per-window-header-line-active-format
+                 ;;                  'per-window-header-line-inactive-format)))
+                 ;;   (with-current-buffer buf
+                 ;;     (when (and (not (eq bfrmt
+                 ;;                         per-window-header-line-active-format))
+                 ;;                (not (eq bfrmt
+                 ;;                         per-window-header-line-inactive-format))
+                 ;;                (not (eq bfrmt tabbar-header-line-format)))
+                 ;;       (set (make-local-variable
+                 ;;             'per-window-header-line-active-format)
+                 ;;            (cons bfrmt (default-value
+                 ;;                          'per-window-header-line-active-format)))
+                 ;;       (set (make-local-variable
+                 ;;             'per-window-header-line-inactive-format)
+                 ;;            (cons bfrmt (default-value
+                 ;;                          'per-window-header-line-inactive-format))))
+                 ;;     (symbol-value cf-sym)))
+                 (let* ((buf (window-buffer win))
+                        (frmt (unless (with-current-buffer buf
+                                        (derived-mode-p 'magit-mode))
+                                (if (eq (selected-window) win)
+                                    per-window-header-line-active-format
+                                  per-window-header-line-inactive-format)))
+                        ;; (bfrmt (buffer-local-value 'header-line-format
+                        ;;                            (window-buffer win)))
+                        )
+                   ;; (if (eq frmt (cdr bfrmt))
+                   ;;     (setq frmt bfrmt)
+                   ;;   (when (and bfrmt (not (eq bfrmt frmt))
+                   ;;              (not (eq bfrmt '(:eval (tabbar-line)))))
+                   ;;     (setq frmt (cons bfrmt frmt))))
+                   (or frmt (buffer-local-value 'header-line-format buf)))))
+
+       (setq
+        per-frame-mode-line-update-display-function
+        #'(lambda (display)
+            (let ((buf (cdr (assq 'buf display))))
+              (with-current-buffer buf
+                (setq-local buffer-read-only nil)
+                (erase-buffer)
+                (let*
+                    ((mode-l-str
+                      (format-mode-line
+                       `("%e" mode-line-front-space
+                         (eldoc-mode-line-string (" " eldoc-mode-line-string " "))
+                         mode-line-modified mode-line-client
+                         mode-line-frame-identification
+                         mode-line-modes mode-line-misc-info mode-line-end-spaces)
+                       'per-frame-mode-line-face
+                       per-frame-header-mode-line--selected-window)))
+                  (insert mode-l-str))
+                (setq-local mode-line-format nil)
+                (setq-local header-line-format nil)
+                (goto-char (point-min))
+                (setq-local buffer-read-only t))))))))
+
 ;; move where I mean
 (with-eval-after-load "mwim-autoloads"
   (global-set-key (kbd "C-a") 'mwim-beginning-of-code-or-line)
