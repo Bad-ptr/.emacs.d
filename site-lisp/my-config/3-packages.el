@@ -1130,8 +1130,10 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
                   (setq persp-names-sorted
                         (cons (safe-persp-name persp) persp-names-sorted)))))
 
-  (defsubst* persp-names-sorted (&optional (phash *persp-hash*)) (append persp-names-sorted nil))
-  (defun persp-names-current-frame-fast-ordered () (append persp-names-sorted nil)))
+  (defsubst* persp-names-sorted (&optional (phash *persp-hash*))
+    (append persp-names-sorted nil))
+  (defun persp-names-current-frame-fast-ordered ()
+    (append persp-names-sorted nil)))
 
 
 (with-eval-after-load "persp-mode"

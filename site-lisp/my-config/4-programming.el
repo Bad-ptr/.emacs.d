@@ -62,9 +62,6 @@
 
      (unless (file-exists-p "Makefile")
        (setq-local compile-command
-                   ;; emulate make's .c.o implicit pattern rule, but with
-                   ;; different defaults for the CC, CPPFLAGS, and CFLAGS
-                   ;; variables:
                    ;; $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
                    (when buffer-file-name
                      (let ((file (file-name-nondirectory buffer-file-name))

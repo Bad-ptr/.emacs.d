@@ -5,10 +5,10 @@
 
 ;; (profiler-start 'mem)
 
-(setq inhibit-default-init t
+(setq inhibit-default-init      t
       package-enable-at-startup nil
-      load-prefer-newer t
-      message-log-max 1000)
+      load-prefer-newer         t
+      message-log-max           1000)
 
 
 ;; https://www.reddit.com/r/emacs/comments/4586eq/quick_emacs_snippet_to_automatically_use/
@@ -22,20 +22,22 @@
 ;; file.  If a socket is found ("/tmp/emacs$UID/server"), Emacs will
 ;; spin up emacsclient and immediately exit itself.  Otherwise, Emacs
 ;; will start a new server.
-(defun server-already-running-p () "Is Emacs already running?"
-       (file-exists-p (format "/tmp/emacs%s/server" (user-uid))))
-(defun server-shunt () "Shunts to emacsclient"
-       (require 'cl-lib)
-       (let ((args (append '("emacsclient" "-a" "''")
-                           (cdr command-line-args))))
-         (setq args (append args
-                            (if window-system
-                                '("-n" "-c")
-                              '("-n" "-c")
-                              ;;'("-t") ;; it doesn't work
-                              )))
-         (shell-command (substring (format "%S" args) 1 -1))
-         (kill-emacs)))
+(defun server-already-running-p ()
+  "Is Emacs already running?"
+  (file-exists-p (format "/tmp/emacs%s/server" (user-uid))))
+(defun server-shunt ()
+  "Shunts to emacsclient"
+  (require 'cl-lib)
+  (let ((args (append '("emacsclient" "-a" "''")
+                      (cdr command-line-args))))
+    (setq args (append args
+                       (if window-system
+                           '("-n" "-c")
+                         '("-n" "-c")
+                         ;;'("-t") ;; it doesn't work
+                         )))
+    (shell-command (substring (format "%S" args) 1 -1))
+    (kill-emacs)))
 ;; this don't work with magit (with-editor)
 ;; (unless (featurep 'server)
 ;;   (if (server-already-running-p) (server-shunt) (server-start)))
@@ -75,7 +77,8 @@
 
   (push (locate-user-emacs-file "site-lisp/") load-path)
 
-  (defconst my/-conf-path (locate-user-emacs-file (concat "site-lisp/" my/-username "-config/")))
+  (defconst my/-conf-path
+    (locate-user-emacs-file (concat "site-lisp/" my/-username "-config/")))
 
   ;; Packages
   (require 'package)
@@ -83,7 +86,8 @@
   (run-hooks 'my/-packages-initialized-hook)
 
   ;; load custom file
-  (setq custom-file (locate-user-emacs-file (concat my/-username "-custom.el")))
+  (setq custom-file
+        (locate-user-emacs-file (concat my/-username "-custom.el")))
   (load custom-file t t)
 
   ;; Install my packages at first run
@@ -130,31 +134,34 @@
                              (concat
                               (if my/-multiuser-private
                                   my/-username "my") "-private.el"))))
-     (when (condition-case-unless-debug err (load priv-file)
-             (file-error
-              (message "%s" err)
-              (let ((ff (lambda ()
-                          (let ((example-file (locate-user-emacs-file "my-private.example"))
-                                (cw (selected-window)))
-                            (my/-warning (format "You run emacs without your private settings set(first run?).\n\
+     (and
+      (condition-case-unless-debug err (load priv-file)
+        (file-error
+         (message "%s" err)
+         (let ((ff
+                (lambda ()
+                  (let ((example-file (locate-user-emacs-file "my-private.example"))
+                        (cw (selected-window)))
+                    (my/-warning (format "You run emacs without your private settings set(first run?).
  To fix this please create a %s file (See %s as example)." priv-file example-file))
-                            (set-window-buffer cw
-                                               (let ((template-auto-insert nil))
-                                                 (with-current-buffer (find-file priv-file)
-                                                   (setq-local lexical-binding t)
-                                                   (add-hook 'kill-buffer-hook
-                                                             #'(lambda () (funcall self t)) nil t)
-                                                   (insert-file-contents example-file nil nil nil t)
-                                                   (current-buffer))))
-                            (display-buffer-pop-up-window (get-buffer "*my/-errors*") nil)
-                            (select-window cw t)
-                            nil))))
-                (my/-exec-after-interactive-frame-available ()
-                  (run-at-time 2 nil ff))))
-             (error (my/-init-error-fatal err) nil))
-       (condition-case-unless-debug err (progn (my/-init-after-private)
-                                  (when arg (run-hooks 'after-init-hook)))
-         (error (my/-init-error-fatal err)))))))
+                    (set-window-buffer
+                     cw (let ((template-auto-insert nil))
+                          (with-current-buffer (find-file priv-file)
+                            (setq-local lexical-binding t)
+                            (add-hook 'kill-buffer-hook
+                                      #'(lambda () (funcall self t)) nil t)
+                            (insert-file-contents example-file nil nil nil t)
+                            (current-buffer))))
+                    (display-buffer-pop-up-window (get-buffer "*my/-errors*") nil)
+                    (select-window cw t)
+                    nil))))
+           (my/-exec-after-interactive-frame-available ()
+             (run-at-time 2 nil ff))))
+        (error (my/-init-error-fatal err) nil))
+      (condition-case-unless-debug err
+          (progn (my/-init-after-private)
+                 (when arg (run-hooks 'after-init-hook)))
+        (error (my/-init-error-fatal err)))))))
 
 (defcustom my/-multiuser-private nil
   "Load different private file for dufferent my/-username or not."
