@@ -339,7 +339,8 @@ int main (int argc, char **argv) {
             ("XXX"    . "#ff4323")
             ("XXXX"   . "#ff4323")
             ("???"    . "#ff4323"))))
-  (add-hook 'my/-prog-mode-hook #'(lambda () (hl-todo-mode +1))))
+  (add-hook 'my/-prog-mode-hook #'(lambda () (hl-todo-mode +1)))
+  (add-hook 'text-mode-hook #'(lambda () (hl-todo-mode +1))))
 
 ;; mark-multiple
 (with-eval-after-load "multiple-cursors-autoloads"
@@ -452,7 +453,8 @@ int main (int argc, char **argv) {
 ;; highlight-numbers
 (with-eval-after-load "highlight-numbers-autoloads"
   (setq highlight-numbers-disable '())
-  (add-hook 'my/-prog-mode-hook #'highlight-numbers-mode))
+  (add-hook 'my/-prog-mode-hook #'highlight-numbers-mode)
+  (add-hook 'text-mode-hook #'highlight-numbers-mode))
 
 ;; ;; highlight-tail-mode
 ;; (with-eval-after-load "highlight-tail-autoloads"
@@ -513,6 +515,7 @@ int main (int argc, char **argv) {
 ;; rainbow-mode
 (with-eval-after-load "rainbow-mode-autoloads"
   (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1)))
+  (add-hook 'text-mode-hook #'(lambda () (rainbow-mode 1)))
   (add-hook 'my/-find-large-file-hook #'(lambda () (rainbow-mode -1))))
 
 
