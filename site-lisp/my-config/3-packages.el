@@ -970,33 +970,109 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
   ;; (with-eval-after-load "magit-autoloads"
   ;;   (autoload 'magit-status-mode "magit")
   ;;   (autoload 'magit-refresh "magit")
-
-  ;; (defvar after-find-file-hook nil)
-  ;; (defun my/-after-find-file-adv (&rest args)
-  ;;   (run-hooks 'after-find-file-hook))
-  ;; (advice-add 'find-file :after 'my/-after-find-file-adv)
-
-  ;; (def-auto-persp "projectile"
-  ;;   :parameters '((dont-save-to-file . t))
-  ;;   :hooks '(after-find-file-hook)
-  ;;   :switch 'frame
-  ;;   :predicate
-  ;;   #'(lambda (buffer)
-  ;;       (and
-  ;;        (buffer-file-name)
-  ;;        (projectile-project-p)))
-  ;;   :get-name-expr
-  ;;   #'(lambda ()
-  ;;       (abbreviate-file-name (projectile-project-root))))
-
-  ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
-  ;; (add-hook 'persp-after-load-state-functions #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
-
   ;;   (persp-def-buffer-save/load
   ;;    :mode 'magit-status-mode :tag-symbol 'def-magit-status-buffer
   ;;    :save-vars '(major-mode default-directory)
   ;;    :after-load-function #'(lambda (b &rest _)
   ;;                             (with-current-buffer b (magit-refresh)))))
+
+
+  ;; (with-eval-after-load "persp-mode"
+  ;;   (defvar persp-mode-projectile-bridge-before-switch-selected-window-buffer nil)
+
+  ;;   ;; (setq persp-add-buffer-on-find-file 'if-not-autopersp)
+
+  ;;   (persp-def-auto-persp "projectile"
+  ;;     :parameters '((dont-save-to-file . t)
+  ;;                   (persp-mode-projectile-bridge . t))
+  ;;     :hooks '(projectile-before-switch-project-hook
+  ;;              projectile-after-switch-project-hook
+  ;;              projectile-find-file-hook
+  ;;              find-file-hook)
+  ;;     :dyn-env '((after-switch-to-buffer-adv-suspend t))
+  ;;     :switch 'frame
+  ;;     :predicate
+  ;;     #'(lambda (buffer &optional state)
+  ;;         (if (eq 'projectile-before-switch-project-hook
+  ;;                 (alist-get 'hook state))
+  ;;             state
+  ;;           (and
+  ;;            projectile-mode
+  ;;            (buffer-live-p buffer)
+  ;;            (buffer-file-name buffer)
+  ;;            ;; (not git-commit-mode)
+  ;;            (projectile-project-p)
+  ;;            (or state t))))
+  ;;     :get-name
+  ;;     #'(lambda (state)
+  ;;         (if (eq 'projectile-before-switch-project-hook
+  ;;                 (alist-get 'hook state))
+  ;;             state
+  ;;           (push (cons 'persp-name
+  ;;                       (concat "p) "
+  ;;                               (with-current-buffer (alist-get 'buffer state)
+  ;;                                 (projectile-project-name))))
+  ;;                 state)
+  ;;           state))
+  ;;     :on-match
+  ;;     #'(lambda (state)
+  ;;         (let ((hook (alist-get 'hook state))
+  ;;               (persp (alist-get 'persp state))
+  ;;               (buffer (alist-get 'buffer state)))
+  ;;           (case hook
+  ;;             (projectile-before-switch-project-hook
+  ;;              (let ((win (if (minibuffer-window-active-p (selected-window))
+  ;;                             (minibuffer-selected-window)
+  ;;                           (selected-window))))
+  ;;                (when (window-live-p win)
+  ;;                  (setq persp-mode-projectile-bridge-before-switch-selected-window-buffer
+  ;;                        (window-buffer win)))))
+
+  ;;             (projectile-after-switch-project-hook
+  ;;              (when (buffer-live-p
+  ;;                     persp-mode-projectile-bridge-before-switch-selected-window-buffer)
+  ;;                (let ((win (selected-window)))
+  ;;                  (unless (eq (window-buffer win)
+  ;;                              persp-mode-projectile-bridge-before-switch-selected-window-buffer)
+  ;;                    (set-window-buffer
+  ;;                     win persp-mode-projectile-bridge-before-switch-selected-window-buffer)))))
+
+  ;;             (find-file-hook
+  ;;              (setcdr (assq :switch state) nil)))
+  ;;           (if (case hook
+  ;;                 (projectile-before-switch-project-hook nil)
+  ;;                 (t t))
+  ;;               (persp--auto-persp-default-on-match state)
+  ;;             (setcdr (assq :after-match state) nil)))
+  ;;         state)
+  ;;     :after-match
+  ;;     #'(lambda (state)
+  ;;         (when (eq 'find-file-hook (alist-get 'hook state))
+  ;;           (run-at-time 0.5 nil
+  ;;                        #'(lambda (buf persp)
+  ;;                            (when (and (eq persp (get-current-persp))
+  ;;                                       (not (eq buf (window-buffer
+  ;;                                                     (selected-window)))))
+  ;;                              ;; (switch-to-buffer buf)
+  ;;                              (persp-add-buffer buf persp t nil)))
+  ;;                        (alist-get 'buffer state)
+  ;;                        (get-current-persp)))
+  ;;         (persp--auto-persp-default-after-match state)))
+
+  ;;   ;; (add-hook 'persp-after-load-state-functions
+  ;;   ;;           #'(lambda (&rest args) (persp-auto-persps-pickup-buffers)) t)
+  ;;   )
+
+  ;; (with-eval-after-load "persp-mode-projectile-bridge-autoloads"
+  ;;   (add-hook 'persp-mode-projectile-bridge-mode-hook
+  ;;             #'(lambda ()
+  ;;                 (if persp-mode-projectile-bridge-mode
+  ;;                     (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+  ;;                   (persp-mode-projectile-bridge-kill-perspectives))))
+  ;;   (add-hook 'after-init-hook
+  ;;             #'(lambda ()
+  ;;                 (persp-mode-projectile-bridge-mode 1))
+  ;;             t))
 
   (push #'(lambda () (persp-mode 1)
             ;; (add-hook 'persp-after-load-state-functions
