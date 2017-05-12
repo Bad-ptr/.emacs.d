@@ -346,8 +346,8 @@ int main (int argc, char **argv) {
 (with-eval-after-load "multiple-cursors-autoloads"
   (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
   (global-set-key (kbd "C-<") #'mc/mark-previous-symbol-like-this)
-  (global-set-key (kbd "C-M-.") #'mc/mark-next-like-this)
-  (global-set-key (kbd "C-M-,") #'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-M->") #'mc/mark-next-like-this)
+  (global-set-key (kbd "C-M-<") #'mc/mark-previous-like-this)
   (global-set-key (kbd "C-c C-<") #'mc/mark-all-like-this)
   (global-set-key (kbd "C-c C->") #'mc/mark-all-like-this-dwim)
   (global-set-key (kbd "C-;") #'mc/mark-all-symbols-like-this)
