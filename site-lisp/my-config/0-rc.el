@@ -58,8 +58,8 @@
 (standard-display-8bit 128 255)
 
 ;; switch off gui
-(tool-bar-mode 0)
-(menu-bar-mode 0)
+(tool-bar-mode   0)
+(menu-bar-mode   0)
 (scroll-bar-mode 0)
 
 ;; turn off startup messages
@@ -83,7 +83,7 @@
 (setq-default truncate-lines t)
 
 ;; default major mode
-(set-default major-mode 'text-mode)
+(setq-default major-mode 'text-mode)
 
 ;; Make searches case insensitive
 (setq case-fold-search t
@@ -97,7 +97,7 @@
 (blink-cursor-mode 1)
 
 ;; Show marked text
-(transient-mark-mode 1)
+(transient-mark-mode   1)
 (delete-selection-mode t)
 
 ;; syntax highlighting
@@ -126,12 +126,16 @@
      (:background "#002005")))
   "Face for show-paren mode, when parens match.")
 (defvar show-paren-deactivated-until-active-mark nil)
-(add-hook 'activate-mark-hook   #'(lambda () (when show-paren-mode
-                                          (setq show-paren-deactivated-until-active-mark t)
-                                          (show-paren-mode -1))))
-(add-hook 'deactivate-mark-hook #'(lambda () (when show-paren-deactivated-until-active-mark
-                                          (setq show-paren-deactivated-until-active-mark nil)
-                                          (show-paren-mode 1))))
+(add-hook 'activate-mark-hook
+          #'(lambda ()
+              (when show-paren-mode
+                (setq show-paren-deactivated-until-active-mark t)
+                (show-paren-mode -1))))
+(add-hook 'deactivate-mark-hook
+          #'(lambda ()
+              (when show-paren-deactivated-until-active-mark
+                (setq show-paren-deactivated-until-active-mark nil)
+                (show-paren-mode 1))))
 
 (defvar-local show-paren-advice-enabled t)
 (add-hook 'my/-find-large-file-hook
@@ -150,24 +154,29 @@ the syntax class ')'."
               (ca (char-after (point)))
               t-beg t-end line column mesg)
           (when (and cb (char-equal (char-syntax cb) ?\)))
-            (save-excursion (backward-list)
-                            (unless (pos-visible-in-window-p)
-                              (setq line (line-number-at-pos)
-                                    column (current-column)
-                                    t-beg (progn (beginning-of-line) (point))
-                                    t-end (progn (end-of-line) (point))
-                                    mesg (format "[%s:%s] %s" line column (buffer-substring t-beg t-end))))))
+            (save-excursion
+              (backward-list)
+              (unless (pos-visible-in-window-p)
+                (setq line (line-number-at-pos)
+                      column (current-column)
+                      t-beg (progn (beginning-of-line) (point))
+                      t-end (progn (end-of-line) (point))
+                      mesg (format "[%s:%s] %s" line column
+                                   (buffer-substring t-beg t-end))))))
           (when (and ca (char-equal (char-syntax ca) ?\())
-            (save-excursion (forward-list)
-                            (unless (pos-visible-in-window-p)
-                              (setq line (line-number-at-pos)
-                                    column (current-column)
-                                    t-beg (progn (beginning-of-line) (point))
-                                    t-end (progn (end-of-line) (point))
-                                    mesg (concat (and mesg (concat mesg "\n"))
-                                                 (format "[%s:%s] %s" line column (buffer-substring t-beg t-end)))))))
-          (when mesg (let ((message-log-max nil))
-                       (message "%s" mesg))))))))
+            (save-excursion
+              (forward-list)
+              (unless (pos-visible-in-window-p)
+                (setq line (line-number-at-pos)
+                      column (current-column)
+                      t-beg (progn (beginning-of-line) (point))
+                      t-end (progn (end-of-line) (point))
+                      mesg (concat (and mesg (concat mesg "\n"))
+                                   (format "[%s:%s] %s" line column
+                                           (buffer-substring t-beg t-end)))))))
+          (when mesg
+            (let ((message-log-max nil))
+              (message "%s" mesg))))))))
 
 (ad-enable-advice #'show-paren-function 'after 'show-matching-paren-offscreen)
 (ad-activate #'show-paren-function)
@@ -177,12 +186,12 @@ the syntax class ')'."
 ;; seems like it overriden by smooth-scrolling package
 (setq
  scroll-margin 5
+ scroll-step   1
  scroll-conservatively 100000
- scroll-step 1
- scroll-up-aggressively nil
+ scroll-up-aggressively   nil
  scroll-down-aggressively nil
  scroll-preserve-screen-position 1
- fast-but-imprecise-scrolling t)
+ fast-but-imprecise-scrolling    t)
 
 ;; Mouse
 (setq mouse-wheel-follow-mouse 't
@@ -207,7 +216,7 @@ the syntax class ')'."
 
 ;; show column & line numbers in status bar
 (column-number-mode 1)
-(line-number-mode 1)
+(line-number-mode   1)
 ;; show buffer size
 (size-indication-mode 1)
 
@@ -245,7 +254,8 @@ the syntax class ')'."
   (let ((last-called (get this-command 'my/-last-call-time)))
     (if (and (eq last-command this-command)
              last-called
-             (<= (time-to-seconds (time-since last-called)) my/-double-key-timeout))
+             (<= (time-to-seconds (time-since last-called))
+                 my/-double-key-timeout))
         (progn
           (cancel-timer my/-double-key-timer)
           (put this-command 'my/-last-call-time nil)
@@ -284,7 +294,8 @@ the syntax class ')'."
 
 ;; backups
 (let ((bu-dir (locate-user-emacs-file "cache/backups")))
-  (unless (file-directory-p bu-dir) (make-directory bu-dir t))
+  (unless (file-directory-p bu-dir)
+    (make-directory bu-dir t))
   (setq make-backup-files t ;; do make backups
         backup-by-copying t ;; and copy them here
         backup-directory-alist `(("." . ,bu-dir))
@@ -298,11 +309,13 @@ the syntax class ')'."
 
 ;; tramp autosave
 (with-eval-after-load "tramp"
-  (setq tramp-auto-save-directory (locate-user-emacs-file "tramp-auto-save")))
+  (setq tramp-auto-save-directory
+        (locate-user-emacs-file "tramp-auto-save")))
 
 ;; abbrevs (abbreviations)
 (let ((abbrev-dir (locate-user-emacs-file "data")))
-  (unless (file-exists-p abbrev-dir) (make-directory abbrev-dir t))
+  (unless (file-exists-p abbrev-dir)
+    (make-directory abbrev-dir t))
 
   (setq abbrev-file-name  ;; tell emacs where to read abbrev
         (expand-file-name "abbrev_defs" abbrev-dir))  ;; definitions from...
@@ -333,7 +346,8 @@ the syntax class ')'."
       bookmark-save-flag 1) ;; bookmarks
 
 ;; saveplace: save location in file when saving files
-(setq save-place-file (locate-user-emacs-file "cache/saveplace"))
+(setq save-place-file
+      (locate-user-emacs-file "cache/saveplace"))
 (setq-default save-place t)            ;; activate it for all buffers
 (require 'saveplace)                   ;; get the package
 
@@ -341,15 +355,17 @@ the syntax class ')'."
 (setq savehist-additional-variables     ;; also save...
       '(search ring regexp-search-ring) ;; ... my search entries
       savehist-autosave-interval 60     ;; save every minute (default: 5 min)
-      savehist-file (locate-user-emacs-file "cache/savehist")) ;; keep my home clean
+      savehist-file                     ;; keep my home clean
+      (locate-user-emacs-file "cache/savehist"))
 (savehist-mode t)
 
 ;; recentf
 (require 'recentf)    ;; save recently used files
 (setq
- recentf-save-file (locate-user-emacs-file "cache/recentf")
+ recentf-save-file
+ (locate-user-emacs-file "cache/recentf")
  recentf-max-saved-items 100     ;; max save 100
- recentf-max-menu-items 15)      ;; max 15 in menu
+ recentf-max-menu-items  15)     ;; max 15 in menu
 (recentf-mode t)                 ;; turn it on
 
 
