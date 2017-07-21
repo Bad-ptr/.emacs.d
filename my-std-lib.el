@@ -18,10 +18,10 @@
       ;;     `(,old-labels ,bindings ,@body)))
       )
   (require 'cl)
-  (defalias 'cl-letf 'letf)
-  (defalias 'cl-labels 'labels)
+  (defalias 'cl-letf     'letf)
+  (defalias 'cl-labels   'labels)
   (defalias 'cl-defmacro 'defmacro*)
-  (defalias 'cl-defun 'defun*))
+  (defalias 'cl-defun    'defun*))
 
 
 ;;; Code:
@@ -212,6 +212,11 @@ re-downloaded in order to locate PACKAGE."
       (if package
           (package-install package)
         (call-interactively #'package-install)))))
+
+
+(if (fboundp 'save-mark-and-excursion)
+    (defalias 'my/-save-mark-and-excursion 'save-mark-and-excursion)
+  (defalias 'my/-save-mark-and-excursion 'save-excursion))
 
 
 (unless (version< emacs-version "24.1")

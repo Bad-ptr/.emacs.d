@@ -269,7 +269,7 @@ the syntax class ')'."
 (defun my/-open-line (&optional N)
   (interactive "*p")
   (open-line N)
-  (save-excursion
+  (my/-save-mark-and-excursion
     (forward-line)
     (indent-according-to-mode)))
 (global-set-key (kbd "C-o") #'my/-open-line)

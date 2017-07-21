@@ -289,7 +289,7 @@ That is, a string used to represent it on the tab bar."
   (defun drag-stuff-sexp-horizontally (arg)
     "Drags word horizontally ARG times."
     (let ((old-point (point))
-          (offset (- (save-mark-and-excursion
+          (offset (- (my/-save-mark-and-excursion
                        (forward-sexp) (point))
                      (point))))
       (condition-case err
