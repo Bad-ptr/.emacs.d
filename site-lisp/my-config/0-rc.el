@@ -20,13 +20,16 @@
 (prefer-coding-system 'cp866-dos)
 (prefer-coding-system 'utf-8-unix)
 
+(set-language-environment 'utf-8)
 (set-default-coding-systems  'utf-8)
 (set-terminal-coding-system  'utf-8)
 (set-keyboard-coding-system  'utf-8)
-(setq locale-coding-system   'utf-8)
 (set-selection-coding-system 'utf-8)
 
+(setq locale-coding-system   'utf-8)
 (setq buffer-file-coding-system 'utf-8)
+(setq coding-system-for-read 'utf-8)
+(setq coding-system-for-write 'utf-8)
 
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
@@ -137,46 +140,60 @@
                 (setq show-paren-deactivated-until-active-mark nil)
                 (show-paren-mode 1))))
 
-(defvar-local show-paren-advice-enabled t)
+(defvar-local my/-show-paren-advice-enabled t)
 (add-hook 'my/-find-large-file-hook
-          #'(lambda () (setq-local show-paren-advice-enabled nil)))
-(defadvice show-paren-function (after show-matching-paren-offscreen activate)
+          #'(lambda () (setq-local my/-show-paren-advice-enabled nil)))
+(defvar my/-show-paren-advice-timeout 0.5)
+(defvar my/-show-paren-advice-timer   nil)
+(defvar my/-show-paren-advice-last-msg "")
+(defadvice show-paren-function
+    (after show-matching-paren-offscreen activate)
   "If the matching paren is offscreen, show the matching line in the
 echo area. Has no effect if the character before point is not of
 the syntax class ')'."
   (interactive)
-  (with-demoted-errors "show-paren error: %S"
-    (when (and show-paren-advice-enabled
-               (let ((ctx (syntax-ppss-context (syntax-ppss))))
-                 (null ctx)))
-      (unless (minibufferp)
-        (let ((cb (char-before (point)))
-              (ca (char-after (point)))
-              t-beg t-end line column mesg)
-          (when (and cb (char-equal (char-syntax cb) ?\)))
-            (save-excursion
-              (backward-list)
-              (unless (pos-visible-in-window-p)
-                (setq line (line-number-at-pos)
-                      column (current-column)
-                      t-beg (progn (beginning-of-line) (point))
-                      t-end (progn (end-of-line) (point))
-                      mesg (format "[%s:%s] %s" line column
-                                   (buffer-substring t-beg t-end))))))
-          (when (and ca (char-equal (char-syntax ca) ?\())
-            (save-excursion
-              (forward-list)
-              (unless (pos-visible-in-window-p)
-                (setq line (line-number-at-pos)
-                      column (current-column)
-                      t-beg (progn (beginning-of-line) (point))
-                      t-end (progn (end-of-line) (point))
-                      mesg (concat (and mesg (concat mesg "\n"))
-                                   (format "[%s:%s] %s" line column
-                                           (buffer-substring t-beg t-end)))))))
-          (when mesg
-            (let ((message-log-max nil))
-              (message "%s" mesg))))))))
+  (unless my/-show-paren-advice-timer
+    (setq my/-show-paren-advice-timer
+          (run-at-time
+           my/-show-paren-advice-timeout nil
+           #'(lambda ()
+               (with-demoted-errors "show-paren error: %S"
+                 (unwind-protect
+                     (when (and (not (minibufferp))
+                                my/-show-paren-advice-enabled
+                                (let ((ctx (syntax-ppss-context (syntax-ppss))))
+                                  (null ctx)))
+                       (let ((cb (char-before (point)))
+                             (ca (char-after (point)))
+                             t-beg t-end line column mesg)
+                         (my/-save-mark-and-excursion
+                           (when (cond
+                                  ((and cb (char-equal (char-syntax cb) ?\)))
+                                   (backward-list) t)
+                                  ((and ca (char-equal (char-syntax ca) ?\())
+                                   (forward-list) t)
+                                  (t nil))
+                             (unless (pos-visible-in-window-p)
+                               (setq
+                                line (line-number-at-pos)
+                                column (current-column)
+                                t-beg (progn (beginning-of-line) (point))
+                                t-end (progn (end-of-line) (point))
+                                mesg (let ((cmsg (current-message)))
+                                       (when (string=
+                                              cmsg
+                                              my/-show-paren-advice-last-msg)
+                                         (setq cmsg nil))
+                                       (setq my/-show-paren-advice-last-msg
+                                             (concat
+                                              (format "[%s:%s] %s" line column
+                                                      (buffer-substring
+                                                       t-beg t-end))
+                                              (and cmsg "\n") cmsg)))))))
+                         (when mesg
+                           (let ((message-log-max nil))
+                             (message "%s" mesg)))))
+                   (setq my/-show-paren-advice-timer nil))))))))
 
 (ad-enable-advice #'show-paren-function 'after 'show-matching-paren-offscreen)
 (ad-activate #'show-paren-function)
@@ -291,6 +308,14 @@ the syntax class ')'."
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)
 (define-key minibuffer-local-map (kbd "<down>") 'next-complete-history-element)
 
+(defun my/-delete-overlays-in-region (&optional start end)
+  (interactive "r")
+  (when (and transient-mark-mode mark-active)
+    (unless start (setq start (point)))
+    (unless end (setq end (mark)))
+    (when (> start end) (rotatef start end)))
+  (when (and start end)
+    (mapc #'delete-overlay (overlays-in start end))))
 
 ;; backups
 (let ((bu-dir (locate-user-emacs-file "cache/backups")))
