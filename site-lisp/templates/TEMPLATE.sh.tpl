@@ -6,19 +6,21 @@
 ## Date: (>>>VC_DATE<<<)
 ## License: (>>>LICENSE<<<)
 
+cleanup () {
+    echo "Caught $1 signal."
+}
+
+signals="HUP TERM QUIT KILL STOP EXIT"
+for signal in $signals;do
+    trap "cleanup ${signal}" "$signal"
+done
+trap 'cleanup INT; trap - INT; kill -INT $$' INT
+
 
 main () {
 
     (>>>POINT<<<)
 
 }
-
-
-signals="HUP TERM QUIT KILL STOP EXIT"
-for signal in $signals;do
-    trap 'echo "Caught ${signal} signal."' "$signal"
-done
-trap 'echo "Caught INT signal."; trap - INT; kill -INT $$' INT
-
 
 main "$@"

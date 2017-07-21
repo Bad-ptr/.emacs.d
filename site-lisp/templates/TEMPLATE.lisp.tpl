@@ -10,7 +10,10 @@
 (in-package :cl-user)
 
 (defpackage (>>>FILE_SANS<<<)
-  (:use :cl))
+  (:documentation "(>>>Documentation<<<)")
+  (:use :cl)
+  #+sb-package-locks
+  (:lock t))
 
 (in-package (>>>FILE_SANS<<<))
 

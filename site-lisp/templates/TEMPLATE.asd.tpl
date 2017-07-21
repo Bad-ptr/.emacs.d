@@ -10,7 +10,9 @@
 (in-package :cl-user)
 
 (defpackage (>>>FILE_SANS<<<)-asd
-  (:use :cl :asdf))
+  (:use :cl :asdf)
+  #+sb-package-locks
+  (:lock t))
 
 (in-package (>>>FILE_SANS<<<)-asd)
 
@@ -19,8 +21,20 @@
   :author "(>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>"
   :license "(>>>LICENSE<<<)."
   :description "(>>>Short_description<<<)"
-  :long-description "(>>>Long_description<<<)"
+  :long-description
+  #.(with-open-file (stream (merge-pathnames
+                             #p"README.md"
+                             (or *load-pathname* *compile-file-pathname*))
+                            :if-does-not-exist nil
+                            :direction :input)
+      (when stream
+        (let ((seq (make-array (file-length stream)
+                               :element-type 'character
+                               :fill-pointer t)))
+          (setf (fill-pointer seq) (read-sequence seq stream))
+          seq)))
   :depends-on ()
+  :serial t
   :components ((:module "src"
                         :components
                         ((:file "(>>>FILE_SANS<<<)")))))
