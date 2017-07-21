@@ -45,26 +45,37 @@
 
 
 (defgroup wrap-with nil
-  "Customization of wrap-with-mode."
+
+  "Customization of the `wrap-with-mode'."
+
   :prefix "wrap-with"
   :group 'wrap-with)
 
 (defcustom wrap-with-special-indent-in-brackets t
-  "If inside () pressed RET then insert newline, indent,
-newline, indent, then go to previous line."
+
+  "If t, then pressing RET inside () will insert newline then indent,
+then insert newline, then indent, then go to the end of the
+  previous(indented) line."
   :group 'wrap-with
+
   :type 'bool)
 
+(defalias 'w-w/save-mark-and-excursion
+  (if (fboundp 'save-mark-and-excursion)
+      'save-mark-and-excursion
+    'w-w/save-mark-and-excursion))
+
 (defun w-w/wrap-beg-end ()
-  "Get begin and end position of region to wrap."
-  (let ((wbeg (mark))
-        (wend (point)))
+
+  "Get start and end positions of a region to wrap."
+
+  (let ((wbeg (mark)) (wend (point)))
     (cond ((and transient-mark-mode mark-active)
            (when (> wbeg wend)
              (rotatef wbeg wend))
            (list wbeg wend))
           ((looking-at "\\w")
-           (save-excursion
+           (w-w/save-mark-and-excursion
              (search-forward-regexp "\\b")
              (skip-syntax-backward "\\w_")
              (setq wbeg (point))
@@ -74,14 +85,17 @@ newline, indent, then go to previous line."
           (t (list wend wend)))))
 
 
-(defun* w-w/wrap-with (w-beg-str
-                       &optional (w-end-str w-beg-str) (w-beg-end (w-w/wrap-beg-end))
-                       (point-pos 'before-closing))
+(defun* w-w/wrap-with
+    (w-beg-str
+     &optional (w-end-str w-beg-str) (w-beg-end (w-w/wrap-beg-end))
+     (point-pos 'before-closing))
+
   "General wrapping function.
 Inserting w-beg-str at begining of region and w-end-str at ending.
 Set point according to point-pos."
+
   (interactive "sWrap region with: ")
-  (multiple-value-bind (w-beg w-end) w-beg-end
+  (destructuring-bind (w-beg w-end) w-beg-end
     (goto-char w-beg)
     (insert w-beg-str)
     (goto-char (+ w-end (string-width w-beg-str)))
@@ -97,15 +111,17 @@ Set point according to point-pos."
 (defconst w-w/pairs-predefined
   '(("(" . ")")
     ("[" . "]")
-    ("{" . "}"))
+    ("{" . "}")
+    ("\"" . nil ))
   "Predefined wrapping pairs.")
 
-(defvar-local w-w/pairs (list) "Wrapping pairs.")
-;; (make-variable-buffer-local 'w-w/pairs)
-;; (setq-default w-w/pairs w-w/pairs-predefined)
+(defvar-local w-w/pairs ()
+  "Wrapping pairs.")
 
 (defun w-w/set-pairs-from-syntax-table ()
+
   "Add pairs based on `major-mode'."
+
   (let ((nplist (list)))
     (dotimes (char 256)
       (let* ((syntax-entry (aref (syntax-table) char))
@@ -121,28 +137,31 @@ Set point according to point-pos."
       (setq w-w/pairs nplist))))
 
 
-(defun* w-w/enlarge-region-if-wrapped (p-open p-close
-                                              &optional (w-beg-end (w-w/wrap-beg-end)))
-  "If region is already wrapped wit p-open/p-close pair then include them in region."
-  (multiple-value-bind (w-beg w-end) w-beg-end
+(defun* w-w/enlarge-region-if-wrapped
+    (p-open p-close &optional (w-beg-end (w-w/wrap-beg-end)))
+
+  "If a selected region is already wrapped wit p-open/p-close
+pair then expand selection on them."
+
+  (destructuring-bind (w-beg w-end) w-beg-end
     (let ((skip-regex (if (= w-beg w-end)
                           "\\s-"
                         "\\(\\s-\\|\n\\)"))
-          is-enlarged new-start new-end)
+          (new-start w-beg) (new-end w-end)
+          is-enlarged)
 
       (when (region-active-p)
-        (save-excursion
+        (w-w/save-mark-and-excursion
           (goto-char w-beg)
           (while (looking-back skip-regex)
             (backward-char))
           (when (looking-back (regexp-quote p-open))
-            (setq new-start (1- (point)))
-
+            (setq new-start (- (point) (string-width p-open)))
             (goto-char w-end)
             (while (looking-at skip-regex)
               (forward-char))
             (when (looking-at (regexp-quote p-close))
-              (setq new-end (1+ (point))
+              (setq new-end (+ (point) (string-width p-close))
                     is-enlarged t)))))
 
       (list is-enlarged (list new-start new-end)))))
@@ -150,9 +169,11 @@ Set point according to point-pos."
 (defun* w-w/wrap-with-pair (p-str
                             &optional (w-beg-end (w-w/wrap-beg-end))
                             close-pair)
+
   "Wrap region with p-str and close-pair.
 If close-pair is nil search pair for p-str and wrap region with that pair.
 If no pair found then use p-str as opening and closing."
+
   (interactive "sWrap with pairs: ")
   (let ((p-open p-str)
         (inp-is-closing-pair nil)
@@ -167,42 +188,40 @@ If no pair found then use p-str as opening and closing."
         (rotatef p-open p-close)))
     (if (not inp-is-closing-pair)
         (w-w/wrap-with p-open p-close w-beg-end 'after-opening)
-      (multiple-value-bind (is-enlrgd beg-end)
+      (destructuring-bind (is-enlrgd (beg end))
           (w-w/enlarge-region-if-wrapped p-open p-close w-beg-end)
-        (if is-enlrgd
-            (multiple-value-bind (beg end) beg-end
-              (set-mark beg)
-              (goto-char end))
-          (if (or (region-active-p)
-                  (not (looking-at (regexp-quote p-close))))
-              (multiple-value-bind (beg end) w-beg-end
-                (w-w/wrap-with p-open p-close w-beg-end
-                               (if (and (eq beg end)
-                                        (not (string= p-open p-close)))
-                                   'after-closing
-                                 'before-closing)))
-            (forward-char)))))))
+        (cond
+         (is-enlrgd (set-mark beg)
+                    (goto-char end))
+         ((or (region-active-p)
+              (not (looking-at (regexp-quote p-close))))
+          (w-w/wrap-with p-open p-close w-beg-end
+                         (if (and (eq beg end)
+                                  (not (string= p-open p-close)))
+                             'after-closing
+                           'before-closing)))
+         (t (forward-char (string-width p-close))))))))
 
 ;; Wrap with html tag:
 
 (defsubst w-w/get-first-part-of-string (str)
-  "Get first part of string before first occurence of space symbol."
+  "Get a part of a STR before a first space symbol occurs."
   (substring str 0 (string-match "[ \f\t\n\r\v]+" str)))
 
 (defun w-w/trim-html-tag-braces (str)
-  "Remove '<' from begining of string and '>' from end."
-  (if (and (stringp str) (> (string-width str) 0))
-      (let ((str-len (string-width str)))
+  "Remove the '<' from the begining of STR and '>' from the end."
+  (let ((str-len (string-width str)))
+    (if (> str-len 0)
         (substring str (if (string= "<" (substring str 0 1))
                            1
                          0)
                    (if (string= ">" (substring str (1- str-len) str-len))
                        (1- str-len)
-                     str-len)))
-    ""))
+                     str-len))
+      "")))
 
 (defun w-w/get-html-tag-name (str)
-  "Get tag name."
+  "Get a tag name."
   (w-w/get-first-part-of-string (w-w/trim-html-tag-braces str)))
 
 (defun w-w/wrap-with-html-tag (inp-str)
@@ -220,10 +239,11 @@ If no pair found then use p-str as opening and closing."
 
 
 (defun w-w/between-pair ()
-  (let ((open (char-before))
+  ;; TODO: skip spaces, use looking-at looking-back
+  (let ((open  (char-before))
         (close (char-after)))
     (when (and open close)
-      (let* ((open (char-to-string open))
+      (let* ((open  (char-to-string open))
              (close (char-to-string close))
              (pairs (assoc open (union w-w/pairs-predefined w-w/pairs))))
         (and pairs (string= close (cdr pairs)))))))
@@ -236,15 +256,18 @@ If no pair found then use p-str as opening and closing."
       (let ((wrap-with-mode nil))
         (call-interactively (key-binding (kbd "RET"))))
     (newline)
-    (save-excursion
+    (w-w/save-mark-and-excursion
       (newline-and-indent))
     (indent-according-to-mode)))
 
 (defun w-w/backspace-current-pair ()
+  ;;XXX: This doesn't support anything other than brackets
   (interactive)
-  (save-excursion
+  (w-w/save-mark-and-excursion
     (backward-up-list)
-    (let ((close-pos (1- (save-excursion (forward-list)))))
+    (let ((close-pos (1-
+                      (w-w/save-mark-and-excursion
+                        (forward-list)))))
       (delete-char 1)
       (goto-char close-pos)
       (delete-backward-char 1))))
@@ -276,7 +299,7 @@ If no pair found then use p-str as opening and closing."
              (end (region-end))
              (m-d (check-string-parens
                    (buffer-substring beg end) major-mode)))
-        (save-excursion
+        (w-w/save-mark-and-excursion
           (when m-d
             (destructuring-bind (matched-s dir) m-d
               (case dir
@@ -307,12 +330,12 @@ If no pair found then use p-str as opening and closing."
               (end (region-end)))
           (destructuring-bind (matched-s dir) m-d
             (case dir
-              ('right (save-excursion
+              ('right (w-w/save-mark-and-excursion
                         (goto-char beg)
                         (yank)
                         (goto-char (+ end (string-width y-txt)))
                         (insert matched-s)))
-              (t (save-excursion
+              (t (w-w/save-mark-and-excursion
                    (goto-char end)
                    (yank)
                    (goto-char beg)
@@ -361,19 +384,16 @@ If no pair found then use p-str as opening and closing."
             (when cl
               (w-w/define-key cl
                 `(w-w/wrap-with-pair ,cl)))))
-      '(("(" . ")")
-        ("[" . "]")
-        ;;("<" . ">")
-        ("{" . "}")
-        ("\"" . nil)))
+      w-w/pairs-predefined)
 
 ;;(define-key wrap-with-mode-map (kbd "C-c w w") #'w-w/wrap-with)
 ;;(define-key wrap-with-mode-map (kbd "C-c w p") #'w-w/wrap-with-pair)
 ;;(define-key wrap-with-mode-map (kbd "C-c w h t") #'w-w/wrap-with-html-tag)
-(define-key wrap-with-mode-map (kbd "M-DEL") #'w-w/backspace-current-pair)
+
+(define-key wrap-with-mode-map (kbd "C-s-<delete>") #'w-w/backspace-current-pair)
 (define-key wrap-with-mode-map (kbd "C-s-w") #'w-w/cut-region-with-surronding-pair)
 (define-key wrap-with-mode-map (kbd "C-s-y") #'w-w/insert-with-surrounding-pair)
-(define-key wrap-with-mode-map (kbd "RET") #'w-w/newline-indent)
+(define-key wrap-with-mode-map (kbd "RET")   #'w-w/newline-indent)
 
 ;;;###autoload
 (define-minor-mode wrap-with-mode
@@ -389,10 +409,13 @@ If no pair found then use p-str as opening and closing."
 
   (if wrap-with-mode
       (progn
-        (w-w/set-pairs-from-syntax-table)
-        (add-hook 'after-change-major-mode-hook #'w-w/set-pairs-from-syntax-table))
-    (remove-hook 'after-change-major-mode-hook #'w-w/set-pairs-from-syntax-table)))
-
+        (dolist (buf (buffer-list))
+          (with-current-buffer buf
+            (w-w/set-pairs-from-syntax-table)))
+        (add-hook 'after-change-major-mode-hook
+                  #'w-w/set-pairs-from-syntax-table))
+    (remove-hook 'after-change-major-mode-hook
+                 #'w-w/set-pairs-from-syntax-table)))
 
 (provide 'wrap-with)
 
