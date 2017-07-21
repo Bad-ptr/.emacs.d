@@ -170,7 +170,7 @@ That is, a string used to represent it on the tab bar."
        ;;  'per-frame-header-line-inactive-face
        ;;  (face-background 'mode-line-inactive))
 
-       (setq common-header-mode-line-update-delay 0.1)
+       ;; (setq common-header-mode-line-update-delay 0.1)
 
        (defvar per-window-header-line-active-format nil)
        (defvar per-window-header-line-inactive-format nil)
@@ -468,6 +468,10 @@ int main (int argc, char **argv) {
   (add-hook 'my/-prog-mode-hook #'(lambda () (hl-todo-mode +1)))
   (add-hook 'text-mode-hook #'(lambda () (hl-todo-mode +1))))
 
+(with-eval-after-load "hilit-chg"
+  (setq highlight-changes-colors
+        '("#970" "#907" "#329" "#938" "#743" "#784" "#967")))
+
 ;; mark-multiple
 (with-eval-after-load "multiple-cursors-autoloads"
   (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
@@ -545,16 +549,31 @@ int main (int argc, char **argv) {
 ;;   (add-hook 'my/-prog-mode-hook #'idle-highlight-mode))
 
 ;; highlight-symbol
-(with-eval-after-load "highlight-symbol-autoloads"
-  (setq highlight-symbol-disable '())
-  (with-eval-after-load "highlight-symbol"
-    (set-face-background 'highlight-symbol-face nil)
-    (set-face-underline 'highlight-symbol-face "#0F0"))
+;; (with-eval-after-load "highlight-symbol-autoloads"
+;;   (setq highlight-symbol-disable '())
+;;   (with-eval-after-load "highlight-symbol"
+;;     (set-face-background 'highlight-symbol-face nil)
+;;     (set-face-underline 'highlight-symbol-face "#0F0"))
+;;   (add-hook 'my/-prog-mode-hook
+;;             (lambda ()
+;;               (when (null (memql major-mode highlight-symbol-disable))
+;;                 (highlight-symbol-mode)
+;;                 (highlight-symbol-nav-mode)))))
+
+;; symbol-overlay
+(with-eval-after-load "symbol-overlay-autoloads"
   (add-hook 'my/-prog-mode-hook
-            (lambda ()
-              (when (null (memql major-mode highlight-symbol-disable))
-                (highlight-symbol-mode)
-                (highlight-symbol-nav-mode)))))
+            (lambda () (symbol-overlay-mode 1)))
+  (with-eval-after-load "symbol-overlay"
+    (set-face-attribute 'symbol-overlay-temp-face nil
+                        :inherit 'default
+                        :foreground nil :background nil
+                        :underline "#0F0")
+    (global-set-key (kbd "M-i") 'symbol-overlay-put)
+    (global-set-key (kbd "M-n") 'symbol-overlay-jump-next)
+    (global-set-key (kbd "M-p") 'symbol-overlay-jump-prev)
+    (global-set-key (kbd "<f7>") 'symbol-overlay-mode)
+    (global-set-key (kbd "<f8>") 'symbol-overlay-remove-all)))
 
 ;; ;; highlight-stages
 ;; (with-eval-after-load "highlight-stages-autoloads"
@@ -653,7 +672,8 @@ int main (int argc, char **argv) {
   (setq hl-paren-colors-dark (list "#FF0000" "#FF00FF" "#00FFFF"))
   (setq hl-paren-sizes (list 1.1))
   (global-highlight-parentheses-mode t)
-  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1))))
+  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1)))
+  (add-hook 'before-revert-hook #'(lambda () (mapc #'delete-overlay hl-paren-overlays))))
 (with-eval-after-load "highlight-parentheses"
   (defun hl-paren-create-overlays ()
     (let ((fg (if (eq (frame-parameter (selected-frame) 'background-mode)
