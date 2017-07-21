@@ -315,6 +315,54 @@ of FILE in the current directory, suitable for creation"
   (when macrosym
     (put macrosym 'lisp-indent-function 'defun)))
 
+(defvar-local my/-lisp-highlight-imenu-symbols-types-regexp     nil)
+(defvar-local my/-lisp-highlight-imenu-symbols-variables-regexp nil)
+(defvar-local my/-lisp-highlight-imenu-symbols-functions-regexp nil)
+(defun lisp-highlight-imenu-symbols ()
+  (interactive)
+  (let* ((imenu-alist (imenu--make-index-alist))
+         (types     (mapcar #'car (cdr   (assoc "Types"     imenu-alist))))
+         (variables (mapcar #'car (cdr   (assoc "Variables" imenu-alist))))
+         (funcs     (mapcar #'car (cdddr                    imenu-alist))))
+    ;; (message "Vars: %s\nTypes: %s\nFuncs: %s" variables types funcs)
+    (dolist (item (list (list 'my/-lisp-highlight-imenu-symbols-types-regexp
+                              'font-lock-type-face
+                              types)
+                        (list 'my/-lisp-highlight-imenu-symbols-variables-regexp'
+                              'font-lock-variable-name-face
+                              variables)
+                        (list 'my/-lisp-highlight-imenu-symbols-functions-regexp
+                              'font-lock-function-name-face
+                              funcs)))
+      (destructuring-bind (var-sym face lst) item
+        (when (symbol-value var-sym)
+          (font-lock-remove-keywords
+           'lisp-mode (list (list (symbol-value var-sym) 0 face)))
+          (setf (symbol-value var-sym) nil))
+        (when lst
+          (setf (symbol-value var-sym)
+                (concat "\\_<" (regexp-opt lst) "\\_>"))
+          (font-lock-add-keywords
+           'lisp-mode (list (list (symbol-value var-sym) 0 face))
+           t))))))
+
+;; (defface font-lock-func-face
+;;   '((nil (:foreground "#b0bdd0" :bold nil))
+;;     (t (:bold nil :italic t)))
+;;   "Font Lock mode face used for function calls."
+;;   :group 'font-lock-highlighting-faces)
+
+;; (font-lock-add-keywords
+;;  'lisp-mode
+;;  '(("(\\s-*\\(\\_<\\(?:\\sw\\|\\s_\\)+\\)\\_>"
+;;     1 'font-lock-func-face keep))
+;;  t)
+
+;; (font-lock-remove-keywords
+;;  'lisp-mode
+;;  '(("(\\s-*\\(\\_<\\(?:\\sw\\|\\s_\\)+\\)\\_>"
+;;     1 'font-lock-func-face keep)))
+
 ;; (let ((q-s-h-file (expand-file-name "~/quicklisp/slime-helper.el")))
 ;;   (when (file-exists-p q-s-h-file)
 ;;     (load q-s-h-file)))
