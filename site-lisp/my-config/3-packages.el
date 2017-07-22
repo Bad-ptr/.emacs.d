@@ -747,7 +747,8 @@ int main (int argc, char **argv) {
                                  completion-separator-self-insert-command)
         company-idle-delay 0.2
         company-show-numbers t
-        company-tooltip-align-annotations t)
+        company-tooltip-align-annotations t
+        company-dabbrev-downcase nil)
 
   (defvar-local company-col-offset 0 "Horisontal tooltip offset.")
   (defvar-local company-row-offset 0 "Vertical tooltip offset.")
