@@ -303,6 +303,14 @@ the syntax class ')'."
       (delete-region start end))))
 (global-set-key (kbd "s-<delete>") #'my/-delete-region-even-if-readonly)
 
+(defun my/-clear-buffer-to-current-line ()
+  (interactive)
+  (save-mark-and-excursion
+    (let ((end (progn (previous-line)
+                      (point-at-eol)))
+          (start (point-min)))
+      (my/-delete-region-even-if-readonly start end))))
+
 (define-key minibuffer-local-map (kbd "C-<up>") 'previous-line)
 (define-key minibuffer-local-map (kbd "C-<down>") 'next-line)
 (define-key minibuffer-local-map (kbd "<up>") 'previous-complete-history-element)

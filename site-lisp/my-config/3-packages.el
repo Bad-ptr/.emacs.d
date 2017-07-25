@@ -498,7 +498,10 @@ int main (int argc, char **argv) {
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
-  (global-set-key (kbd "M-o") 'er/expand-region))
+  (global-set-key (kbd "M-o") #'(lambda (arg)
+                                  (interactive "p")
+                                  (let (shift-select-mode)
+                                    (er/expand-region arg)))))
 
 ;; redo+
 (with-eval-after-load "redo+-autoloads"

@@ -305,15 +305,39 @@ of FILE in the current directory, suitable for creation"
 
 ;; lisp
 
-(defun lisp-add-new-macro-indent (&optional macrosym)
+(defun lisp-set-symbol-indent (&optional sym indent)
   (interactive
    (list
     (intern
      (read-string
       "Specify a macro name: " (let ((sap (symbol-at-point)))
                                  (and sap (symbol-name sap)))))))
-  (when macrosym
-    (put macrosym 'lisp-indent-function 'defun)))
+  (setq indent
+        (if current-prefix-arg
+            (read
+             (read-string
+              "Indent type(nil,defun,function name or integer): " "1"))
+          'defun))
+  (when sym
+    (put sym 'lisp-indent-function indent)))
+
+(defface font-lock-current-file-functions-face
+  '((nil (:foreground "#b0bdd0"
+                      :inherit 'font-lock-function-name-face))
+    (t (:bold nil :italic t)))
+  "Font Lock mode face used for function calls."
+  :group 'font-lock-highlighting-faces)
+(defface font-lock-current-file-variables-face
+  '((nil (:inherit 'font-lock-variable-name-face))
+    (t (:bold nil :italic t)))
+  "Font Lock mode face used for function calls."
+  :group 'font-lock-highlighting-faces)
+(defface font-lock-current-file-types-face
+  '((nil (:foreground "#70aa40" :bold nil
+                      :inherit 'font-lock-type-face))
+    (t (:bold nil :italic t)))
+  "Font Lock mode face used for function calls."
+  :group 'font-lock-highlighting-faces)
 
 (defvar-local my/-lisp-highlight-imenu-symbols-types-regexp     nil)
 (defvar-local my/-lisp-highlight-imenu-symbols-variables-regexp nil)
@@ -326,31 +350,25 @@ of FILE in the current directory, suitable for creation"
          (funcs     (mapcar #'car (cdddr                    imenu-alist))))
     ;; (message "Vars: %s\nTypes: %s\nFuncs: %s" variables types funcs)
     (dolist (item (list (list 'my/-lisp-highlight-imenu-symbols-types-regexp
-                              'font-lock-type-face
+                              ''font-lock-current-file-types-face
                               types)
                         (list 'my/-lisp-highlight-imenu-symbols-variables-regexp'
-                              'font-lock-variable-name-face
+                              ''font-lock-current-file-variables-face
                               variables)
                         (list 'my/-lisp-highlight-imenu-symbols-functions-regexp
-                              'font-lock-function-name-face
+                              ''font-lock-current-file-functions-face
                               funcs)))
       (destructuring-bind (var-sym face lst) item
         (when (symbol-value var-sym)
           (font-lock-remove-keywords
-           'lisp-mode (list (list (symbol-value var-sym) 0 face)))
+           major-mode (list (list (symbol-value var-sym) 0 face)))
           (setf (symbol-value var-sym) nil))
         (when lst
           (setf (symbol-value var-sym)
                 (concat "\\_<" (regexp-opt lst) "\\_>"))
           (font-lock-add-keywords
-           'lisp-mode (list (list (symbol-value var-sym) 0 face))
+           major-mode (list (list (symbol-value var-sym) 0 face))
            t))))))
-
-;; (defface font-lock-func-face
-;;   '((nil (:foreground "#b0bdd0" :bold nil))
-;;     (t (:bold nil :italic t)))
-;;   "Font Lock mode face used for function calls."
-;;   :group 'font-lock-highlighting-faces)
 
 ;; (font-lock-add-keywords
 ;;  'lisp-mode
