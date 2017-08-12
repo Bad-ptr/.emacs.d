@@ -397,7 +397,7 @@ the syntax class ')'."
 (setq
  recentf-save-file
  (locate-user-emacs-file "cache/recentf")
- recentf-max-saved-items 100     ;; max save 100
+ recentf-max-saved-items 1000    ;; max save 1000
  recentf-max-menu-items  15)     ;; max 15 in menu
 (recentf-mode t)                 ;; turn it on
 

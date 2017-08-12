@@ -883,6 +883,7 @@ int main (int argc, char **argv) {
 ;; ivy
 (with-eval-after-load "ivy-autoloads"
   (setq ivy-use-virtual-buffers t
+        ivy-virtual-abbreviate "full"
         ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                 (t . ivy--regex-fuzzy)))
   (ivy-mode 1)
