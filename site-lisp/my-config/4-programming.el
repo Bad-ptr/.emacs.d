@@ -75,7 +75,7 @@
                    ;; $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
                    (when buffer-file-name
                      (let ((file (file-name-nondirectory buffer-file-name))
-                           (mkfile (get-closest-pathname)))
+                           (mkfile (get-closest-pathname "Makefile")))
                        (if mkfile
                            (progn (format "cd %s; make" (file-name-directory mkfile)))
                          (format "%s %s %s -c %s -o %s.o"
@@ -134,38 +134,51 @@
   "Face with overstrike.")
 
 
-(with-eval-after-load "dash"
-  (defun my/-renormalize-faces ()
-    (interactive)
-    (let* ((c-bg (color-name-to-rgb (frame-parameter (selected-frame) 'background-color)))
-           (c-op (color-name-to-rgb (face-foreground 'open-paren-face)))
-           (c-cp (color-name-to-rgb (face-foreground 'close-paren-face)))
-           (bg-mode (frame-parameter (selected-frame) 'background-mode))
-           (dif-o-c-p (-zip-with #'- c-op c-cp)))
-      ;;(message "%s - %s = %s" c-op c-cp dif-o-c-p)
-      (setq c-op (-zip-with #'- c-bg dif-o-c-p)
-            c-cp (-zip-with #'- c-op dif-o-c-p))
-      ;;(message "%s - %s = %s" c-bg dif-o-c-p c-op)
-      (set-face-foreground 'open-paren-face (apply #'color-rgb-to-hex c-op))
-      (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex c-cp)))))
+(defun my/-renormalize-faces ()
+  (interactive)
+  (let* ((c-bg (color-name-to-rgb (frame-parameter (selected-frame) 'background-color)))
+         (c-op (color-name-to-rgb (face-foreground 'open-paren-face)))
+         (c-cp (color-name-to-rgb (face-foreground 'close-paren-face)))
+         (bg-mode (frame-parameter (selected-frame) 'background-mode))
+         (dif-o-c-p (cl-mapcar #'- c-op c-cp)))
+    ;;(message "%s - %s = %s" c-op c-cp dif-o-c-p)
+    (setq c-op (cl-mapcar #'- c-bg dif-o-c-p)
+          c-cp (cl-mapcar #'- c-op dif-o-c-p))
+    ;;(message "%s - %s = %s" c-bg dif-o-c-p c-op)
+    (set-face-foreground 'open-paren-face  (apply #'color-rgb-to-hex c-op))
+    (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex c-cp))))
 
-
-(cl-defun get-closest-pathname (&optional (file "Makefile") (maxlevel 3))
+(defvar my/-project-file-names '("Makefile" "build.sh" ".git" ".hg" "bin"))
+(cl-defun get-closest-pathname
+    (&optional (files my/-project-file-names) (maxlevel 3))
   "Determine the pathname of the first instance of FILE starting from the current directory towards root.
 This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
 of FILE in the current directory, suitable for creation"
-  (let ((root (expand-file-name "/")) ; the win32 builds should translate this correctly
-        (level 0))
-    (expand-file-name file
-                      (loop
-                       for d = default-directory then (expand-file-name ".." d)
-                       do (setq level (+ level 1))
-                       if (file-exists-p (expand-file-name file d))
-                       return d
-                       if (> level maxlevel)
-                       return nil
-                       if (equal d root)
-                       return nil))))
+  (let ( ; the win32 builds should translate this correctly
+        (root (expand-file-name "/")))
+    (unless (listp files) (setq files (list files)))
+    (cl-loop
+     for d     = default-directory then (expand-file-name ".." d)
+     and level = 0                 then (1+ level)
+     when (or (> level maxlevel) (string= d root))
+      return nil
+     end
+     for f in files
+      when (file-exists-p (expand-file-name f d))
+       return d
+      end
+     finally (return nil))))
+
+(defun my/-get-project-root ()
+  (let ((proot (cond
+                ((and (bound-and-true-p global-ede-mode)
+                      ede-object ede-object-project)
+                 ;; (ede-project-root-directory ede-object-project)
+                 (ede-expand-filename ede-object "."))
+                ((bound-and-true-p projectile-mode)
+                 (projectile-project-root))
+                (t (get-closest-pathname)))))
+    (or proot "./")))
 
 (defun run-current-file ()
   "Execute or compile the current file. For example,
@@ -248,13 +261,15 @@ of FILE in the current directory, suitable for creation"
 ;; C/Cpp/C++
 (setq c-default-style "gnu")
 
-(defvar my/-c-include-paths (cons "."
-                                  (when (executable-find "cpp")
-                                    (with-temp-buffer
-                                      (shell-command
-                                       "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
-                                       (current-buffer))
-                                      (split-string (buffer-string) "\n" t))))
+(defvar my/-c-include-paths
+  (cons
+   "."
+   (when (executable-find "cpp")
+     (with-temp-buffer
+       (shell-command
+        "echo | cpp -x c++ -Wp,-v 2>&1 | grep '^ .*include' | sed 's/^ //g'"
+        (current-buffer))
+       (split-string (buffer-string) "\n" t))))
   "List of dirs with includes for c.")
 (defun my/-c-get-includes ()
   (concatenate 'list
