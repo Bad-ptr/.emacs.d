@@ -120,23 +120,7 @@
   (set-face-attribute
    'tabbar-separator nil
    :background "gray20"
-   :height 0.6)
-
-  (defun tabbar-buffer-tab-label (tab)
-    "Return a label for TAB.
-That is, a string used to represent it on the tab bar."
-    (let ((label (if tabbar--buffer-show-groups
-                     (format "[%s] " (tabbar-tab-tabset tab))
-                   (format "%s " (tabbar-tab-value tab)))))
-      ;; Unless the tab bar auto scrolls to keep the selected tab
-      ;; visible, shorten the tab label to keep as many tabs as possible
-      ;; in the visible area of the tab bar.
-      (if tabbar-auto-scroll-flag
-          label
-        (tabbar-shorten
-         label (max 1 (/ (window-width)
-                         (length (tabbar-view
-                                  (tabbar-current-tabset))))))))))
+   :height 0.6))
 
 ;; Common header/mode-line
 
@@ -669,42 +653,17 @@ int main (int argc, char **argv) {
 
 ;; highlight-parentheses
 (with-eval-after-load "highlight-parentheses-autoloads"
-  (setq hl-paren-background-colors '("#FFF" "#DDCCDD" "#CCDDDD"))
-  (setq hl-paren-background-colors-dark '("#333" "#444" "#555"))
-  (setq hl-paren-colors (list "#FF0000" "#FF00FF" "#00FFFF"))
-  (setq hl-paren-colors-dark (list "#FF0000" "#FF00FF" "#00FFFF"))
-  (setq hl-paren-sizes (list 1.1))
+  (setq hl-paren-background-colors
+        #'(lambda ()
+            (if (eq (frame-parameter (selected-frame) 'background-mode)
+                    'light)
+                '("#FFF" "#DDCCDD" "#CCDDDD")
+              '("#333" "#444" "#555"))))
+  (setq hl-paren-colors '("#FF0000" "#FF00FF" "#00FFFF"))
+  (setq hl-paren-attributes '((:height 1.1 :weight bold)))
   (global-highlight-parentheses-mode t)
-  (add-hook 'my/-find-large-file-hook #'(lambda () (highlight-parentheses-mode -1)))
-  (add-hook 'before-revert-hook #'(lambda () (mapc #'delete-overlay hl-paren-overlays))))
-(with-eval-after-load "highlight-parentheses"
-  (defun hl-paren-create-overlays ()
-    (let ((fg (if (eq (frame-parameter (selected-frame) 'background-mode)
-                      'light)
-                  hl-paren-colors
-                hl-paren-colors-dark))
-          (bg (if (eq (frame-parameter (selected-frame) 'background-mode)
-                      'light)
-                  hl-paren-background-colors
-                hl-paren-background-colors-dark))
-          (size hl-paren-sizes)
-          attributes)
-      (while (or fg bg)
-        (setq attributes (face-attr-construct 'hl-paren-face))
-        (when (car fg)
-          (setq attributes (plist-put attributes :foreground (car fg))))
-        (pop fg)
-        (when (car bg)
-          (setq attributes (plist-put attributes :background (car bg))))
-        (pop bg)
-        (when (car size)
-          (setq attributes (plist-put attributes :height (car size)))
-          (setq attributes (plist-put attributes :weight 'bold)))
-        (pop size)
-        (dotimes (i 2) ;; front and back
-          (push (make-overlay 0 0) hl-paren-overlays)
-          (overlay-put (car hl-paren-overlays) 'face attributes)))
-      (setq hl-paren-overlays (nreverse hl-paren-overlays)))))
+  (add-hook 'my/-find-large-file-hook
+            #'(lambda () (highlight-parentheses-mode -1))))
 
 ;; ;; highlight-blocks-mode
 ;; do not enable it as it's too slow
