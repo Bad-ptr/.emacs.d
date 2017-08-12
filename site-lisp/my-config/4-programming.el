@@ -584,6 +584,24 @@ Lisp function does not specify a special indentation."
     (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
     (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
     (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
+
+(with-eval-after-load "python-mode"
+  (let ((action-lambda
+         #'(lambda ()
+             (let* ((prootbin
+                     (expand-file-name "bin" (my/-get-project-root)))
+                    (venv-file
+                     (expand-file-name "activate" prootbin)))
+               (when (file-exists-p venv-file)
+                 (setq-local exec-path
+                             (cons prootbin exec-path)))))))
+    (mapc #'(lambda (b)
+              (with-current-buffer b
+                (when (eq 'python-mode major-mode)
+                  (funcall action-lambda))))
+          (buffer-list))
+    (add-hook 'python-mode-hook action-lambda)))
+
 ;; (with-eval-after-load "jedi-autoloads"
 ;;   (add-hook 'python-mode-hook #'jedi:setup))
 
