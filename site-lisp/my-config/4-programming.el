@@ -471,18 +471,18 @@ Lisp function does not specify a special indentation."
 
 (defface font-lock-current-file-functions-face
   '((nil (:foreground "#b0bdd0"
-                      :inherit 'font-lock-function-name-face))
+                      :inherit font-lock-function-name-face))
     (t (:bold nil :italic t)))
   "Font Lock mode face used for function calls."
   :group 'font-lock-highlighting-faces)
 (defface font-lock-current-file-variables-face
-  '((nil (:inherit 'font-lock-variable-name-face))
+  '((nil (:inherit font-lock-variable-name-face))
     (t (:bold nil :italic t)))
   "Font Lock mode face used for function calls."
   :group 'font-lock-highlighting-faces)
 (defface font-lock-current-file-types-face
   '((nil (:foreground "#70aa40" :bold nil
-                      :inherit 'font-lock-type-face))
+                      :inherit font-lock-type-face))
     (t (:bold nil :italic t)))
   "Font Lock mode face used for function calls."
   :group 'font-lock-highlighting-faces)
@@ -500,7 +500,7 @@ Lisp function does not specify a special indentation."
     (dolist (item (list (list 'my/-lisp-highlight-imenu-symbols-types-regexp
                               ''font-lock-current-file-types-face
                               types)
-                        (list 'my/-lisp-highlight-imenu-symbols-variables-regexp'
+                        (list 'my/-lisp-highlight-imenu-symbols-variables-regexp
                               ''font-lock-current-file-variables-face
                               variables)
                         (list 'my/-lisp-highlight-imenu-symbols-functions-regexp
@@ -516,7 +516,9 @@ Lisp function does not specify a special indentation."
                 (concat "\\_<" (regexp-opt lst) "\\_>"))
           (font-lock-add-keywords
            major-mode (list (list (symbol-value var-sym) 0 face))
-           t))))))
+           t)))))
+  (when (fboundp major-mode)
+    (funcall major-mode)))
 
 ;; (font-lock-add-keywords
 ;;  'lisp-mode
