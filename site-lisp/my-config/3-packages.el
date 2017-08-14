@@ -456,6 +456,28 @@ int main (int argc, char **argv) {
   (setq highlight-changes-colors
         '("#970" "#907" "#329" "#938" "#743" "#784" "#967")))
 
+(with-eval-after-load "hi-lock"
+  (defun highlight-toggle-symbol-at-point ()
+    "Toggle highlight of symbol at point."
+    (interactive)
+    (let* ((regexp (hi-lock-regexp-okay
+                    (find-tag-default-as-symbol-regexp)))
+           (hi-lock-auto-select-face t)
+           (face (hi-lock-read-face-name)))
+      (unless (string-prefix-p "\\_<" regexp)
+        (setq regexp
+              (concat "\\_<" regexp
+                      (unless (string-suffix-p "\\_>" regexp)
+                        "\\_>"))))
+      (let ((old (assoc regexp hi-lock-interactive-patterns)))
+        (if old
+            (hi-lock-unface-buffer regexp)
+          (or (facep face) (setq face 'hi-yellow))
+          (unless hi-lock-mode (hi-lock-mode 1))
+          (hi-lock-set-pattern regexp face))))))
+(autoload 'highlight-toggle-symbol-at-point "hi-lock"
+  "Toggle highlight of symbol at point" t)
+
 ;; mark-multiple
 (with-eval-after-load "multiple-cursors-autoloads"
   (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
