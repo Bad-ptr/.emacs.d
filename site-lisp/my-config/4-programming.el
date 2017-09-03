@@ -148,23 +148,30 @@
     (set-face-foreground 'open-paren-face  (apply #'color-rgb-to-hex c-op))
     (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex c-cp))))
 
-(defvar my/-project-file-names '("Makefile" "build.sh" ".git" ".hg" "bin"))
+(defvar my/-project-file-names
+  '("^Makefile$" "^build\.sh$" "^\.git$" "^\.hg$" "^bin$" "^.+\.asd$"))
+(defun files-rx-exists-in-dir (rx &optional dir)
+  (directory-files (or dir "./") nil rx t))
 (cl-defun get-closest-pathname
-    (&optional (files my/-project-file-names) (maxlevel 3))
-  "Determine the pathname of the first instance of FILE starting from the current directory towards root.
-This may not do the correct thing in presence of links. If it does not find FILE, then it shall return the name
-of FILE in the current directory, suitable for creation"
+    (&optional (file-rxs my/-project-file-names) (maxlevel 3))
+
+  "Determine the pathname of the first instance of FILE starting
+from the current directory towards root.  This may not do the
+correct thing in presence of links. If it does not find FILE,
+then it shall return the name of FILE in the current directory,
+suitable for creation"
+
   (let ( ; the win32 builds should translate this correctly
         (root (expand-file-name "/")))
-    (unless (listp files) (setq files (list files)))
+    (unless (listp file-rxs) (setq file-rxs (list file-rxs)))
     (cl-loop
      for d     = default-directory then (expand-file-name ".." d)
      and level = 0                 then (1+ level)
      when (or (> level maxlevel) (string= d root))
       return nil
      end
-     for f in files
-      when (file-exists-p (expand-file-name f d))
+     for f-rx in file-rxs
+      when (files-rx-exists-in-dir f-rx d)
        return d
       end
      finally (return nil))))
@@ -640,7 +647,8 @@ Lisp function does not specify a special indentation."
 
 (with-eval-after-load "template"
   (push '("PERL_PACKAGE_NAME"
-          (insert (perl-fname-to-package (concat (nth 0 template-file) (nth 1 template-file)) "lib")))
+          (insert (perl-fname-to-package
+                   (concat (nth 0 template-file) (nth 1 template-file)) "lib")))
         template-expansion-alist)
   (push '("PERL_VERSION"
           (insert (or (and (boundp 'perl-version) perl-version) "5.018")))
