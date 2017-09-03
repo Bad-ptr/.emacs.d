@@ -1412,39 +1412,31 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
     (persp-fr-start)))
 
 (with-eval-after-load "persp-mode"
-  (defvar persp-names-sorted (and (bound-and-true-p *persp-hash*) (persp-names))
-    "Ordered list of perspective names.")
-
   (add-hook 'persp-before-switch-functions
             #'(lambda (new-persp-name w-or-f)
                 (let ((cur-persp-name (safe-persp-name (get-current-persp))))
-                  (when (member cur-persp-name persp-names-sorted)
-                    (setq persp-names-sorted
+                  (when (member cur-persp-name persp-names-cache)
+                    (setq persp-names-cache
                           (cons cur-persp-name
-                                (delete cur-persp-name persp-names-sorted)))))))
+                                (delete cur-persp-name persp-names-cache)))))))
 
   (add-hook 'persp-renamed-functions
             #'(lambda (persp old-name new-name)
-                (setq persp-names-sorted
-                      (cons new-name (delete old-name persp-names-sorted)))))
+                (setq persp-names-cache
+                      (cons new-name (delete old-name persp-names-cache)))))
 
   (add-hook 'persp-before-kill-functions
             #'(lambda (persp)
-                (setq persp-names-sorted
-                      (delete (safe-persp-name persp) persp-names-sorted))))
+                (setq persp-names-cache
+                      (delete (safe-persp-name persp) persp-names-cache))))
 
   (add-hook 'persp-created-functions
             #'(lambda (persp phash)
                 (when (and (eq phash *persp-hash*)
                            (not (member (safe-persp-name persp)
-                                        persp-names-sorted)))
-                  (setq persp-names-sorted
-                        (cons (safe-persp-name persp) persp-names-sorted)))))
-
-  (defsubst* persp-names-sorted (&optional (phash *persp-hash*))
-    (append persp-names-sorted nil))
-  (defun persp-names-current-frame-fast-ordered ()
-    (append persp-names-sorted nil)))
+                                        persp-names-cache)))
+                  (setq persp-names-cache
+                        (cons (safe-persp-name persp) persp-names-cache))))))
 
 
 (with-eval-after-load "persp-mode"
