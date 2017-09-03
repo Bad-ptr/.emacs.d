@@ -19,6 +19,11 @@ trap 'cleanup INT; trap - INT; kill -INT $$' INT
 
 main () {
 
+    if [ -n "$1" ]; then
+        echo "This script takes no arguments!"
+        exit 1
+    fi
+
     (>>>POINT<<<)
 
 }

@@ -7,14 +7,14 @@
 |#
 
 
-(in-package :cl-user)
+(in-package #:cl-user)
 
-(defpackage (>>>FILE_SANS<<<)
+(defpackage #:(>>>LISP_PROJECT_NAME<<<)
   (:documentation "(>>>Documentation<<<)")
-  (:use :cl)
+  (:use #:cl)
   #+sb-package-locks
   (:lock t))
 
-(in-package (>>>FILE_SANS<<<))
+(in-package #:(>>>LISP_PROJECT_NAME<<<))
 
 (>>>POINT<<<)

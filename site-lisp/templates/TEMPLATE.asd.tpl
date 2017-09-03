@@ -7,18 +7,19 @@
 |#
 
 
-(in-package :cl-user)
+;; (in-package #:cl-user)
 
-(defpackage (>>>FILE_SANS<<<)-asd
-  (:use :cl :asdf)
-  #+sb-package-locks
-  (:lock t))
+;; (defpackage #:(>>>FILE_SANS<<<)-asd
+;;   (:use #:cl #:asdf)
+;;   #+sb-package-locks
+;;   (:lock t))
 
-(in-package (>>>FILE_SANS<<<)-asd)
+;; (in-package #:(>>>FILE_SANS<<<)-asd)
 
-(defsystem (>>>FILE_SANS<<<)
+(defsystem #:(>>>FILE_SANS<<<)
   :version "(>>>Version_number<<<)"
   :author "(>>>USER_NAME<<<) ((>>>USER_NICKNAME<<<)) <(>>>USER_MAIL<<<)>"
+  :maintainer "(>>>USER_NAME<<<)"
   :license "(>>>LICENSE<<<)."
   :description "(>>>Short_description<<<)"
   :long-description

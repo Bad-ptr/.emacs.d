@@ -535,6 +535,11 @@ Lisp function does not specify a special indentation."
 ;;   (when (file-exists-p q-s-h-file)
 ;;     (load q-s-h-file)))
 
+(with-eval-after-load "template"
+  (push '("LISP_PROJECT_NAME"
+          (insert (file-name-base
+                   (string-remove-suffix "/" (my/-get-project-root)))))
+        template-expansion-alist))
 
 (with-eval-after-load "slime"
   ;; (setq inferior-lisp-program "sbcl")
