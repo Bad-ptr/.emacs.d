@@ -483,28 +483,58 @@ int main (int argc, char **argv) {
   "Toggle highlight of symbol at point" t)
 
 ;; mark-multiple
+;; (with-eval-after-load "multiple-cursors-autoloads"
+  ;; (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
+  ;; (global-set-key (kbd "C-<") #'mc/mark-previous-symbol-like-this)
+  ;; (global-set-key (kbd "C-M->") #'mc/mark-next-like-this)
+  ;; (global-set-key (kbd "C-M-<") #'mc/mark-previous-like-this)
+  ;; (global-set-key (kbd "C-c C-<") #'mc/mark-all-like-this)
+  ;; (global-set-key (kbd "C-c C->") #'mc/mark-all-like-this-dwim)
+  ;; (global-set-key (kbd "C-;") #'mc/mark-all-symbols-like-this)
+  ;; (global-set-key (kbd "C-:") #'mc/mark-all-symbols-like-this-in-defun)
+  ;; (global-set-key (kbd "C-c SPC") #'set-rectangular-region-anchor)
+
+  ;; (global-set-key (kbd "C-S-<mouse-1>") #'mc/add-cursor-on-click))
+;; (with-eval-after-load "multiple-cursors-core"
+;;   (define-key mc/keymap (kbd "C-.")  #'mc/unmark-next-like-this)
+;;   (define-key mc/keymap (kbd "C-,")  #'mc/unmark-previous-like-this)
+;;   (define-key mc/keymap (kbd "C-?")  #'mc/skip-to-next-like-this)
+;;   (define-key mc/keymap (kbd "C-\"") #'mc/skip-to-previous-like-this)
+
+;;   (define-key mc/keymap (kbd "C-S-s") #'mc/toggle-pause)
+
+;;   (define-key mc/keymap (kbd "C-'") #'mc-hide-unmatched-lines-mode)
+;;   (require 'mc-cycle-cursors))
 (with-eval-after-load "multiple-cursors-autoloads"
-  (global-set-key (kbd "C->") #'mc/mark-next-symbol-like-this)
-  (global-set-key (kbd "C-<") #'mc/mark-previous-symbol-like-this)
-  (global-set-key (kbd "C-M->") #'mc/mark-next-like-this)
-  (global-set-key (kbd "C-M-<") #'mc/mark-previous-like-this)
-  (global-set-key (kbd "C-c C-<") #'mc/mark-all-like-this)
-  (global-set-key (kbd "C-c C->") #'mc/mark-all-like-this-dwim)
-  (global-set-key (kbd "C-;") #'mc/mark-all-symbols-like-this)
-  (global-set-key (kbd "C-:") #'mc/mark-all-symbols-like-this-in-defun)
-  (global-set-key (kbd "C-c SPC") #'set-rectangular-region-anchor)
+  (autoload 'mc/cycle-backward "mc-cycle-cursors" nil t)
+  (autoload 'mc/cycle-forward  "mc-cycle-cursors" nil t)
 
-  (global-set-key (kbd "C-S-<mouse-1>") #'mc/add-cursor-on-click))
-(with-eval-after-load "multiple-cursors-core"
-  (define-key mc/keymap (kbd "C-.")  #'mc/unmark-next-like-this)
-  (define-key mc/keymap (kbd "C-,")  #'mc/unmark-previous-like-this)
-  (define-key mc/keymap (kbd "C-?")  #'mc/skip-to-next-like-this)
-  (define-key mc/keymap (kbd "C-\"") #'mc/skip-to-previous-like-this)
+  (with-eval-after-load "hydra-autoloads"
+    (defhydra multiple-cursors-hydra (:hint nil)
 
-  (define-key mc/keymap (kbd "C-S-s") #'mc/toggle-pause)
+      "
+     ^Up^            ^Down^        ^Other^
+----------------------------------------------
+[_p_]   Next    [_n_]   Next    [_s_] Mark all symbols
+[_P_]   Skip    [_N_]   Skip    [_S_] -||- in defun
+[_M-p_] Unmark  [_M-n_] Unmark  [_a_] Mark all
+[_M-v_] Go Prev [_C-v_] Go Next [_r_] Mark by regexp
+^ ^             ^ ^             [_q_] Quit"
 
-  (define-key mc/keymap (kbd "C-'") #'mc-hide-unmatched-lines-mode)
-  (require 'mc-cycle-cursors))
+      ("s" mc/mark-all-symbols-like-this)
+      ("S" mc/mark-all-symbols-like-this-in-defun)
+      ("a" mc/mark-all-like-this :exit t)
+      ("n" mc/mark-next-like-this)
+      ("N" mc/skip-to-next-like-this)
+      ("M-n" mc/unmark-next-like-this)
+      ("p" mc/mark-previous-like-this)
+      ("P" mc/skip-to-previous-like-this)
+      ("M-p" mc/unmark-previous-like-this)
+      ("r" mc/mark-all-in-region-regexp :exit t)
+      ("M-v" mc/cycle-backward)
+      ("C-v" mc/cycle-forward)
+      ("q" nil))
+    (global-set-key (kbd "C-c ;") #'multiple-cursors-hydra/body)))
 
 ;; expand-region
 (with-eval-after-load "expand-region-autoloads"
