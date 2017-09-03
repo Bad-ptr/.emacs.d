@@ -16,7 +16,11 @@
   (view-mode))
 (add-to-list 'auto-mode-alist '("\\.fb2$" . fbread-mode))
 
-(add-hook 'tabulated-list-mode-hook #'(lambda () (hl-line-mode 1)))
+(let ((hl-line-mode-hooks '(tabulated-list-mode-hook
+                            occur-mode-hook grep-mode-hook
+                            ivy-occur-mode-hook)))
+  (dolist (hook hl-line-mode-hooks)
+    (add-hook hook #'(lambda () (hl-line-mode 1)))))
 
 (with-eval-after-load "comint"
   (push #'comint-truncate-buffer comint-output-filter-functions))
