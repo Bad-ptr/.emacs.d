@@ -338,7 +338,7 @@ the syntax class ')'."
         delete-old-versions t))
 
 (setq auto-save-list-file-prefix
-      (concat user-emacs-directory "cache/auto-save-list/.saves-"))
+      (expand-file-name "cache/auto-save-list/.saves-" user-emacs-directory))
 
 ;; tramp autosave
 (with-eval-after-load "tramp"

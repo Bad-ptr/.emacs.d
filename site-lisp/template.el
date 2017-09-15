@@ -2587,7 +2587,7 @@ See `easy-menu-define' for the format of MENU."
     (if (and (boundp 'init-file-loaded) init-file-loaded)
       ;; doesn't exist in Emacs
       (template-after-init)
-    (add-hook 'after-init-hook 'template-after-init t)))
+    (add-hook 'emacs-startup-hook 'template-after-init t)))
 
 (defun template-after-init ()
   "Late initialization for package template.

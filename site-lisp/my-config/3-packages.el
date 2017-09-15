@@ -130,7 +130,7 @@
 
 (with-eval-after-load "common-header-mode-line-autoloads"
   (add-hook
-   'after-init-hook
+   'emacs-startup-hook
    #'(lambda ()
        (common-header-mode-line-mode 1)
 
@@ -1235,7 +1235,7 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
   ;;                 (if persp-mode-projectile-bridge-mode
   ;;                     (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
   ;;                   (persp-mode-projectile-bridge-kill-perspectives))))
-  ;;   (add-hook 'after-init-hook
+  ;;   (add-hook 'emacs-startup-hook
   ;;             #'(lambda ()
   ;;                 (persp-mode-projectile-bridge-mode 1))
   ;;             t))
@@ -1248,7 +1248,7 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
             ;; (with-eval-after-load "helm"
             ;;   (persp-update-completion-system 'completing-read))
             )
-        after-init-hook))
+        emacs-startup-hook))
 
 ;; (with-eval-after-load "persp-mode"
 ;;   (with-eval-after-load "helm-mode"

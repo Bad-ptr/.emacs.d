@@ -160,7 +160,8 @@
         (error (my/-init-error-fatal err) nil))
       (condition-case-unless-debug err
           (progn (my/-init-after-private)
-                 (when arg (run-hooks 'after-init-hook)))
+                 (when arg (run-hooks 'after-init-hook)
+                           (run-hooks 'emacs-startup-hook)))
         (error (my/-init-error-fatal err)))))))
 
 (defcustom my/-multiuser-private nil
