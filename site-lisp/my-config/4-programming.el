@@ -782,4 +782,16 @@ Lisp function does not specify a special indentation."
     (define-key html-mode-map (kbd "TAB") 'simplezen-expand-or-indent-for-tab)))
 
 
+;; Visual Basic
+(autoload 'visual-basic-mode "visual-basic-mode" "Visual Basic mode." t)
+(setq auto-mode-alist (append '(("\\.\\(frm\\|bas\\|cls\\)$" .
+                                 visual-basic-mode))
+                              auto-mode-alist))
+
+(autoload 'vbscript-mode "vbscript-mode" "VBScript mode." t)
+(setq auto-mode-alist
+      (append '(("\\.\\(vbs\\|wsf\\)$" . vbscript-mode))
+              auto-mode-alist))
+
+
 ;; 4-programming.el ends here
