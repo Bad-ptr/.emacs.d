@@ -154,4 +154,13 @@ If current buffer is write-protected (`buffer-read-only'), do nothing."
     (set-buffer-file-coding-system target-coding-system)))
 
 
+(defun my/-indirrect-narrow ()
+  (interactive)
+  (let ((beg (point)) (end (mark))
+        (new-buffer
+         (make-indirect-buffer
+          (current-buffer) (generate-new-buffer-name (buffer-name)) t)))
+    (pop-to-buffer new-buffer)
+    (narrow-to-region beg end)))
+
 ;; 2-user-funcs.el ends here
