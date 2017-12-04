@@ -788,7 +788,7 @@ Lisp function does not specify a special indentation."
                                  visual-basic-mode))
                               auto-mode-alist))
 
-(autoload 'vbscript-mode "vbscript-mode" "VBScript mode." t)
+(autoload 'vbscript-mode "vbs-repl" "VBScript mode." t)
 (setq auto-mode-alist
       (append '(("\\.\\(vbs\\|wsf\\)$" . vbscript-mode))
               auto-mode-alist))
