@@ -319,14 +319,21 @@
 ;;   (push '(grep-mode :align t) shackle-rules))
 
 ;; golden-ratio
-(with-eval-after-load "golden-ratio-autoloads"
-  (when (>= emacs-major-version 24)
-    (golden-ratio-mode 1))
-  ;; (unless (fboundp 'window--resizable-p)
-  ;;   (defun window--resizable-p (window &rest args)
-  ;;     (with-selected-window window
-  ;;       (not (minibuffer-selected-window)))))
-  )
+;; (with-eval-after-load "golden-ratio-autoloads"
+;;   (when (>= emacs-major-version 24)
+;;     (golden-ratio-mode 1))
+;;   ;; (unless (fboundp 'window--resizable-p)
+;;   ;;   (defun window--resizable-p (window &rest args)
+;;   ;;     (with-selected-window window
+;;   ;;       (not (minibuffer-selected-window)))))
+;;   )
+;; zoom
+(with-eval-after-load "zoom-autoloads"
+  (defun my/--zoom-size-callback ()
+    (cond ((> (frame-pixel-width) 1280) '(90 . 0.75))
+          (t                            '(0.5 . 0.5))))
+  (setq zoom-size 'my/--zoom-size-callback)
+  (zoom-mode))
 
 ;; golden-ratio-scroll-screen
 (with-eval-after-load "golden-ratio-scroll-screen-autoloads"
