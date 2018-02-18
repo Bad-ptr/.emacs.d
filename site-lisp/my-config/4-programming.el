@@ -48,6 +48,12 @@
     (add-hook text-hook hook-lambda)))
 
 (add-hook
+ 'html-mode-hook
+ #'(lambda ()
+     (font-lock-add-keywords
+      nil '(("<"   . 'open-paren-face)   (">" . 'close-paren-face))
+      'append)))
+(add-hook
  'my/-prog-mode-hook
  #'(lambda ()
      (eldoc-mode 1)
