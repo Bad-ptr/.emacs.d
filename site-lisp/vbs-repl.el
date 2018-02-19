@@ -207,7 +207,8 @@ Wend
   (let ((tempfile (make-temp-file "vbsrepl" nil ".vbs")))
     (with-temp-file tempfile
       (insert vbs-repl-script))
-    (make-comint "VBScript" "cscript" nil tempfile)))
+    (with-current-buffer (make-comint "VBScript" "cscript" nil tempfile)
+      (set-buffer-process-coding-system 'cp1251 'cp1251))))
 
 (defun vbs-setup-repl ()
   "Set up a REPL in the opposite window, restarting it if necessary."
