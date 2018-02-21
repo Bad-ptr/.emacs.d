@@ -4,6 +4,8 @@
           #'(lambda ()
               (setq interprogram-paste-function #'gui-selection-value)
               (windmove-default-keybindings 'control)
-              (set-clipboard-coding-system 'utf-16le)))
+              ;; (set-clipboard-coding-system 'utf-16-le)
+              ;; (set-selection-coding-system 'utf-16-le)
+              ))
 
 ;;; init.el ends here
