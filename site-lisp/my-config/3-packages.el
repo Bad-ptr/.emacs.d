@@ -950,6 +950,24 @@ int main (int argc, char **argv) {
   (autoload 'rgrep-default-command "grep")
   (defvar counsel-rgrep-last-cmd ""
     "Last command generated in counsel-rgrep")
+
+  (defun my/counsel-rgrep-action (x)
+    "Go to occurrence X in current Git repository."
+    (when (string-match "\\`\\(.*?\\)\0\\([0-9]+\\):\\(.*\\)\\'" x)
+      (let ((file-name (match-string-no-properties 1 x))
+            (line-number (match-string-no-properties 2 x)))
+        (find-file (expand-file-name
+                    file-name
+                    (ivy-state-directory ivy-last)))
+        (goto-char (point-min))
+        (forward-line (1- (string-to-number line-number)))
+        (re-search-forward (ivy--regex ivy-text t) (line-end-position) t)
+        (swiper--ensure-visible)
+        (run-hooks 'counsel-grep-post-action-hook)
+        (unless (eq ivy-exit 'done)
+          (swiper--cleanup)
+          (swiper--add-overlays (ivy--regex ivy-text))))))
+
   (defun counsel-rgrep (&optional zgrep-p)
     (interactive "P")
     (require 'counsel)
@@ -983,7 +1001,8 @@ int main (int argc, char **argv) {
                 :keymap counsel-ag-map
                 :history 'counsel-git-grep-history
                 :re-builder #'ivy--regex
-                :action #'counsel-git-grep-action
+                ;; :action #'counsel-git-grep-action
+                :action #'my/counsel-rgrep-action
                 :unwind (lambda ()
                           (counsel-delete-process)
                           (swiper--cleanup))
