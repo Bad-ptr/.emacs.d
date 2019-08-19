@@ -953,7 +953,7 @@ int main (int argc, char **argv) {
   (defun counsel-rgrep (&optional zgrep-p)
     (interactive "P")
     (require 'counsel)
-    (ivy-set-prompt 'counsel-rgrep counsel-prompt-function)
+    (ivy-set-prompt 'counsel-rgrep #'counsel-prompt-function-default)
     (let ((file-name-pattern
            (read-string "File name pattern: " "*" nil "*"))
           (grep-program (if zgrep-p "zgrep" "grep"))
@@ -962,7 +962,7 @@ int main (int argc, char **argv) {
                 (apply-partially
                  #'(lambda (dir file-name-pattern grep-progam string)
                      (if (< (length string) 3)
-                         (counsel-more-chars 3)
+                         (counsel-more-chars)
                        (let ((regex ;; (counsel-unquote-regex-parens
                               ;;  (setq ivy--old-re
                               ;;        (ivy--regex string)))
