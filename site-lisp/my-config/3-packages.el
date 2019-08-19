@@ -941,9 +941,7 @@ int main (int argc, char **argv) {
                      (funcall grep-read-files-original regexp)))
                 (file-name-nondirectory ret)))))
   (with-eval-after-load "ivy-rich-autoloads"
-    ;; (require 'ivy-rich)
-    (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer)))
+    (ivy-rich-mode)))
 
 ;; counsel
 (with-eval-after-load "counsel-autoloads"
