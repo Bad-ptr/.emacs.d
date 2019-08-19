@@ -627,10 +627,10 @@ int main (int argc, char **argv) {
   (add-hook 'my/-prog-mode-hook
             (lambda () (symbol-overlay-mode 1)))
   (with-eval-after-load "symbol-overlay"
-    ;; (set-face-attribute 'symbol-overlay-temp-face nil
-    ;;                     :inherit 'default
-    ;;                     :foreground nil :background nil
-    ;;                     :underline "#0F0")
+    (set-face-attribute 'symbol-overlay-default-face nil
+                        :inherit 'default
+                        :foreground nil :background nil
+                        :underline "#0F0")
     (global-set-key (kbd "M-i") 'symbol-overlay-put)
     (global-set-key (kbd "M-n") 'symbol-overlay-jump-next)
     (global-set-key (kbd "M-p") 'symbol-overlay-jump-prev)
