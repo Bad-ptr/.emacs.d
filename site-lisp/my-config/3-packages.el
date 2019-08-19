@@ -463,6 +463,18 @@ int main (int argc, char **argv) {
   (add-hook 'my/-prog-mode-hook #'(lambda () (hl-todo-mode +1)))
   (add-hook 'text-mode-hook #'(lambda () (hl-todo-mode +1))))
 
+(with-eval-after-load "line-reminder-autoloads"
+  (setq line-reminder-ignore-buffer-names
+        '("*Buffer List*"
+          "*Checkdoc Status*"
+          "*Echo Area 0*"
+          "*helm "
+          "magit"
+          "*run*"
+          "*shell*"
+          "*undo-tree*"))
+  (global-line-reminder-mode t))
+
 (with-eval-after-load "hilit-chg"
   (setq highlight-changes-colors
         '("#970" "#907" "#329" "#938" "#743" "#784" "#967")))
