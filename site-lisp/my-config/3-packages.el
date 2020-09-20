@@ -1015,7 +1015,8 @@ int main (int argc, char **argv) {
                          (grep-compute-defaults)
                          (setq counsel-rgrep-last-cmd
                                (concat
-                                (rgrep-default-command regex file-name-pattern dir)
+                                (let (grep-highlight-matches)
+                                 (rgrep-default-command regex file-name-pattern dir))
                                 (when (string= "zgrep" grep-program)
                                   " || true")))
                          (counsel--async-command counsel-rgrep-last-cmd)
