@@ -193,6 +193,14 @@ suitable for creation"
                 (t (get-closest-pathname)))))
     (or proot "./")))
 
+;; TODO:
+;; (add-variable-watcher
+;;  'header-line-format
+;;  #'(lambda (sym val op where)
+;;      (message "Setting the `%s': %s %s %s" sym val op where)))
+
+;; (get-variable-watchers 'header-line-format)
+
 (defun run-current-file ()
   "Execute or compile the current file. For example,
  if the current buffer is the file x.pl, then it'll call “perl x.pl” in a shell.
@@ -556,7 +564,10 @@ Lisp function does not specify a special indentation."
 
 (with-eval-after-load "slime"
   ;; (setq inferior-lisp-program "sbcl")
-  (setq inferior-lisp-program "/opt/sbcl/bin/sbcl")
+  ;; (setq inferior-lisp-program "clisp")
+   (setq inferior-lisp-program "/opt/sbcl/bin/sbcl")
+  ;; (setq inferior-lisp-program "/opt/cmucl/bin/lisp")
+  ;; (setq inferior-lisp-program "/home/constantin/projects/lisp_stuff/abcl/abcl")
   (slime-setup '(slime-fancy)))
 
 (with-eval-after-load "slime-repl"

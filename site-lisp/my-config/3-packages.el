@@ -719,6 +719,22 @@ int main (int argc, char **argv) {
 (with-eval-after-load "beacon-autoloads"
   (beacon-mode 1))
 
+;; rainbow-identifiers
+;; https://www.reddit.com/r/emacs/comments/6xpzx6/subword_syntax_highlighting_with/
+;; (with-eval-after-load "rainbow-identifiers-autoloads"
+;;   (defun rainbow-identifiers--matcher (end)
+;;     "The matcher function to be used by font lock mode."
+;;     (catch 'rainbow-identifiers--matcher
+;;       (while (re-search-forward (rx word-start (*? any) word-end) end t)
+;;         (let ((beginning (match-beginning 0))
+;;               (end (match-end 0)))
+;;           (when (run-hook-with-args-until-failure 'rainbow-identifiers-filter-functions beginning end)
+;;             (let* ((identifier (buffer-substring-no-properties beginning end))
+;;                    (hash (rainbow-identifiers--hash-function identifier)))
+;;               (setq rainbow-identifiers--face (funcall rainbow-identifiers-choose-face-function hash))
+;;               (throw 'rainbow-identifiers--matcher t)))))
+;;       nil)))
+
 ;; rainbow-mode
 (with-eval-after-load "rainbow-mode-autoloads"
   (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1)))
@@ -846,6 +862,14 @@ int main (int argc, char **argv) {
   ;;(add-hook 'eval-expression-minibuffer-setup-hook #'minibuffer-company)
   ;; (with-eval-after-load "company-flx-autoloads"
   ;; (company-flx-mode)
+  ;; (with-eval-after-load "readline-complete-autoloads"
+  ;;   (require 'readline-complete)
+  ;;   ;; bind "set completion-query-items 0"
+  ;;   ;; bind "set page-completions off"
+  ;;   (push '("^constantin@zxnotdead:.+?$ " ac-prefix-rlc-shell) ac-rlc-prompts)
+  ;;   (push '("^\$[[:space:]]" ac-prefix-rlc-shell) ac-rlc-prompts)
+  ;;   (setq explicit-bash-args '("-c" "export EMACS=; stty echo; bash"))
+  ;;   (push 'company-readline company-backends))
   )
 
 
@@ -1114,7 +1138,7 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 ;;   )
 
 
-;; ;; projectile
+;; projectile
 ;; (with-eval-after-load "projectile-autoloads"
 ;;   (setq projectile-keymap-prefix (kbd "C-x p"))
 ;;   (projectile-global-mode)
@@ -1177,6 +1201,12 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
   ;;    :save-vars '(major-mode default-directory)
   ;;    :after-load-function #'(lambda (b &rest _)
   ;;                             (with-current-buffer b (magit-refresh)))))
+
+  ;; (persp-def-buffer-save/load
+  ;;  :mode 'shell-mode
+  ;;  :mode-restore-function #'(lambda (_mode) (shell)) ; or #'identity if you do not want to start shell process
+  ;;  :tag-symbol 'def-shell
+  ;;  :save-vars '(major-mode default-directory))
 
 
   ;; (with-eval-after-load "persp-mode"

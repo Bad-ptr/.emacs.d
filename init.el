@@ -10,6 +10,8 @@
       load-prefer-newer         t
       message-log-max           1000)
 
+;;(defun time-stamp-string ()
+;;  (format-time-string "%02H:%02M:%02S"))
 
 ;; https://www.reddit.com/r/emacs/comments/4586eq/quick_emacs_snippet_to_automatically_use/
 ;; Automagical EmacsClient functionality
