@@ -736,7 +736,8 @@ int main (int argc, char **argv) {
 ;;       nil)))
 
 ;; rainbow-mode
-(with-eval-after-load "rainbow-mode-autoloads"
+(require 'rainbow-mode)
+(with-eval-after-load "rainbow-mode"
   (add-hook 'my/-prog-mode-hook #'(lambda () (rainbow-mode 1)))
   (add-hook 'text-mode-hook #'(lambda () (rainbow-mode 1)))
   (add-hook 'my/-find-large-file-hook #'(lambda () (rainbow-mode -1))))

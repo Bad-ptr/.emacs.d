@@ -98,7 +98,7 @@
       (let ((package-archives package-archives)
             (my/-favourite-packages-list my/-favourite-packages-list))
         (add-to-list 'package-archives '("GNU/ELPA" . "http://elpa.gnu.org/packages/"))
-        (push 'rainbow-mode my/-favourite-packages-list)
+        ;; (push 'rainbow-mode my/-favourite-packages-list)
         (unless (featurep 'cl-lib)
           (push 'cl-lib my/-favourite-packages-list))
         (my/-install-favourite-packages))))
