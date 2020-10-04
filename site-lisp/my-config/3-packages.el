@@ -563,9 +563,12 @@ int main (int argc, char **argv) {
                                     (er/expand-region arg)))))
 
 ;; redo+
-(with-eval-after-load "redo+-autoloads"
-  (setq undo-no-redo t)
-  (require 'redo+))
+(require 'redo+)
+(with-eval-after-load "redo+"
+  (setq undo-no-redo t))
+;; (with-eval-after-load "redo+-autoloads"
+;;   (setq undo-no-redo t)
+;;   (require 'redo+))
 
 ;; undo-tree
 (with-eval-after-load "undo-tree-autoloads"
