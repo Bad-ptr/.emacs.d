@@ -850,15 +850,17 @@ int main (int argc, char **argv) {
 
         (setq-local company-show-numbers nil)
         (setq-local company-backends '((company-elisp-minibuffer company-capf)))
+        ;;(setq-local max-mini-window-height 10)
         (setq-local company-tooltip-limit 8)
         (setq-local company-col-offset 1)
-        (setq-local company-row-offset 1)
+        (setq-local company-row-offset 0)
         (setq-local company-frontends
                     '(company-pseudo-tooltip-unless-just-one-frontend
                       company-preview-if-just-one-frontend))
 
         (company-mode 1)
-        (when (eq this-command #'execute-extended-command)
+        (when (or (eq this-command #'execute-extended-command)
+                  (eq this-command #'eval-expression))
           (company-complete)))))
 
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
