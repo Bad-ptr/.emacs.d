@@ -51,7 +51,7 @@
     caml
     cmake-mode
     cperl-mode
-    coffee-mode
+    ;; coffee-mode
     company
     ;; company-inf-python
     ;; company-inf-ruby
@@ -71,17 +71,19 @@
     glsl-mode
     gnu-apl-mode
     go-eldoc go-mode
-    golden-ratio
+    ;; golden-ratio
+    zoom
     haml-mode
     haskell-mode
     ;; hexrgb
     ;; highlight-blocks highlight-parentheses highlight-tail
     highlight-parentheses
     ;; httprepl
-    ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
-    flx flx-ido
-    smex
+    ;; ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
+    ;; flx flx-ido
+    ;; smex
     ;; helm
+    ivy counsel swiper
     ;; inf-ruby
     ;; io-mode io-mode-inf
     jabber
@@ -95,7 +97,7 @@
     markdown-mode
     miniedit
     multiple-cursors
-    nemerle
+    ;; nemerle
     ;; omnisharp
     pcre2el
     persp-mode
@@ -103,7 +105,7 @@
     ;; qml-mode
     ;; rainbow-blocks rainbow-identifiers ;color-identifiers-mode
     ;; rectangle-utils
-    redo+
+    ;; redo+ ;; removed from melpa
     rust-mode
     sass-mode
     shell-pop
