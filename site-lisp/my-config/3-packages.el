@@ -837,8 +837,8 @@ int main (int argc, char **argv) {
   (defun minibuffer-company ()
     (unless company-mode
       (when (and global-company-mode
-                 (or (eq this-command #'execute-extended-command)
-                     (eq this-command #'eval-expression)))
+                 (memq this-command '(execute-extended-command
+                                      eval-expression)))
 
         (setq-local company-minibuffer-mode this-command)
 
@@ -859,8 +859,7 @@ int main (int argc, char **argv) {
                       company-preview-if-just-one-frontend))
 
         (company-mode 1)
-        (when (or (eq this-command #'execute-extended-command)
-                  (eq this-command #'eval-expression))
+        (when (eq this-command #'execute-extended-command)
           (company-complete)))))
 
   (add-hook 'minibuffer-setup-hook #'minibuffer-company)
