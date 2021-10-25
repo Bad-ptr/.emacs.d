@@ -2558,9 +2558,10 @@ See `easy-menu-define' for the format of MENU."
 	    (memq 'keys template-initialize))
     (condition-case nil			; older Emacses don't understand all
 	(progn
-	  (define-key ctl-x-map "t" 'template-new-file)
-	  (define-key ctl-x-map [(control =)] 'template-single-comment)
-	  (define-key ctl-x-map [(control ?\;)] 'template-block-comment))
+	  ;; (define-key ctl-x-map "t" 'template-new-file)
+	  ;; (define-key ctl-x-map [(control =)] 'template-single-comment)
+	  ;; (define-key ctl-x-map [(control ?\;)] 'template-block-comment)
+      )
       (error nil)))
   (when (or (eq template-initialize t)
 	    (memq 'menus template-initialize))
