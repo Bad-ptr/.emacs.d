@@ -21,7 +21,8 @@
   (defalias 'cl-letf     'letf)
   (defalias 'cl-labels   'labels)
   (defalias 'cl-defmacro 'defmacro*)
-  (defalias 'cl-defun    'defun*))
+  (defalias 'cl-defun    'defun*)
+  (defalias 'cl-do       'do))
 
 
 ;;; Code:
@@ -180,10 +181,23 @@ buffer-local wherever it is set."
 (defun my/-init-error-fatal (msg)
   (my/-error-message "INIT_ERROR" msg t))
 
-(defun my/-load-directory (dir)
+(defun my/-load-directory (dir &optional noelc)
   (when (file-directory-p dir)
-    (dolist (file (directory-files dir t "[0-9a-zA-Z].*\.el"))
-      (load file))))
+    (let ((files (directory-files dir t (if noelc
+                                            "[0-9a-zA-Z].*\\.el$"
+                                          "[0-9a-zA-Z].*\\.elc?$"))))
+      (unless noelc
+        (cl-do ((cns files (cdr cns)))
+            ((null cns))
+          (unless (null (cdr cns))
+            (let ((fst (car cns))
+                  (scd (cadr cns)))
+              (when (and (string-suffix-p ".elc" scd t)
+                         (string-prefix-p fst scd t))
+                (setf (car cns) scd
+                      (cdr cns) (cddr cns)))))))
+      (dolist (file files)
+        (load file)))))
 
 (with-eval-after-load "package"
   (defun require-package (package &optional min-version no-refresh)
