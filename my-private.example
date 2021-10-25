@@ -78,12 +78,14 @@
     ;; hexrgb
     ;; highlight-blocks highlight-parentheses highlight-tail
     highlight-parentheses
+    symbol-overlay
     ;; httprepl
     ;; ido-at-point ido-hacks ido-ubiquitous ido-grid-mode ; ido-vertical-mode
-    ;; flx flx-ido
-    ;; smex
+    ;;flx flx-ido
+    ;;smex
     ;; helm
     ivy counsel swiper
+    ;; hydra
     ;; inf-ruby
     ;; io-mode io-mode-inf
     jabber
@@ -105,13 +107,13 @@
     ;; qml-mode
     ;; rainbow-blocks rainbow-identifiers ;color-identifiers-mode
     ;; rectangle-utils
-    ;; redo+ ;; removed from melpa
     rust-mode
     sass-mode
     shell-pop
     simplezen
     skeletor
 
+    line-reminder
     smooth-scrolling
     golden-ratio-scroll-screen
     tabbar
@@ -119,6 +121,7 @@
     ;; vlf
     undo-tree
     wgrep
+    mwim
     )
   "List of packages I like.")
 
