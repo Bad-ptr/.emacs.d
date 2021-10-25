@@ -280,6 +280,9 @@ suitable for creation"
 
 
 ;; C/Cpp/C++
+
+(load-file (locate-user-emacs-file "site-lisp/cc-mode-load.el"))
+
 (setq c-default-style "gnu")
 
 (defvar my/-c-include-paths
