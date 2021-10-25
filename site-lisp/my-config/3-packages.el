@@ -219,8 +219,12 @@
                  ;;                          'per-window-header-line-inactive-format))))
                  ;;     (symbol-value cf-sym)))
                  (let* ((buf (window-buffer win))
-                        (frmt (unless (with-current-buffer buf
-                                        (derived-mode-p 'magit-mode))
+                        (frmt (unless (or (string-prefix-p " " (buffer-name (window-buffer win)))
+                                          (with-current-buffer buf
+                                            (derived-mode-p 'magit-mode))
+                                          ;; (and (boundp 'transient--window) (eq win transient--window))
+                                          ;; (and (boundp 'lv-wnd) (eq win lv-wnd))
+                                          )
                                 (if (eq (selected-window) win)
                                     per-window-header-line-active-format
                                   per-window-header-line-inactive-format)))
@@ -233,6 +237,14 @@
                    ;;              (not (eq bfrmt '(:eval (tabbar-line)))))
                    ;;     (setq frmt (cons bfrmt frmt))))
                    (or frmt (buffer-local-value 'header-line-format buf)))))
+
+       (setq per-window-mode-line-format-function
+             #'(lambda (win)
+                 (unless (or (string-prefix-p " " (buffer-name (window-buffer win)))
+                          ;; (and (boundp 'lv-wnd) (eq win lv-wnd))
+                          ;; (and (boundp 'transient--window) (eq win transient--window))
+                          )
+                   " ")))
 
        (setq
         per-frame-mode-line-update-display-function
