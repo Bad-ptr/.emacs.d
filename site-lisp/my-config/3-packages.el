@@ -492,7 +492,7 @@ int main (int argc, char **argv) {
               (concat "\\_<" regexp
                       (unless (string-suffix-p "\\_>" regexp)
                         "\\_>"))))
-      (let ((old (assoc regexp hi-lock-interactive-patterns)))
+      (let ((old (assoc regexp hi-lock-interactive-lighters)))
         (if old
             (hi-lock-unface-buffer regexp)
           (or (facep face) (setq face 'hi-yellow))
