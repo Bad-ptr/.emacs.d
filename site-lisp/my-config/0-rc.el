@@ -382,8 +382,9 @@ the syntax class ')'."
 ;; saveplace: save location in file when saving files
 (setq save-place-file
       (locate-user-emacs-file "cache/saveplace"))
-(setq-default save-place t)            ;; activate it for all buffers
+;;(setq-default save-place t)            ;; activate it for all buffers
 (require 'saveplace)                   ;; get the package
+(save-place-mode t)
 
 ;; savehist: save some history
 (setq savehist-additional-variables     ;; also save...
