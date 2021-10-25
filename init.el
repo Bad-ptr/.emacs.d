@@ -77,7 +77,7 @@
 (defun my/-init-after-private ()
   "Init actions after private information set."
 
-  (push (locate-user-emacs-file "site-lisp/") load-path)
+  ;; (push (locate-user-emacs-file "site-lisp/") load-path)
 
   (defconst my/-conf-path
     (locate-user-emacs-file (concat "site-lisp/" my/-username "-config/")))

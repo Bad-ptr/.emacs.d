@@ -5,6 +5,7 @@
               (setq interprogram-paste-function #'gui-selection-value)
               (windmove-default-keybindings 'control)
               (set-clipboard-coding-system 'utf-16le)
-	      (setq redisplay-dont-pause t)))
+              (setq redisplay-dont-pause t)))
+
 
 ;;; init.el ends here
