@@ -163,4 +163,18 @@ If current buffer is write-protected (`buffer-read-only'), do nothing."
     (pop-to-buffer new-buffer)
     (narrow-to-region beg end)))
 
+(defun my/-write-file-no-eol-conversion (filename &optional confirm)
+  (interactive
+   (list (if buffer-file-name
+             (read-file-name "Write file: "
+                             nil nil nil nil)
+           (read-file-name "Write file: " default-directory
+                           (expand-file-name
+                            (file-name-nondirectory (buffer-name))
+                            default-directory)
+                           nil nil))
+         (not current-prefix-arg)))
+  (let ((inhibit-eol-conversion t))
+    (write-file filename confirm)))
+
 ;; 2-user-funcs.el ends here
