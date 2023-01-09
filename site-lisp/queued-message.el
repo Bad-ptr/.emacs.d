@@ -8,7 +8,7 @@
 ;; Date: 2014/11/21 10:35:56
 ;; License: GPL either version 2 or any later version
 ;; Keywords: message, queue
-;; X-URL: 
+;; X-URL:
 
 ;;; License:
 
@@ -113,9 +113,14 @@ If you set message string as empty string -- that message will not be shown.")
 
 (defvar q-m/-prep-msg-for-display-func
   #'(lambda (msg i)
-      (concat (propertize (number-to-string i)
-                          'face '(:background "gray"))
-              "|" (q-m/Msg-msg-s msg)))
+      (concat
+       "["
+       (number-to-string i)
+       ;; (propertize (number-to-string i)
+       ;;              'face '(:background "gray"))
+       "] "
+       ;;"|"
+       (q-m/Msg-msg-s msg)))
   "This function is called with the message string and position
 in the display-list as arguments. Must return string.")
 
@@ -129,7 +134,7 @@ in the display-list as arguments. Must return string.")
   "Default function that called when a message
 placed in the `q-m/-display-list'.")
 
-(defvar *q-m/-messages-separator* " "
+(defvar *q-m/-messages-separator* "\n"
   "Separator between messages.")
 
 (defvar *q-m/-string-cache* nil
