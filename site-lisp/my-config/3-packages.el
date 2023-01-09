@@ -769,17 +769,20 @@ int main (int argc, char **argv) {
 
 ;; highlight-parentheses
 (with-eval-after-load "highlight-parentheses-autoloads"
-  (setq hl-paren-background-colors
+  (setq highlight-parentheses-background-colors
         #'(lambda ()
             (if (eq (frame-parameter (selected-frame) 'background-mode)
                     'light)
                 '("#FFF" "#DDCCDD" "#CCDDDD")
               '("#333" "#444" "#555"))))
-  (setq hl-paren-colors '("#FF0000" "#FF00FF" "#00FFFF"))
-  (setq hl-paren-attributes '((:height 1.1 :weight bold)))
+  (setq highlight-parentheses-colors '("#FF0000" "#FF00FF" "#00FFFF"))
+  (setq highlight-parentheses-attributes '((:height 1.1 :weight bold)))
   (global-highlight-parentheses-mode t)
+  (add-hook 'minibuffer-setup-hook #'highlight-parentheses-minibuffer-setup)
   (add-hook 'my/-find-large-file-hook
-            #'(lambda () (highlight-parentheses-mode -1))))
+            #'(lambda () (highlight-parentheses-mode -1)))
+  (add-hook 'my/after-load-unload-theme-functions
+            #'(lambda (&rest _args) (highlight-parentheses--color-update))))
 
 ;; ;; highlight-blocks-mode
 ;; do not enable it as it's too slow
