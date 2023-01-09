@@ -110,7 +110,7 @@
 ;;   (with-eval-after-load "ido"
 ;;     (global-set-key
 ;;      "\M-x"
-;;      (lambda ()
+;;      #'(lambda ()
 ;;        (interactive)
 ;;        (call-interactively
 ;;         (intern
@@ -354,7 +354,7 @@
 
 ;; magit
 ;; (with-eval-after-load "magit-autoloads"
-;;   (add-hook 'magit-mode-hook '(lambda () (font-lock-mode 0))))
+;;   (add-hook 'magit-mode-hook #'(lambda () (font-lock-mode 0))))
 
 ;; templates
 (with-eval-after-load "template"
@@ -633,7 +633,7 @@ int main (int argc, char **argv) {
 ;;     (set-face-background 'highlight-symbol-face nil)
 ;;     (set-face-underline 'highlight-symbol-face "#0F0"))
 ;;   (add-hook 'my/-prog-mode-hook
-;;             (lambda ()
+;;             #'(lambda ()
 ;;               (when (null (memql major-mode highlight-symbol-disable))
 ;;                 (highlight-symbol-mode)
 ;;                 (highlight-symbol-nav-mode)))))
@@ -641,7 +641,7 @@ int main (int argc, char **argv) {
 ;; symbol-overlay
 (with-eval-after-load "symbol-overlay-autoloads"
   (add-hook 'my/-prog-mode-hook
-            (lambda () (symbol-overlay-mode 1)))
+            #'(lambda () (symbol-overlay-mode 1)))
   (with-eval-after-load "symbol-overlay"
     (set-face-attribute 'symbol-overlay-default-face nil
                         :inherit 'default
@@ -1046,9 +1046,9 @@ int main (int argc, char **argv) {
                 :re-builder #'ivy--regex
                 ;; :action #'counsel-git-grep-action
                 :action #'my/counsel-rgrep-action
-                :unwind (lambda ()
-                          (counsel-delete-process)
-                          (swiper--cleanup))
+                :unwind #'(lambda ()
+                            (counsel-delete-process)
+                            (swiper--cleanup))
                 :caller 'counsel-rgrep)))
   (ivy-set-display-transformer 'counsel-rgrep 'counsel-git-grep-transformer)
 
@@ -1095,7 +1095,7 @@ When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
 
 ;; ;; helm
 ;; ;; (with-eval-after-load "helm-autoloads"
-;; ;;   (add-hook 'my/-packages-initialized-hook (lambda () (require 'helm-config))))
+;; ;;   (add-hook 'my/-packages-initialized-hook #'(lambda () (require 'helm-config))))
 ;; (with-eval-after-load "helm-autoloads";"helm-config"
 ;;   (global-set-key (kbd "C-c h") 'helm-command-prefix)
 
