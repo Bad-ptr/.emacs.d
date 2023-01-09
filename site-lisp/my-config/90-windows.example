@@ -1,4 +1,4 @@
-;;; 90-windows.el --- windows configuration.
+;;; 90-windows.el --- windows configuration. -*- mode: emacs-lisp; indent-tabs-mode: t; -*-
 
 ;; .==========================================[ !!! WARNING !!! ]==============================================.
 ;; |                                                                                                           |
