@@ -146,13 +146,62 @@
          (c-op (color-name-to-rgb (face-foreground 'open-paren-face)))
          (c-cp (color-name-to-rgb (face-foreground 'close-paren-face)))
          (bg-mode (frame-parameter (selected-frame) 'background-mode))
-         (dif-o-c-p (cl-mapcar #'- c-op c-cp)))
-    ;;(message "%s - %s = %s" c-op c-cp dif-o-c-p)
-    (setq c-op (cl-mapcar #'- c-bg dif-o-c-p)
-          c-cp (cl-mapcar #'- c-op dif-o-c-p))
-    ;;(message "%s - %s = %s" c-bg dif-o-c-p c-op)
-    (set-face-foreground 'open-paren-face  (apply #'color-rgb-to-hex c-op))
-    (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex c-cp))))
+         (diff-op (if (eq bg-mode 'light) #'- #'+))
+         (dif-o-bg-p ;; (cl-mapcar diff-op c-bg c-op)
+          (list 0.2 0.2 0.2))
+         (dif-o-c-p ;; (cl-mapcar diff-op c-op c-cp)
+          (list 0.5 0.5 0.5)))
+    (cl-flet ((clamp-rgb (clst)
+                         (mapcar #'(lambda (i)
+                                     (cond
+                                      ((< i 0.0) 0.0)
+                                      ((> i 1.0) 1.0)
+                                      (t i)))
+                                 clst)))
+      ;;(message "%s - %s = %s" c-op c-cp dif-o-c-p)
+      (setq c-op (cl-mapcar diff-op c-bg dif-o-bg-p)
+            c-cp (cl-mapcar diff-op c-op dif-o-c-p))
+      ;;(message "%s - %s = %s" c-bg dif-o-c-p c-op)
+      (set-face-foreground 'open-paren-face  (apply #'color-rgb-to-hex (append (clamp-rgb c-op) (list 2))))
+      (set-face-foreground 'close-paren-face (apply #'color-rgb-to-hex (append (clamp-rgb c-cp) (list 2))))
+
+      (when (facep 'whitespace-tab)
+        (setq dif-o-bg-p (cl-mapcar diff-op c-bg (list 0.1 0.1 0.1)))
+        (set-face-background
+         'whitespace-tab
+         (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2))))
+        (set-face-background
+         'whitespace-line
+         (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2))))
+
+        (setq dif-o-bg-p (cl-mapcar diff-op c-bg (list 0.2 0.2 0.2)))
+        (set-face-background
+         'whitespace-space-after-tab
+         (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2))))
+        (set-face-background
+         'whitespace-space-before-tab
+         (face-background 'whitespace-space-after-tab)))
+
+      (setq dif-o-bg-p (cl-mapcar diff-op c-bg (if (eq bg-mode 'light)
+                                                   (list 0.2 0.1 0.2)
+                                                 (list 0.1 0.2 0.1))))
+
+      (when (facep 'highlight)
+        (set-face-background
+         'highlight
+         (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2)))))
+      (when (facep 'hl-line)
+        (set-face-background
+         'hl-line
+         (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2)))))
+
+      (setq dif-o-bg-p (cl-mapcar diff-op c-bg (if (eq bg-mode 'light)
+                                                   (list 0.2 0.2 0.1)
+                                                 (list 0.1 0.1 0.2))))
+      (set-face-background
+       'region
+       (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2)))))))
+(add-hook 'my/after-load-unload-theme-functions #'(lambda (&rest args) (my/-renormalize-faces)))
 
 (defvar my/-project-file-names
   '("^Makefile$" "^build\.sh$" "^\.git$" "^\.hg$" "^bin$" "^.+\.asd$"))
