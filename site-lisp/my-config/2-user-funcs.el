@@ -69,6 +69,10 @@
   (interactive)
   (untabify (point-min) (point-max)))
 
+(defun tabify-buffer ()
+  (interactive)
+  (tabify (point-min) (point-max)))
+
 (defun indent-buffer ()
   (interactive)
   (indent-region (point-min) (point-max)))
@@ -80,12 +84,11 @@ might be bad."
   (interactive)
   ;;(let ((m-m major-mode))
   ;;(fundamental-mode)
-  (untabify-buffer)
+  (if indent-tabs-mode
+      (tabify-buffer)
+    (untabify-buffer))
   (delete-trailing-whitespace)
-  (set-buffer-file-coding-system 'utf-8)
-  ;;(funcall m-m)
-  ;;)
-  )
+  (set-buffer-file-coding-system coding-system-for-write))
 
 (defun cleanup-buffer ()
   "Perform a bunch of operations on the whitespace content of a buffer.
@@ -104,7 +107,8 @@ Including indent-buffer, which should not be called automatically on save."
 (defun trim-string (string)
   "Remove white spaces in beginning and ending of STRING.
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
-  (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
+  (replace-regexp-in-string "\\`[ \t\n]*" ""
+                            (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
 (defun toggle-mode-line-to-header ()
   "toggles the modeline to header"
