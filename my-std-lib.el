@@ -73,19 +73,31 @@
                  (null (cdr (frame-list)))
                  (eq (selected-frame) terminal-frame)))))
 
+(defmacro my/--with-captures (captures &rest body)
+  (declare (indent defun))
+  (if captures
+      `(lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
+         ,@body)
+    `(progn ,@body)))
 (cl-defmacro my/-exec-after-interactive-frame-available ((&rest captures) &rest body)
   (declare (indent defun))
   `(if (my/-is-interactive-frame-available)
        (progn ,@body)
-     (lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
+     (my/--with-captures ,captures
        (add-hook-that-fire-once 'after-make-frame-functions (frame)
          (with-selected-frame frame
            ,@body)))))
 
 (cl-defmacro my/-exec-after-delay ((&rest captures) delay &rest body)
   (declare (indent defun))
-  `(lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
+  `(my/--with-captures ,captures
      (run-at-time ,delay nil #'(lambda () ,@body))))
+
+(cl-defmacro my/-exec-after-all-parts-of-config-loaded ((&rest captures) &rest body)
+  (declare (indent defun))
+  `(my/--with-captures ,captures
+     (add-hook-that-fire-once 'my/-config-loaded-hook ()
+       ,@body)))
 
 ;; with-eval-after-load for Emacs < 24.4
 (unless (fboundp 'with-eval-after-load)
