@@ -7,6 +7,8 @@
 (require 'generic-x)
 (require 'newcomment)
 
+(with-eval-after-load "pdf-tools-autoloads"
+  (pdf-tools-install))
 
 (defun fbread-mode ()
   (interactive)
