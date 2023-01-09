@@ -77,6 +77,9 @@
 ;; Create frames maximized
 (push '(fullscreen . maximized) initial-frame-alist)
 
+;; Don't mind of frame size
+(setq frame-inhibit-implied-resize t)
+
 ;; always end a file with a newline
 (setq require-final-newline t)
 
@@ -210,6 +213,8 @@ the syntax class ')'."
  scroll-down-aggressively nil
  scroll-preserve-screen-position 1
  fast-but-imprecise-scrolling    t)
+;; (pixel-scroll-mode)
+;; (pixel-scroll-precision-mode)
 
 ;; Mouse
 (setq mouse-wheel-follow-mouse 't
@@ -245,7 +250,9 @@ the syntax class ')'."
 (setq-default tab-width 4
               backward-delete-char-untabify-method 'hungry)
 ;; use spaces (not tabs) for indenting
-(setq-default indent-tabs-mode nil)
+;; (setq-default indent-tabs-mode nil)
+;; use tabs for indenting
+(setq-default indent-tabs-mode t)
 
 ;; make "yes or no" "y or n"
 (fset 'yes-or-no-p 'y-or-n-p)
