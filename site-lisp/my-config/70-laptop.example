@@ -1,4 +1,4 @@
-;;; 70-laptop.el --- laptop configuration.
+;;; 70-laptop.el --- laptop configuration. -*- mode: emacs-lisp; indent-tabs-mode: t; -*-
 
 ;; .==========================================[ !!! WARNING !!! ]==============================================.
 ;; |                                                                                                           |
