@@ -22,6 +22,11 @@
   (dolist (hook hl-line-mode-hooks)
     (add-hook hook #'(lambda () (hl-line-mode 1)))))
 
+(with-eval-after-load "helpful-autoloads"
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key))
+
 (with-eval-after-load "comint"
   (push #'comint-truncate-buffer comint-output-filter-functions))
 
