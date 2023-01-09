@@ -1,4 +1,4 @@
-;;; 3-packages.el --- setting up packages
+;;; 3-packages.el --- setting up packages  -*- lexical-binding: t; -*-
 
 
 ;;; Code:
@@ -6,6 +6,18 @@
 
 (require 'generic-x)
 (require 'newcomment)
+
+(when (fboundp 'load-theme)
+  (defvar my/after-load-unload-theme-functions nil
+    "Hook run after a color theme changed.")
+  (defun my/--after-load-unload-theme-adv (&rest args)
+    (apply #'run-hook-with-args 'my/after-load-unload-theme-functions args))
+  (advice-add #'load-theme :after #'my/--after-load-unload-theme-adv)
+  (advice-add #'disable-theme :after #'my/--after-load-unload-theme-adv)
+  (my/-exec-after-all-parts-of-config-loaded ()
+    (my/-exec-after-interactive-frame-available ()
+      (my/-exec-after-delay () 3
+        (run-hook-with-args 'my/after-load-unload-theme-functions (car custom-enabled-themes))))))
 
 (with-eval-after-load "pdf-tools-autoloads"
   (pdf-tools-install))
