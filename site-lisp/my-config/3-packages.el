@@ -1039,7 +1039,7 @@ int main (int argc, char **argv) {
                                   " || true")))
                          (counsel--async-command counsel-rgrep-last-cmd)
                          nil)))
-                 "./" file-name-pattern grep-program)
+                 "." file-name-pattern grep-program)
                 :dynamic-collection t
                 :keymap counsel-ag-map
                 :history 'counsel-git-grep-history
