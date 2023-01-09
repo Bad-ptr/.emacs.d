@@ -837,12 +837,12 @@ Lisp function does not specify a special indentation."
                                     (cleanup-buffer)))))
 
 ;; JS
-(with-eval-after-load "tern-autoloads"
-  (add-hook 'js-mode-hook #'(lambda () (tern-mode t)))
-  (with-eval-after-load "company-tern-autoloads"
-    (add-to-list 'company-backends 'company-tern)))
-(with-eval-after-load "js2-mode-autoloads"
-  (defalias 'js-mode 'js2-mode))
+;; (with-eval-after-load "tern-autoloads"
+;;   (add-hook 'js-mode-hook #'(lambda () (tern-mode t)))
+;;   (with-eval-after-load "company-tern-autoloads"
+;;     (add-to-list 'company-backends 'company-tern)))
+;; (with-eval-after-load "js2-mode-autoloads"
+;;   (defalias 'js-mode 'js2-mode))
 
 ;; HTML
 (with-eval-after-load "simplezen-autoloads"
