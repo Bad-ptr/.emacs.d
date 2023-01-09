@@ -107,8 +107,8 @@
   (my/-load-directory my/-conf-path)
 
   (run-hooks 'my/-config-loaded-hook)
-  (when (fboundp 'my/-exec-after-all-parts-of-config-loaded)
-    (my/-exec-after-all-parts-of-config-loaded)))
+  (when (fboundp 'my/-init-after-all-parts-of-config-loaded)
+    (my/-init-after-all-parts-of-config-loaded)))
 
 
 (defcustom my/-packages-initialized-hook nil
