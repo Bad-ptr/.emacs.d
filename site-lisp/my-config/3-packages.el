@@ -31,8 +31,11 @@
   (push #'comint-truncate-buffer comint-output-filter-functions))
 
 (with-eval-after-load "whitespace"
-  (setq whitespace-style '(face lines-tail trailing tab-mark)
-        whitespace-line-column fill-column))
+  (setq whitespace-style ;; '(face lines-tail trailing tab-mark)
+        '(face trailing tabs lines-tail newline empty indentation space-after-tab space-before-tab)
+        whitespace-line-column fill-column)
+  (set-face-foreground whitespace-line nil)
+  (set-face-foreground whitespace-tab nil))
 
 ;;Jabber
 (with-eval-after-load "jabber"
