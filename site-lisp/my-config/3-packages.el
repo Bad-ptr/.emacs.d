@@ -1043,7 +1043,7 @@ int main (int argc, char **argv) {
 		   (read-string "File name pattern: " "*" nil "*"))
 		  (grep-program (if zgrep-p "zgrep" "grep"))
 		  (counsel--git-grep-dir (expand-file-name "./")))
-	  (ivy-read (if zgrep-p "zrgrep" "rgrep")
+	  (ivy-read (if zgrep-p "zrgrep " "rgrep ")
 				(apply-partially
 				 #'(lambda (dir file-name-pattern grep-progam string)
 					 (if (< (length string) 3)
