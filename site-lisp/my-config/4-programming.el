@@ -180,7 +180,12 @@
 		 (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2))))
 		(set-face-background
 		 'whitespace-space-before-tab
-		 (face-background 'whitespace-space-after-tab)))
+		 (face-background 'whitespace-space-after-tab))
+
+		(setq dif-o-bg-p (cl-mapcar diff-op c-bg (list 0.05 0.05 0.05)))
+		(set-face-background
+		 'whitespace-indentation
+		 (apply #'color-rgb-to-hex (append (clamp-rgb dif-o-bg-p) (list 2)))))
 
 	  (setq dif-o-bg-p (cl-mapcar diff-op c-bg (if (eq bg-mode 'light)
 												   (list 0.2 0.1 0.2)
