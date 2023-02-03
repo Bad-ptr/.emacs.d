@@ -1012,6 +1012,11 @@ int main (int argc, char **argv) {
 
 ;; counsel
 (with-eval-after-load "counsel-autoloads"
+
+  ;; C-c C-o -- generate occur buuffer
+  ;; C-x C-q -- edit occur, C-x C-s -- save changes to files
+  ;; if counsel-edit-mode installed -- M-o e -- edit, C-c C-c -- apply
+
   (setq counsel-find-file-at-point t)
 
   (autoload 'rgrep-default-command "grep")
@@ -1052,47 +1057,68 @@ int main (int argc, char **argv) {
 							  ;;  (setq ivy--old-re
 							  ;;		(ivy--regex string)))
 							  string)
-							 grep-find-template
+							 grep-command
 							 grep-find-command
+							 grep-template
+							 grep-find-template
+							 grep-use-null-filename-separator
 							 grep-host-defaults-alist)
 						 (grep-compute-defaults)
 						 (setq counsel-rgrep-last-cmd
 							   (concat
 								(let (grep-highlight-matches)
-								 (rgrep-default-command regex file-name-pattern dir))
+								  (rgrep-default-command regex file-name-pattern dir))
 								(when (string= "zgrep" grep-program)
 								  " || true")))
 						 (counsel--async-command counsel-rgrep-last-cmd)
 						 nil)))
 				 "." file-name-pattern grep-program)
 				:dynamic-collection t
-				:keymap counsel-ag-map
-				:history 'counsel-git-grep-history
+				:preselect
+                (when (< (- (line-end-position) (line-beginning-position)) 300)
+                  (format "%d:%s"
+                          (line-number-at-pos)
+                          (regexp-quote
+                           (buffer-substring-no-properties
+                            (line-beginning-position)
+                            (line-end-position)))))
+				:keymap counsel-grep-map
+				:history 'counsel-grep-history
 				:re-builder #'ivy--regex
 				;; :action #'counsel-git-grep-action
 				:action #'my/counsel-rgrep-action
-				:unwind #'(lambda ()
-							(counsel-delete-process)
-							(swiper--cleanup))
 				:caller 'counsel-rgrep)))
-  (ivy-set-display-transformer 'counsel-rgrep 'counsel-git-grep-transformer)
 
-  (defun counsel-rgrep-occur ()
-	"Generate a custom occur buffer for `counsel-rgrep'.
-When REVERT is non-nil, regenerate the current *ivy-occur* buffer."
-	(unless (eq major-mode 'ivy-occur-grep-mode)
-	  (ivy-occur-grep-mode))
-	(setq default-directory counsel--git-grep-dir)
-	(let* ((cmd-out (shell-command-to-string counsel-rgrep-last-cmd))
-		   (cands (split-string cmd-out "\n" t)))
-	  ;; Need precise number of header lines for `wgrep' to work.
-	  (insert (format "-*- mode:grep; default-directory: %S -*-\n\n\n"
-					  default-directory))
-	  (insert (format "%d candidates:\n" (length cands)))
-	  (ivy--occur-insert-lines cands)))
+  (defun counsel-rgrep-transformer (str)
+	"Highlight file and line number in STR."
+	(when (string-match "\\`\\([^:]+\\):\\([^:]+\\):" str)
+      (add-face-text-property (match-beginning 1) (match-end 1)
+                              'ivy-grep-info nil str)
+      (add-face-text-property (match-beginning 2) (match-end 2)
+                              'ivy-grep-line-number nil str))
+	str)
+  (ivy-set-display-transformer 'counsel-rgrep 'counsel-rgrep-transformer)
+
+  (defun counsel-rgrep-occur (&optional _cands)
+	"Generate a custom occur buffer for `counsel-rgrep'."
+	(counsel-grep-like-occur counsel-rgrep-last-cmd))
 
   (ivy-set-occur 'counsel-rgrep 'counsel-rgrep-occur)
   ;; (push '(counsel-git-grep . ivy--regex-plus) ivy-re-builders-alist)
+
+  (ivy-configure 'counsel-rgrep
+	:update-fn 'auto
+	:unwind-fn #'counsel--grep-unwind
+	:index-fn #'ivy-recompute-index-swiper-async
+	:occur #'counsel-rgrep-occur
+	:more-chars 2
+	:grep-p t
+	:exit-codes '(1 ""))
+
+  (with-eval-after-load "counsel-edit-mode-autoloads"
+	(counsel-edit-mode-setup-ivy)
+	(ivy-add-actions 'counsel-rgrep
+					 '(("e" counsel-edit-mode-ivy-action "Edit Results"))))
 
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "M-y") 'counsel-yank-pop)
