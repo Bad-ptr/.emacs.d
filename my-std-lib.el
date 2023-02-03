@@ -79,6 +79,7 @@
 	  `(lexical-let (,@(mapcar #'(lambda (c) (list c c)) captures))
 		 ,@body)
 	`(progn ,@body)))
+
 (cl-defmacro my/-exec-after-interactive-frame-available ((&rest captures) &rest body)
   (declare (indent defun))
   `(if (my/-is-interactive-frame-available)
