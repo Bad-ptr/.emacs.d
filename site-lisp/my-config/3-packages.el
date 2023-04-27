@@ -554,6 +554,12 @@ int main (int argc, char **argv) {
   (define-key mc/keymap (kbd "C-?")	 #'mc/skip-to-next-like-this)
   (define-key mc/keymap (kbd "C-\"") #'mc/skip-to-previous-like-this)
 
+  (autoload 'mc/cycle-backward "mc-cycle-cursors" nil t)
+  (autoload 'mc/cycle-forward  "mc-cycle-cursors" nil t)
+
+  (define-key mc/keymap (kbd "M-n") #'mc/cycle-forward)
+  (define-key mc/keymap (kbd "M-p") #'mc/cycle-backward)
+
   (define-key mc/keymap (kbd "C-S-s") #'mc/toggle-pause)
 
   (define-key mc/keymap (kbd "C-'") #'mc-hide-unmatched-lines-mode)
@@ -1019,26 +1025,45 @@ int main (int argc, char **argv) {
 
   (setq counsel-find-file-at-point t)
 
+  (autoload 'counsel-set-async-exit-code "counsel")
   (autoload 'rgrep-default-command "grep")
   (defvar counsel-rgrep-last-cmd ""
 	"Last command generated in counsel-rgrep")
 
   (defun my/counsel-rgrep-action (x)
-	"Go to occurrence X in current Git repository."
-	(when (string-match "\\`\\(.*?\\)\0\\([0-9]+\\):\\(.*\\)\\'" x)
-	  (let ((file-name (match-string-no-properties 1 x))
-			(line-number (match-string-no-properties 2 x)))
-		(find-file (expand-file-name
-					file-name
-					(ivy-state-directory ivy-last)))
-		(goto-char (point-min))
-		(forward-line (1- (string-to-number line-number)))
-		(re-search-forward (ivy--regex ivy-text t) (line-end-position) t)
-		(swiper--ensure-visible)
-		(run-hooks 'counsel-grep-post-action-hook)
-		(unless (eq ivy-exit 'done)
-		  (swiper--cleanup)
-		  (swiper--add-overlays (ivy--regex ivy-text))))))
+	"Go to occurrence X."
+	(when (eq ivy-exit 'done)
+	  (when (string-match "\\`\\(.*?\\):\\([0-9]+\\):\\(.*\\)\\'" x)
+		(let ((file-name (match-string-no-properties 1 x))
+			  (line-number (match-string-no-properties 2 x)))
+		  (find-file (expand-file-name
+					  file-name
+					  (ivy-state-directory ivy-last)))
+		  (goto-char (point-min))
+		  (forward-line (1- (string-to-number line-number)))
+		  (when (re-search-forward (ivy--regex ivy-text t) (line-end-position) t)
+			(when swiper-goto-start-of-match
+			  (goto-char (match-beginning 0))))
+		  (swiper--ensure-visible)
+		  (run-hooks 'counsel-grep-post-action-hook))))
+
+	;; (when (string-match "\\`\\(.*?\\):\\([0-9]+\\):\\(.*\\)\\'" x)
+	;;   (let ((file-name (match-string-no-properties 1 x))
+	;; 		(line-number (match-string-no-properties 2 x)))
+	;; 	(find-file (expand-file-name
+	;; 				file-name
+	;; 				(ivy-state-directory ivy-last)))
+	;; 	(goto-char (point-min))
+	;; 	(forward-line (1- (string-to-number line-number)))
+	;; 	(when (re-search-forward (ivy--regex ivy-text t) (line-end-position) t)
+	;;	  (when swiper-goto-start-of-match
+	;; 		(goto-char (match-beginning 0))))
+	;; 	(swiper--ensure-visible)
+	;; 	(run-hooks 'counsel-grep-post-action-hook)
+	;; 	(unless (eq ivy-exit 'done)
+	;; 	  (swiper--cleanup)
+	;; 	  (swiper--add-overlays (ivy--regex ivy-text)))))
+	)
 
   (defun counsel-rgrep (&optional zgrep-p)
 	(interactive "P")
@@ -1075,19 +1100,19 @@ int main (int argc, char **argv) {
 				 "." file-name-pattern grep-program)
 				:dynamic-collection t
 				:preselect
-                (when (< (- (line-end-position) (line-beginning-position)) 300)
-                  (format "%d:%s"
-                          (line-number-at-pos)
-                          (regexp-quote
-                           (buffer-substring-no-properties
-                            (line-beginning-position)
-                            (line-end-position)))))
+				(when (< (- (line-end-position) (line-beginning-position)) 300)
+				  (format "%d:%s"
+						  (line-number-at-pos)
+						  (regexp-quote
+						   (buffer-substring-no-properties
+							(line-beginning-position)
+							(line-end-position)))))
 				:keymap counsel-grep-map
 				:history 'counsel-grep-history
 				:re-builder #'ivy--regex
 				;; :action #'counsel-git-grep-action
 				:action #'my/counsel-rgrep-action
-				:caller 'counsel-rgrep)))
+				:caller #'counsel-rgrep)))
 
   (defun counsel-rgrep-transformer (str)
 	"Highlight file and line number in STR."
@@ -1097,21 +1122,23 @@ int main (int argc, char **argv) {
       (add-face-text-property (match-beginning 2) (match-end 2)
                               'ivy-grep-line-number nil str))
 	str)
-  (ivy-set-display-transformer 'counsel-rgrep 'counsel-rgrep-transformer)
+  ;;(ivy-set-display-transformer 'counsel-rgrep 'counsel-rgrep-transformer)
 
   (defun counsel-rgrep-occur (&optional _cands)
 	"Generate a custom occur buffer for `counsel-rgrep'."
 	(counsel-grep-like-occur counsel-rgrep-last-cmd))
 
-  (ivy-set-occur 'counsel-rgrep 'counsel-rgrep-occur)
+  ;; (ivy-set-occur 'counsel-rgrep 'counsel-rgrep-occur)
   ;; (push '(counsel-git-grep . ivy--regex-plus) ivy-re-builders-alist)
 
   (ivy-configure 'counsel-rgrep
 	:update-fn 'auto
 	:unwind-fn #'counsel--grep-unwind
-	:index-fn #'ivy-recompute-index-swiper-async
+	;;:index-fn #'ivy-recompute-index-swiper-async
+	:index-fn #'counsel--git-grep-index
 	:occur #'counsel-rgrep-occur
 	:more-chars 2
+	:display-transformer-fn #'counsel-rgrep-transformer
 	:grep-p t
 	:exit-codes '(1 ""))
 
@@ -1737,3 +1764,48 @@ int main (int argc, char **argv) {
 ;;	 (advice-add #'persp-remove-buffer :after #'persp-remove-buffer-after-adv)
 
 ;;	 (run-at-time t 30 #'persp--check-for-killed-buffers))
+
+(with-eval-after-load "rect.el"
+  ;; https://lists.gnu.org/archive/html/emacs-devel/2023-01/msg00610.html
+
+  (defvar rectangle-select-skip-line nil
+	"Control the `apply-on-rectangle' execution.
+`nil' -- apply action to selected lines, `t' -- skip empty lines,
+`function' -- skip line if it return non-`nil'.
+The function get all arguments of `apply-on-rectangle' as input.")
+
+  (defun apply-on-rectangle (function start end &rest args)
+	"Call FUNCTION for each line of rectangle with corners at START, END.
+FUNCTION is called with two arguments: the start and end columns of the
+rectangle, plus ARGS extra arguments.  Point is at the beginning of line when
+the function is called.
+The `rectangle-select-skip-line' variable allow to skip lines.
+The final point after the last operation will be returned."
+	(save-excursion
+	  (let* ((cols (rectangle--pos-cols start end))
+			 (startcol (car cols))
+			 (endcol (cdr cols))
+			 (startpt (progn (goto-char start) (line-beginning-position)))
+			 (endpt (progn (goto-char end)
+						   (copy-marker (line-end-position))))
+			 final-point)
+		;; Ensure the start column is the left one.
+		(if (< endcol startcol)
+			(let ((col startcol))
+			  (setq startcol endcol endcol col)))
+		;; Start looping over lines.
+		(goto-char startpt)
+		(while
+			(progn
+			  (when (cond
+					 ((null rectangle-select-skip-line)
+					  t)
+					 ((functionp rectangle-select-skip-line)
+					  (apply rectangle-select-skip-line function start end args))
+					 (t
+					  (not (string-match-p "\\`\\s-*$" (thing-at-point 'line)))))
+				(apply function startcol endcol args))
+			  (setq final-point (point))
+			  (and (zerop (forward-line 1)) (bolp)
+				   (<= (point) endpt))))
+		final-point))))
