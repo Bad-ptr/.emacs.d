@@ -673,7 +673,7 @@ int main (int argc, char **argv) {
   (with-eval-after-load "symbol-overlay"
 	(set-face-attribute 'symbol-overlay-default-face nil
 						:inherit 'default
-						:foreground nil :background nil
+						:foreground 'unspecified :background 'unspecified
 						:underline "#0F0")
 	(global-set-key (kbd "M-i") 'symbol-overlay-put)
 	(global-set-key (kbd "M-n") 'symbol-overlay-jump-next)

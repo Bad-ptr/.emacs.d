@@ -72,7 +72,7 @@
 
 ;; Make emacs use the clipboard
 (setq x-select-enable-clipboard t
-      interprogram-paste-function #'x-cut-buffer-or-selection-value)
+      interprogram-paste-function #'x-selection-value)
 
 ;; Create frames maximized
 (push '(fullscreen . maximized) initial-frame-alist)
