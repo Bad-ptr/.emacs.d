@@ -1075,28 +1075,34 @@ int main (int argc, char **argv) {
 		  (counsel--git-grep-dir (expand-file-name "./")))
 	  (ivy-read (if zgrep-p "zrgrep " "rgrep ")
 				(apply-partially
-				 #'(lambda (dir file-name-pattern grep-progam string)
-					 (if (< (length string) 3)
-						 (ivy-more-chars)
-					   (let ((regex ;; (counsel-unquote-regex-parens
-							  ;;  (setq ivy--old-re
-							  ;;		(ivy--regex string)))
-							  string)
-							 grep-command
-							 grep-find-command
-							 grep-template
-							 grep-find-template
-							 grep-use-null-filename-separator
-							 grep-host-defaults-alist)
-						 (grep-compute-defaults)
-						 (setq counsel-rgrep-last-cmd
-							   (concat
-								(let (grep-highlight-matches)
-								  (rgrep-default-command regex file-name-pattern dir))
-								(when (string= "zgrep" grep-program)
-								  " || true")))
-						 (counsel--async-command counsel-rgrep-last-cmd)
-						 nil)))
+				 (lambda (dir file-name-pattern grep-progam string &rest rest)
+				   (if (< (length string) 3)
+					   (ivy-more-chars)
+					 (let ((regex ;; (counsel-unquote-regex-parens
+							;;  (setq ivy--old-re
+							;;		(ivy--regex string)))
+							string)
+						   ;; grep-command
+						   ;; grep-find-command
+						   ;; grep-template
+						   ;; grep-find-template
+						   ;; grep-use-null-filename-separator
+						   grep-host-defaults-alist
+						   )
+					   (grep-apply-setting 'grep-command nil)
+					   (grep-apply-setting 'grep-find-command nil)
+					   (grep-apply-setting 'grep-template nil)
+					   (grep-apply-setting 'grep-find-template nil)
+					   (grep-apply-setting 'grep-use-null-filename-separator nil)
+					   (grep-compute-defaults)
+					   (setq counsel-rgrep-last-cmd
+							 (concat
+							  (let (grep-highlight-matches)
+								(rgrep-default-command regex file-name-pattern dir))
+							  (when (string= "zgrep" grep-program)
+								" || true")))
+					   (counsel--async-command counsel-rgrep-last-cmd)
+					   nil)))
 				 "." file-name-pattern grep-program)
 				:dynamic-collection t
 				:preselect
